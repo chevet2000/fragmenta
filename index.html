@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v3.1 — purga geométrica infinita</title>
+<title>FRAGMENTA v3.2 — purga geométrica infinita</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -100,6 +100,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .netstat{font-size:11px;letter-spacing:.18em;color:var(--dim);min-height:34px;line-height:1.7}
 .netstat .ok{color:var(--mint)}
 .netstat .err{color:var(--coral)}
+.netstat .prof{color:var(--sky);font-size:9px;letter-spacing:.2em}
 #joinInput{width:100%;font-family:inherit;font-size:26px;font-weight:700;letter-spacing:.3em;text-align:center;
   text-transform:uppercase;background:var(--panel);border:1px solid var(--line);color:var(--ink);
   padding:12px;margin-bottom:12px;outline:none;user-select:text;-webkit-user-select:text}
@@ -113,6 +114,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .card{position:relative;display:flex;align-items:stretch;text-align:left;background:var(--panel);
   border:1px solid var(--line);padding:13px 14px 13px 17px;cursor:pointer;color:var(--ink)}
 .card:active{transform:scale(.985)}
+.card:disabled{opacity:.45}
 .card .c-side{width:3px;flex:none;margin-right:13px}
 .card.t0 .c-side{background:var(--mint)}
 .card.t1 .c-side{background:var(--amber)}
@@ -122,6 +124,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .card.t2 .c-top b{color:var(--coral)}
 .tag{font-size:8px;letter-spacing:.24em;padding:2px 5px;border:1px solid var(--line);color:var(--dim)}
 .card p{font-size:11.5px;color:var(--dim);line-height:1.45}
+.choicenote{font-size:10px;letter-spacing:.2em;color:var(--mint);text-align:center;padding:8px 4px;font-weight:700}
 
 #scrShop{justify-content:flex-start;padding:0}
 .shop-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -129,6 +132,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .shop-head h2{font-size:15px;letter-spacing:.32em}
 .shop-head .hh-l{display:flex;flex-direction:column;gap:3px}
 .shop-hint{font-size:8.5px;letter-spacing:.22em;color:var(--dim)}
+.shop-hint .prof{color:var(--sky)}
 .shop-res{display:flex;gap:12px;font-weight:700;font-size:13px}
 .shop-res span{display:flex;align-items:center;gap:5px}
 .shop-res svg{width:13px;height:13px}
@@ -174,6 +178,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .stats b{font-size:14px}
 .panel .btn{margin-top:9px}
 #pbUnlock{font-size:10px;letter-spacing:.2em;color:var(--sky);font-weight:700;margin:-6px 0 12px;min-height:14px;text-align:center}
+#pbUnlock.warn{color:var(--coral)}
 #pbMinLv{font-size:10px;letter-spacing:.2em;color:var(--coral);font-weight:700;margin:-8px 0 12px;text-align:center}
 #ovKeep{font-size:9.5px;letter-spacing:.14em;font-weight:700;text-align:center;line-height:1.8;margin:-4px 0 12px}
 #ovKeep .k1{color:var(--mint)}
@@ -182,6 +187,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 .rbtn{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--vio);background:rgba(12,16,22,.6);
   color:var(--ink);margin-top:8px;cursor:pointer}
 .rbtn:active{transform:scale(.985)}
+.rbtn:disabled{opacity:.45}
 .rbtn.got{opacity:.4;border-style:dashed}
 .rbtn b{font-size:13px;letter-spacing:.12em;color:var(--vio)}
 .rbtn p{font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.4}
@@ -190,7 +196,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 #psMiss div{font-size:10.5px;letter-spacing:.06em;line-height:1.7}
 #psMiss .ok{color:var(--mint)}
 #netWait{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:rgba(7,9,13,.8);backdrop-filter:blur(4px);text-align:center;padding:24px}
+  background:rgba(7,9,13,.85);backdrop-filter:blur(4px);text-align:center;padding:24px}
 #netWait .code{font-size:26px}
 </style>
 </head>
@@ -232,7 +238,8 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
   <div class="p-kicker" id="nwKick">CONEXIÓN PERDIDA</div>
   <h2 style="font-size:20px;letter-spacing:.2em;margin:8px 0 10px" id="nwTitle">ESPERANDO…</h2>
   <div class="netstat" id="nwStat"></div>
-  <button class="btn" style="width:220px;margin-top:14px" id="btnNwCancel">SALIR</button>
+  <button class="btn hidden" style="width:220px;margin-top:8px" id="btnNwSolo">SEGUIR SOLO</button>
+  <button class="btn" style="width:220px;margin-top:8px" id="btnNwCancel">SALIR</button>
 </div>
 
 <div class="scr show" id="scrMenu">
@@ -240,7 +247,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
   <h1 class="title">FRAGMENTA</h1>
   <div class="title-rule"></div>
   <p class="tagline">Los enemigos sueltan <b>oro y experiencia</b>: la EXP sube el nivel de tu nave y desbloquea cartas. Élites invocadores, oleadas mixtas, reliquias del Guardián. Al caer <b>conservas</b> tu arsenal, oro y gemas.</p>
-  <div id="diffLbl">DIFICULTAD · <b id="diffName">SOLO ×1</b></div>
+  <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
     <button data-d="normal">NORMAL ×2.2</button>
@@ -259,7 +266,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v3.1.1 · PROGRESO GUARDADO EN ESTE DISPOSITIVO · CO-OP 2J ONLINE</div>
+  <div class="ver">FRAGMENTA v3.2 · PERFIL LOCAL Y ONLINE SEPARADOS · CO-OP 2J</div>
 </div>
 
 <div class="scr" id="scrLobby">
@@ -268,14 +275,15 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
     <h2>ESPERANDO JUGADOR 2</h2>
     <div class="code" id="lobbyCode">-----</div>
     <button class="btn" id="btnCopy" style="margin-bottom:12px">COPIAR CÓDIGO</button>
-    <div id="lobbyDiffLbl" style="font-size:9px;letter-spacing:.3em;color:var(--dim)">DIFICULTAD DE LA PARTIDA</div>
+    <div style="font-size:9px;letter-spacing:.3em;color:var(--dim)">DIFICULTAD DE LA PARTIDA</div>
     <div class="diffrow" id="lobbyDiffRow">
       <button data-d="normal" class="on">NORMAL ×2.2</button>
       <button data-d="dificil">DIFÍCIL ×3</button>
       <button data-d="hardcore">HARDCORE ×5</button>
     </div>
-    <div class="netstat" id="lobbyStat" style="margin-top:12px">Comparte el código con tu compañero.<br>La partida empieza cuando se conecte.</div>
-    <button class="btn primary hidden" id="btnStartCoop" style="margin-top:12px">COMENZAR PARTIDA</button>
+    <div class="netstat" id="lobbyStat" style="margin-top:12px">Conectando…</div>
+    <button class="btn" id="btnLobbyArsenal" style="margin-top:10px">ARSENAL · PERFIL ONLINE</button>
+    <button class="btn primary hidden" id="btnStartCoop" style="margin-top:10px">COMENZAR PARTIDA</button>
     <button class="btn" id="btnLobbyCancel" style="margin-top:10px">CANCELAR</button>
   </div>
 </div>
@@ -285,7 +293,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
     <div class="p-kicker" style="color:var(--sky)">UNIRSE A SALA</div>
     <h2>CÓDIGO DE SALA</h2>
     <input id="joinInput" maxlength="5" placeholder="·····" autocomplete="off" autocapitalize="characters">
-    <div class="netstat" id="joinStat">Pide el código de 5 letras a tu compañero.</div>
+    <div class="netstat" id="joinStat">Pide el código de 5 letras a tu compañero.<br><span class="prof">USARÁS TU PERFIL ONLINE (separado del local)</span></div>
     <button class="btn primary" id="btnJoinGo" style="margin-top:12px">CONECTAR</button>
     <button class="btn" id="btnJoinCancel" style="margin-top:10px">CANCELAR</button>
   </div>
@@ -328,7 +336,7 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
     <div id="ndInfo">
       <b id="ndName">ÁRBOL DE HABILIDADES</b>
       <div id="ndMeta"></div>
-      <p id="ndDesc">Toca un nodo. Algunos exigen haber alcanzado cierta oleada Y cierto nivel de nave (histórico). Se guarda en tu dispositivo y en el modo online cada jugador usa su propio árbol.</p>
+      <p id="ndDesc">Toca un nodo. Algunos exigen haber alcanzado cierta oleada Y cierto nivel de nave (histórico). El perfil LOCAL y el perfil ONLINE son independientes.</p>
       <div id="ndCost"></div>
     </div>
     <button class="btn primary" id="btnBuy" disabled>DESBLOQUEAR</button>
@@ -362,7 +370,6 @@ h1.title{font-size:clamp(38px,11vw,54px);font-weight:700;letter-spacing:.18em;ma
 
 <script>
 'use strict';
-/* diagnóstico visible en pantalla (útil en móvil) */
 window.addEventListener('error',function(ev){
   var b=document.getElementById('errbox');
   if(b){ b.classList.remove('hidden'); b.textContent='ERROR: '+(ev.message||'desconocido'); }
@@ -396,23 +403,35 @@ function resize(){
 }
 window.addEventListener('resize',resize); resize();
 
-/* ============ guardado + migración ============ */
-const SAVE_KEY='fragmenta_v3', OLD_KEY='fragmenta_v2', VERSION='3.1.1';
-let save={gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo'};
-let imported=false;
-try{
-  const d=JSON.parse(localStorage.getItem(SAVE_KEY));
-  if(d)save=Object.assign(save,d);
-  else{
-    const old=JSON.parse(localStorage.getItem(OLD_KEY));
-    if(old){
-      save.gold=old.gold||0; save.gems=old.gems||0; save.tree=old.tree||{};
-      save.best=old.best||{lvl:0,kills:0}; save.totKills=old.totKills||0; save.runs=old.runs||0;
-      save.bestAll=save.best.lvl||0; imported=true;
+/* ============ PERFILES: local y online separados ============ */
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='3.2';
+function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo'};}
+function loadSave(key,migrate){
+  try{
+    const d=JSON.parse(localStorage.getItem(key));
+    if(d)return Object.assign(blankSave(),d);
+    if(migrate){
+      const o=JSON.parse(localStorage.getItem(KEY_OLD));
+      if(o){const s=blankSave();s.gold=o.gold||0;s.gems=o.gems||0;s.tree=o.tree||{};
+        s.best=o.best||{lvl:0,kills:0};s.totKills=o.totKills||0;s.runs=o.runs||0;
+        s.bestAll=(o.best&&o.best.lvl)||0;return s;}
     }
-  }
-}catch(e){}
-function persist(){ try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){} }
+  }catch(e){}
+  return blankSave();
+}
+let localSave=loadSave(KEY_LOCAL,true);
+let netSave=loadSave(KEY_NET,false);
+let save=localSave;            // perfil activo
+let saveProfile='local';       // 'local' | 'net'
+function useProfile(p){
+  if(saveProfile===p)return;
+  saveProfile=p;
+  save=(p==='local')?localSave:netSave;
+  if(typeof recompute==='function'&&runActive)recompute();
+}
+function persist(){
+  try{localStorage.setItem(saveProfile==='local'?KEY_LOCAL:KEY_NET,JSON.stringify(save));}catch(e){}
+}
 const has=id=>!!save.tree[id];
 
 /* ============ audio ============ */
@@ -446,6 +465,7 @@ const SFX={
   buy(){tone(600,950,.1,'square',.06);tone(950,1250,.1,'square',.05,.09)},
   boss(){tone(130,70,.6,'sawtooth',.1);tone(90,50,.7,'square',.07,.1)},
   relic(){[523,659,784,1047].forEach((f,i)=>tone(f,f,.16,'sine',.05,i*.08))},
+  rescue(){tone(300,700,.2,'sine',.06);tone(500,1100,.25,'sine',.05,.12)},
 };
 
 /* ============ dificultad ============ */
@@ -609,8 +629,9 @@ const CARDS=[
 let state='menu',runActive=false,shopReturn='menu',lastWaveType='';
 const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]],relics:[],
   shipLv:1,exp:0,missions:[],combo:0};
-let pendingShipLevels=0,frenzyT=0;
+let pendingShipLevels=0,frenzyT=0,shipwaitT=0;
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[];
+let wrecks=[]; // cadáveres rescatables {slot,x,y,ttl,prog}
 let dronePos={'0':[],'1':[]},droneCd={'0':[],'1':[]};
 let boss=null,bossName='';
 let formY=0,formT=0,time=0,shake=0,eid=1,fxId=1;
@@ -636,13 +657,13 @@ let localSlot=0;
 
 /* ============ RED (PeerJS) ============ */
 let pingTimer=null;
-const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,snapAcc:0,
+const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
   hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal'};
 const amClient=()=>net.mode==='client';
 function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
 function peerReady(){ return typeof Peer!=='undefined'; }
-function mkPeerId(code){ return 'frg311-'+code; }
+function mkPeerId(code){ return 'frg32-'+code; }
 function destroyNet(){
   if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
   try{if(net.conn)net.conn.close();}catch(e){}
@@ -651,6 +672,7 @@ function destroyNet(){
   net.walletG=0;net.walletM=0;net.retries=0;net.ping=0;
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
+  net.remoteStats={};net.lobbyDiff='normal';
 }
 function computeStatblock(){
   const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:3,regenRate:0,nova:null,
@@ -666,18 +688,22 @@ function computeStatblock(){
 /* ---- HOST ---- */
 function hostLobby(){
   if(!peerReady()){
+    showScr('lobby');
     $('#lobbyStat').innerHTML='<span class="err">No se pudo cargar el módulo de red. Recarga la página (requiere internet).</span>';
-    showScr('lobby');return;
+    return;
   }
+  useProfile('net');
   destroyNet();
   net.mode='host';net.code=makeCode();
   const peer=new Peer(mkPeerId(net.code));
   net.peer=peer;
   $('#lobbyCode').textContent=net.code;
-  $('#lobbyStat').innerHTML='Conectando al servicio de salas…';
+  $('#lobbyStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Conectando al servicio de salas…';
   $('#btnStartCoop').classList.add('hidden');
   showScr('lobby');state='lobby';
-  peer.on('open',()=>{ $('#lobbyStat').innerHTML='Sala activa.<br>Esperando a tu compañero…'; });
+  peer.on('open',()=>{
+    $('#lobbyStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Sala activa. Esperando a tu compañero…';
+  });
   peer.on('connection',conn=>{
     if(net.conn&&net.connected){ try{conn.close();}catch(e){} return; }
     const md=conn.metadata||{};
@@ -715,6 +741,7 @@ function hostLostClient(){
   $('#nwKick').textContent='JUGADOR 2 DESCONECTADO';
   $('#nwTitle').textContent='PARTIDA EN PAUSA';
   $('#nwStat').innerHTML='La sala sigue abierta.<br>Código para reconectar: <b style="color:var(--amber)">'+net.code+'</b>';
+  $('#btnNwSolo').classList.remove('hidden');
   $('#btnNwCancel').textContent='TERMINAR PARTIDA';
 }
 function hostOnData(d){
@@ -726,25 +753,30 @@ function hostOnData(d){
   }
   if(d.t==='nova'){ fireNovaSlot(1); return; }
   if(d.t==='pickC'&&state==='shipwait'){
-    net.clientChosen=true; net.clientCard=d.id; checkShipChoice(); return;
+    net.clientChosen=true; net.clientCard=d.id;
+    if(!net.hostChosen)setChoiceNote('JUGADOR 2 YA ELIGIÓ · ELIGE TÚ');
+    checkShipChoice(); return;
   }
   if(d.t==='pickR'&&state==='postboss'){
-    net.clientRelic=true; net.clientRelicId=d.id; applyRelicChoice(); return;
+    net.clientRelic=true; net.clientRelicId=d.id;
+    if(!net.hostRelic)setRelicNote('JUGADOR 2 YA ELIGIÓ · ELIGE TÚ');
+    applyRelicChoice(); return;
   }
   if(d.t==='bye'){ if(runActive)runActive=false; destroyNet(); goMenu(); }
 }
 function checkShipChoice(){
   if(state!=='shipwait')return;
-  if(net.hostChosen&&net.clientChosen){
-    run.buffs[0].push(net.hostCard); run.buffs[1].push(net.clientCard);
-    net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
-    pendingShipLevels--; recompute();
-    if(pendingShipLevels>0)beginShipChoiceHost();
-    else{ state='play'; sendMsg({t:'ev',k:'resume'}); persist(); }
-  }
+  if(!(net.hostChosen&&net.clientChosen))return;
+  run.buffs[0].push(net.hostCard); run.buffs[1].push(net.clientCard);
+  net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
+  pendingShipLevels--; recompute(); persist();
+  if(pendingShipLevels>0)beginShipChoiceHost();
+  else{ state='play'; showScr(null); sendMsg({t:'ev',k:'resume'}); }
 }
 function beginShipChoiceHost(){
-  state='shipwait';net.hostChosen=false;net.clientChosen=false;
+  if(!net.connected){ showShipLevelLocal(); return; }
+  state='shipwait';shipwaitT=0;
+  net.hostChosen=false;net.clientChosen=false;
   const picks=[],used=new Set();
   for(let i=0;i<3;i++){
     const r=Math.random();
@@ -757,8 +789,10 @@ function beginShipChoiceHost(){
   while(picks.length<3)picks.push(CARDS[0]);
   sendMsg({t:'ev',k:'ship',lv:run.shipLv,ids:picks.map(c=>c.id)});
   showShipCards(picks,c=>{
-    net.hostChosen=true; net.hostCard=c; SFX.buy(); checkShipChoice();
-  },'JUGADOR 2 · ELIGIENDO…');
+    net.hostChosen=true; net.hostCard=c.id; SFX.buy();
+    markChoiceDone('JUGADOR 1');
+    checkShipChoice();
+  },null);
 }
 /* ---- CLIENTE ---- */
 function joinRoom(code){
@@ -766,9 +800,10 @@ function joinRoom(code){
     $('#joinStat').innerHTML='<span class="err">No se pudo cargar el módulo de red. Recarga la página (requiere internet).</span>';
     return;
   }
+  useProfile('net');
   destroyNet();
   net.mode='client';net.code=code;net.retries=0;
-  $('#joinStat').textContent='Conectando…';
+  $('#joinStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Conectando…';
   connectAsClient(false);
 }
 function connectAsClient(rejoin){
@@ -812,6 +847,7 @@ function clientRetry(){
   $('#nwKick').textContent='CONEXIÓN PERDIDA';
   $('#nwTitle').textContent='RECONECTANDO ('+net.retries+')';
   $('#nwStat').innerHTML='Buscando al anfitrión…<br>Sala: <b style="color:var(--amber)">'+net.code+'</b>';
+  $('#btnNwSolo').classList.add('hidden');
   $('#btnNwCancel').textContent='SALIR';
   setTimeout(()=>{
     if(net.mode==='client'&&!net.connected){
@@ -828,6 +864,7 @@ function clientLost(){
 function netEndLocal(msg){
   destroyNet();
   runActive=false;state='menu';
+  useProfile('local');
   $('#netWait').classList.add('hidden');
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
   refreshMenu();showScr('menu');
@@ -861,12 +898,7 @@ function clientEvent(d){
     state='levelup';SFX.lvl();
     showShipCards(picks,c=>{
       sendMsg({t:'pickC',id:c.id}); SFX.buy();
-      showScr(null); state='netwait';
-      $('#netWait').classList.remove('hidden');
-      $('#nwKick').textContent='MEJORA ELEGIDA';
-      $('#nwTitle').textContent='ESPERANDO…';
-      $('#nwStat').textContent='El anfitrión continúa la partida.';
-      $('#btnNwCancel').textContent='SALIR';
+      markChoiceDone('TÚ');
     },null);
     return;
   }
@@ -874,12 +906,7 @@ function clientEvent(d){
     state='postboss';
     showRelicCards(d.ids.map(id=>RELICS.find(r=>r.id===id)).filter(Boolean),r=>{
       sendMsg({t:'pickR',id:r.id});
-      showScr(null); state='netwait';
-      $('#netWait').classList.remove('hidden');
-      $('#nwKick').textContent='RELIQUIA ELEGIDA';
-      $('#nwTitle').textContent='ESPERANDO…';
-      $('#nwStat').textContent='El anfitrión continúa la partida.';
-      $('#btnNwCancel').textContent='SALIR';
+      markRelicDone('TÚ');
     });
     showScr('post'); return;
   }
@@ -891,15 +918,15 @@ function clientEvent(d){
     runActive=false;state='over';
     $('#netWait').classList.add('hidden');
     const st=(kk,v)=>`<div><small>${kk}</small><b>${v}</b></div>`;
-    $('#ovStats').innerHTML=st('OLEADA',d.level)+st('NAVE NIVEL',d.ship)+st('TU ORO GANADO',d.yg);
-    $('#ovKeep').innerHTML='<span class="k1">SE CONSERVA · árbol · oro · gemas · récords</span><br><span class="k2">SE PIERDE · cartas y reliquias de la incursión</span>';
+    $('#ovStats').innerHTML=st('OLEADA',d.level)+st('NAVE NIVEL',d.ship)+st('ORO DE LA INCURSIÓN',d.yg);
+    $('#ovKeep').innerHTML='<span class="k1">SE CONSERVA · árbol · oro · gemas · récords (perfil online)</span><br><span class="k2">SE PIERDE · cartas y reliquias de la incursión</span>';
     $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
     showScr('over'); return;
   }
   if(k==='end'){ netEndLocal('El anfitrión cerró la sala.'); return; }
 }
 /* snapshot cliente */
-let cEnemies=new Map(),cEB=[],cBL=[],cPK=[],cNovaCd=1,cBossPct=0;
+let cEnemies=new Map(),cEB=[],cBL=[],cPK=[],cWrecks=[],cNovaCd=1,cBossPct=0;
 function applySnap(d){
   d.p.forEach((pd,i)=>{
     const pl=players[i];if(!pl)return;
@@ -934,6 +961,7 @@ function applySnap(d){
   cEB=d.eb.map(b=>({x:b[0],y:b[1],r:b[2],color:ECOLORS[b[3]]||'#F2EFE6'}));
   cBL=d.bl.map(b=>({x:b[0],y:b[1],ang:b[2]/100,kind:b[3]}));
   cPK=d.pk.map(p=>({t:['gold','gem','heart'][p[0]],x:p[1],y:p[2]}));
+  cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],ttl:w[3]/10,prog:w[4]/100}));
   cNovaCd=d.nc;
 }
 
@@ -1245,11 +1273,45 @@ function nextWave(){
     persist();
   }
   for(const pl of players)if(pl.hp<=0){pl.hp=Math.ceil(pl.maxHp/2);floater(pl.x,pl.y-30,'REDESPLIEGUE','#7FD1B9',13);}
+  wrecks=[];
   for(const pl of players){pl.shieldLvl=true;pl.emerUsed=false;}
   if(P.secondWind&&L%5===0)for(const pl of players){pl.hp=pl.maxHp;floater(pl.x,pl.y-30,'SEGUNDO AIRE','#7FD1B9',13);}
   formY=0;formT=0;
   buildWave(L);
   waveState='play';clearTimer=0;
+}
+
+/* ============ cadáveres / rescate ============ */
+function updWrecks(dt){
+  for(const w of wrecks){
+    w.ttl-=dt;
+    const pl=players[w.slot];
+    if(pl&&pl.hp>0){w.remove=true;continue;}
+    let resc=null;
+    for(const q of players){
+      if(q.hp>0&&Math.hypot(q.x-w.x,q.y-w.y)<36){resc=q;break;}
+    }
+    if(resc){
+      if(resc.hp>=2){
+        w.prog=Math.min(1,w.prog+dt/1.2);
+        if(w.prog>=1){
+          resc.hp-=1;
+          pl.hp=Math.min(pl.maxHp,2);pl.invul=2.2;pl.x=w.x;pl.y=w.y;
+          floater(w.x,w.y-24,'¡RESATADO!','#7FD1B9',14);
+          floater(resc.x,resc.y-30,'-1 VIDA','#FF6B6B',11);
+          hostRing(w.x,w.y,90,'#7FD1B9');
+          tone(300,700,.2,'sine',.06);tone(500,1100,.25,'sine',.05,.12);
+          vib(60);
+          w.remove=true;
+        }
+      }else if(Math.random()<dt*2.5){
+        floater(w.x,w.y-32,'NECESITAS 2+ DE VIDA','#FF6B6B',10);
+      }
+    }else{
+      w.prog=Math.max(0,w.prog-dt);
+    }
+  }
+  wrecks=wrecks.filter(w=>!w.remove&&w.ttl>0);
 }
 
 /* ============ daño / botín ============ */
@@ -1430,8 +1492,13 @@ function hitPlayer(pl,d){
   if(pl.neb)shockNova(pl,150,pl.dmg+4,'#FF7EB6',slot);
   if(pl.hp<=0){
     pl.hp=0;burst(pl.x,pl.y,'#F2EFE6',20,180);
-    if(players.every(p=>p.hp<=0))gameOver();
-    else floater(pl.x,pl.y-20,'NAVE CAÍDA','#FF6B6B',13);
+    if(players.every(p=>p.hp<=0)){
+      wrecks=[];
+      gameOver();
+    }else{
+      wrecks.push({slot:pl.slot,x:pl.x,y:pl.y,ttl:30,prog:0});
+      floater(pl.x,pl.y-20,'NAVE CAÍDA · RESCÁTALA','#FF6B6B',12);
+    }
   }
 }
 function shoot(pl){
@@ -1915,9 +1982,10 @@ function sendSnap(){
     return [Math.round(b.x),Math.round(b.y),Math.round(Math.atan2(b.vy,b.vx)*100),kind];
   });
   const pk=pickups.slice(0,60).map(p=>[p.t==='gold'?0:p.t==='gem'?1:2,Math.round(p.x),Math.round(p.y)]);
+  const wk=wrecks.map(w=>[w.slot,Math.round(w.x),Math.round(w.y),Math.round(w.ttl*10),Math.round(w.prog*100)]);
   const cN=players[1]&&players[1].nova;
   const nc=novaCdGlobal>0?clamp(1-novaCdGlobal/((cN?cN.cd:18)*(cN?players[1].novaCdMul:1)),0,1):1;
-  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,
+  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,
     sv:run.shipLv,se:run.exp,wl:run.level,nc:nc});
   if(net.walletG>0||net.walletM>0){
     sendMsg({t:'ev',k:'wallet',g:net.walletG,m:net.walletM});
@@ -2004,6 +2072,30 @@ function drawEnemy(e){
   g.fillStyle=e.elite?'#D9C2FF':(e.flash>.4?'#FFD166':'#F2EFE6');
   g.fillText(Math.max(0,Math.ceil(e.hp)),0,1);
   g.restore();
+}
+function drawWreck(w){
+  const g=ctx;
+  g.save();g.translate(w.x,w.y);
+  g.rotate(Math.PI/4);
+  g.globalAlpha=.55+Math.sin(time*6)*.15;
+  g.strokeStyle='#8B93A1';g.lineWidth=2;
+  g.beginPath();
+  g.moveTo(0,-17);g.lineTo(5,-4);g.lineTo(15,9);g.lineTo(6,6);g.lineTo(4,13);
+  g.lineTo(-4,13);g.lineTo(-6,6);g.lineTo(-15,9);g.lineTo(-5,-4);g.closePath();
+  g.stroke();
+  g.rotate(-Math.PI/4);
+  g.globalAlpha=1;
+  if(w.prog>0){
+    g.strokeStyle='#7FD1B9';g.lineWidth=3;
+    g.beginPath();g.arc(0,0,22,-Math.PI/2,-Math.PI/2+TAU*w.prog);g.stroke();
+  }
+  g.strokeStyle='rgba(255,107,107,.75)';g.lineWidth=2;g.setLineDash([5,7]);
+  g.beginPath();g.arc(0,0,28,-Math.PI/2,-Math.PI/2+TAU*clamp(w.ttl/30,0,1));g.stroke();
+  g.setLineDash([]);
+  g.restore();
+  ctx.font='700 8px "Chakra Petch",monospace';ctx.textAlign='center';
+  ctx.fillStyle='#7FD1B9';
+  ctx.fillText('ACÉRCATE PARA RESCATAR',w.x,w.y+42);
 }
 function drawBossCommon(){
   const b=boss;if(!b)return;
@@ -2121,6 +2213,8 @@ function renderGame(dt){
     for(const e of enemies)drawEnemy(e);
   }
   if(boss)drawBossCommon();
+  const wrList=amClient()?cWrecks:wrecks;
+  for(const w of wrList)drawWreck(w);
   const ebList=amClient()?cEB:ebullets;
   for(const b of ebList){
     ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();
@@ -2203,6 +2297,26 @@ function renderMenuBG(dt){
 /* ============ pantallas ============ */
 const scr={menu:$('#scrMenu'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
+function setChoiceNote(txt){
+  const box=$('#cards');
+  let n=box.querySelector('.choicenote');
+  if(!n){n=document.createElement('div');n.className='choicenote';box.appendChild(n);}
+  n.textContent=txt;
+}
+function markChoiceDone(who){
+  document.querySelectorAll('#cards .card').forEach(el=>{el.disabled=true;});
+  setChoiceNote('✓ '+who+' · ESPERANDO AL OTRO JUGADOR…');
+}
+function setRelicNote(txt){
+  const box=$('#relicCards');
+  let n=box.querySelector('.choicenote');
+  if(!n){n=document.createElement('div');n.className='choicenote';box.appendChild(n);}
+  n.textContent=txt;
+}
+function markRelicDone(who){
+  document.querySelectorAll('#relicCards .rbtn').forEach(el=>{el.disabled=true;});
+  setRelicNote('✓ '+who+' · ESPERANDO AL OTRO JUGADOR…');
+}
 function refreshMenu(){
   $('#mBest').textContent=save.bestAll?`RÉCORD · OLEADA ${save.bestAll}`:'PRIMERA INCURSIÓN';
   $('#mGold').innerHTML=`${icoGold} ${save.gold}`;
@@ -2218,20 +2332,23 @@ function refreshMenu(){
 function goMenu(){
   state='menu';runActive=false;
   destroyNet();
+  wrecks=[];
+  useProfile('local');
   refreshMenu();showScr('menu');
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
 }
 function startRun(){
   audio();
+  useProfile('local');
   runDiff=save.diff;
   run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
   run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;rollMissions();
   pendingShipLevels=0;frenzyT=0;remoteBase=null;
   save.runs++;persist();
   players=[mkPlayer(0)];localSlot=0;
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
-  cEnemies.clear();cEB=[];cBL=[];cPK=[];
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
   recompute();
   for(const pl of players){
     pl.hp=pl.maxHp;pl.invul=1;pl.shots=0;pl.fireAcc=0;pl.emerUsed=false;
@@ -2254,9 +2371,9 @@ function startCoop(){
   pendingShipLevels=0;frenzyT=0;
   save.runs++;persist();
   players=[mkPlayer(0),mkPlayer(1)];localSlot=0;
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
-  cEnemies.clear();cEB=[];cBL=[];cPK=[];
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
   recompute();
   for(const pl of players){
     pl.hp=pl.maxHp;pl.invul=1;pl.shots=0;pl.fireAcc=0;pl.emerUsed=false;
@@ -2284,8 +2401,8 @@ function startRunClient(){
   ];
   pendingShipLevels=0;frenzyT=0;
   players=[mkPlayer(0),mkPlayer(1)];localSlot=1;
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];
-  cEnemies.clear();cEB=[];cBL=[];cPK=[];boss=null;
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
   recompute();
   for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
   players[1].x=W*.58;players[1].y=H-130;
@@ -2309,7 +2426,7 @@ function showShipCards(picks,onPick,waitNote){
   });
   if(waitNote){
     const note=document.createElement('div');
-    note.style.cssText='font-size:9px;letter-spacing:.24em;color:var(--dim);text-align:center';
+    note.className='choicenote';
     note.textContent=waitNote;
     box.appendChild(note);
   }
@@ -2352,11 +2469,16 @@ function showRelicCards(list,onPick){
 }
 function applyRelicChoice(){
   if(state!=='postboss')return;
+  if(!(net.mode==='host'&&players.length===2))return;
   if(net.hostRelic&&net.clientRelic){
     if(!run.relics.includes(net.hostRelicId))run.relics.push(net.hostRelicId);
     if(!run.relics.includes(net.clientRelicId))run.relics.push(net.clientRelicId);
     net.hostRelic=false;net.clientRelic=false;
     recompute();persist();
+    setRelicNote('AMBOS ELIGIERON · PULSA CONTINUAR');
+    const pu=$('#pbUnlock');
+    pu.classList.remove('warn');
+    pu.textContent='AMBOS LISTOS · PULSA CONTINUAR';
   }
 }
 function showPostBoss(){
@@ -2368,8 +2490,9 @@ function showPostBoss(){
     st('GUARDIÁN PURGADO',bossName)+st('OLEADA',run.level)+
     st('ORO DE LA INCURSIÓN',run.goldRun)+st('GEMAS',run.gemsRun);
   $('#pbMinLv').textContent=`▲ NIVEL MÍNIMO ENEMIGO: ${minLvlOf(run.level+1)}`;
+  const pu=$('#pbUnlock');pu.classList.remove('warn');
   if(coop){
-    $('#pbUnlock').textContent='';
+    pu.textContent='CADA JUGADOR ELIGE UNA RELIQUIA (AMBAS SE APLICAN)';
     curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
     sendMsg({t:'ev',k:'relics',ids:curRelics.map(r=>r.id)});
     showRelicCards(curRelics,r=>{net.hostRelic=true;net.hostRelicId=r.id;applyRelicChoice();});
@@ -2377,7 +2500,7 @@ function showPostBoss(){
     return;
   }
   const n=TREE.filter(nd=>!has(nd.id)&&save.best.lvl>=nd.wave&&save.bestShip>=(nd.ship||1)).length;
-  $('#pbUnlock').textContent=n>0?`► ${n} MEJORA${n>1?'S':''} DESBLOQUEABLE${n>1?'S':''} EN EL ARSENAL`:'';
+  pu.textContent=n>0?`► ${n} MEJORA${n>1?'S':''} DESBLOQUEABLE${n>1?'S':''} EN EL ARSENAL`:'';
   curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
   showRelicCards(curRelics,r=>{
     run.relics.push(r.id);recompute();persist();
@@ -2401,9 +2524,10 @@ function gameOver(){
     st('OLEADA ALCANZADA',run.level)+st('NAVE NIVEL',run.shipLv)+
     st('DESTRUIDOS',run.kills)+st('TIEMPO',fmtT(run.time))+
     st('ORO CONSEGUIDO',run.goldRun)+st('GEMAS',run.gemsRun);
+  const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
-    `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · récord nv ${save.bestShip}</span><br>`+
-    `<span class="k2">SE PIERDE · ${(run.buffs[0]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
+    `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · récords (${prof})</span><br>`+
+    `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');
   $('#bossBar').classList.add('hidden');
   showScr('over');
@@ -2471,7 +2595,7 @@ function selectNode(id){
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
     mt.textContent=`${TREE.length} MEJORAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Cuatro ramas con sub-ramas. Cada nodo exige una oleada récord y algunos también un nivel de nave histórico. En el modo online, cada jugador usa su propio árbol.';
+    ds.textContent='Cuatro ramas con sub-ramas. Cada nodo exige una oleada récord y algunos también un nivel de nave histórico. El perfil LOCAL y el ONLINE son independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
@@ -2501,10 +2625,13 @@ function buyNode(){
 }
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
-  $('#shopHint').textContent=`${ownedCount()}/${TREE.length} DESBLOQUEADAS · v${VERSION}`;
+  const prof=saveProfile==='local'?'PERFIL LOCAL':'PERFIL ONLINE';
+  $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · v${VERSION}`;
 }
 function openShop(from){
-  shopReturn=from;renderTree();updateShopRes();selectNode(null);showScr('shop');
+  shopReturn=from;
+  renderTree();updateShopRes();selectNode(null);
+  showScr('shop');
 }
 
 /* ============ HUD ============ */
@@ -2603,7 +2730,12 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  $('#btnPbShop').addEventListener('click',()=>openShop('post'));
  $('#btnPbGo').addEventListener('click',()=>{
   if(net.mode==='host'&&players.length===2){
-    if(!(net.hostRelic&&net.clientRelic))return;
+    if(!(net.hostRelic&&net.clientRelic)){
+      const pu=$('#pbUnlock');
+      pu.classList.add('warn');
+      pu.textContent=net.hostRelic?'FALTA LA ELECCIÓN DEL JUGADOR 2…':'ELIGE TU RELIQUIA PRIMERO';
+      return;
+    }
     showScr(null);
     run.level++;nextWave();
     sendMsg({t:'ev',k:'resume'});
@@ -2641,12 +2773,13 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
   if(navigator.clipboard)navigator.clipboard.writeText(c).catch(()=>{});
   $('#lobbyStat').innerHTML='Código copiado: <b style="color:var(--amber)">'+c+'</b><br>Envíaselo a tu compañero.';
 });
+ $('#btnLobbyArsenal').addEventListener('click',()=>openShop('lobby'));
  $('#btnLobbyCancel').addEventListener('click',()=>{destroyNet();goMenu();});
  $('#btnStartCoop').addEventListener('click',()=>{if(net.connected)startCoop();});
  $('#btnJoin').addEventListener('click',()=>{
   audio();
   $('#joinInput').value='';
-  $('#joinStat').textContent='Pide el código de 5 letras a tu compañero.';
+  $('#joinStat').innerHTML='Pide el código de 5 letras a tu compañero.<br><span class="prof">USARÁS TU PERFIL ONLINE (separado del local)</span>';
   showScr('join');state='joinmenu';
 });
  $('#joinInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});
@@ -2656,6 +2789,20 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
   joinRoom(c);
 });
  $('#btnJoinCancel').addEventListener('click',()=>{destroyNet();goMenu();});
+ $('#btnNwSolo').addEventListener('click',()=>{
+  // el anfitrión continúa sin el jugador 2
+  if(net.mode==='host'&&runActive){
+    sendMsg({t:'ev',k:'end'});
+    destroyNet();
+    players=[players[0]];
+    wrecks=wrecks.filter(w=>w.slot===0);
+    recompute();
+    $('#netWait').classList.add('hidden');
+    $('#netTag').classList.add('hidden');
+    $('#btnNwSolo').classList.add('hidden');
+    state='play';
+  }
+});
  $('#btnNwCancel').addEventListener('click',()=>{
   if(net.mode==='host'&&net.connected)sendMsg({t:'ev',k:'end'});
   netEndLocal(null);
@@ -2691,12 +2838,13 @@ function loop(now){
     updBoss(dt);
     updEBullets(dt);
     updCollisions();
+    if(players.length===2)updWrecks(dt);
     updPickups(dt);
     updFx(dt);
     checkClear(dt);
     enemies=enemies.filter(e=>!e.dead);
     if(pendingShipLevels>0){
-      if(net.mode==='host'&&players.length===2)beginShipChoiceHost();
+      if(net.mode==='host'&&players.length===2&&net.connected)beginShipChoiceHost();
       else showShipLevelLocal();
     }
     if(net.mode==='host'){
@@ -2708,10 +2856,24 @@ function loop(now){
   }else if(runActive&&state!=='pause'){
     updFx(dt);
   }
+  /* watchdog: el P2 se fue durante la elección de cartas → el host resuelve solo */
+  if(state==='shipwait'&&net.mode==='host'){
+    if(!net.connected){
+      shipwaitT+=dt;
+      if(shipwaitT>6&&!net.clientChosen){
+        net.clientChosen=true;net.clientCard='dmg1';
+        checkShipChoice();
+      }
+    }else shipwaitT=0;
+  }
+  if(state==='postboss'&&net.mode==='host'&&!net.connected&&!net.clientRelic){
+    net.clientRelic=true;net.clientRelicId=RELICS[0].id;
+    applyRelicChoice();
+  }
   hudAcc+=dt;
   if(hudAcc>.1){hudAcc=0;if(runActive)refreshHUD();}
   persAcc+=dt;
-  if(persAcc>8){persAcc=0;if(runActive&&net.mode!=='client')persist();}
+  if(persAcc>8){persAcc=0;if(runActive)persist();}
   if(runActive)renderGame(dt);else renderMenuBG(dt);
 }
 requestAnimationFrame(loop);
