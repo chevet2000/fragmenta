@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.1 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.2 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -314,7 +314,7 @@ button{font-family:inherit}
 <div id="hudBot" class="hidden">
   <div id="hpBox">
     <svg viewBox="0 0 12 12"><path d="M6 1 L11 6 L6 11 L1 6 Z" fill="#FF6B6B"/></svg>
-    <b id="hpTxt">3/3</b><span id="dmgTxt">DAÑO 2</span>
+    <b id="hpTxt">4/4</b><span id="dmgTxt">DAÑO 2</span>
   </div>
   <div id="botBtns">
     <button id="btnEmo" class="hidden" aria-label="Emoticones">
@@ -364,7 +364,7 @@ button{font-family:inherit}
     <canvas id="heroCv" width="640" height="330"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">Arrastra el dedo en <b>cualquier parte</b> de la pantalla: la nave te sigue con un margen para que no la tapes. 8 Guardiánes · Campistas · cofres · logros · <b>DESAFÍO SEMANAL</b>.</p>
+  <p class="tagline">Arrastra el dedo: la nave te sigue. La NOVA es tu <b>botón de emergencia</b>: la tendrás antes del primer Guardián. 8 Guardiánes · Campistas · cofres · logros · <b>DESAFÍO SEMANAL</b>.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -390,7 +390,7 @@ button{font-family:inherit}
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.1 · CONTROL MEJORADO · CAMPISTAS · MAESTRÍA · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.2 · DIFICULTAD PROGRESIVA · NOVA TEMPRANA<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -505,7 +505,7 @@ button{font-family:inherit}
     <div id="ndInfo">
       <b id="ndName">ÁRBOL DE HABILIDADES</b>
       <div id="ndMeta"></div>
-      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. Perfil LOCAL y ONLINE independientes. Exporta tu perfil abajo para pasarlo a otro dispositivo.</p>
+      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. La NOVA está en la rama SOPORTE, casi desde el principio. Perfil LOCAL y ONLINE independientes.</p>
       <div id="ndCost"></div>
     </div>
     <button class="btn primary" id="btnBuy" disabled>DESBLOQUEAR</button>
@@ -656,7 +656,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.1';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.2';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
@@ -977,7 +977,7 @@ const TREE=[
  {id:'db3',b:'def',s:'B',i:2,cost:{gems:24},wave:26,ship:12,tag:'PIO',name:'PIEL DE PIEDRA',desc:'Todo daño recibido se reduce en 1 (mín. 1).',fx:b=>b.stone=true},
  {id:'db4',b:'def',s:'B',i:3,cost:{gems:30},wave:32,ship:16,tag:'FLE',name:'FORTALEZA',desc:'Tu escudo recarga en 15 s en vez de 25.',fx:b=>b.shieldFast=true},
  {id:'u1',b:'sup',i:0,cost:{gold:300},wave:1,tag:'IMA',name:'IMÁN',desc:'Radio de recogida +80%.',fx:b=>b.magnet=1.8},
- {id:'u2',b:'sup',i:1,cost:{gems:6},wave:3,tag:'NOV',name:'NOVA',desc:'Activa: onda de 15 de daño que limpia balas. Recarga 18 s.',fx:b=>b.nova=b.nova||{d:15,cd:18}},
+ {id:'u2',b:'sup',i:1,cost:{gems:5},wave:2,tag:'NOV',name:'NOVA',desc:'Tu botón de emergencia: onda de 15 de daño que limpia balas. Recarga 18 s.',fx:b=>b.nova=b.nova||{d:15,cd:18}},
  {id:'u3',b:'sup',i:2,cost:{gems:8},wave:6,tag:'NAM',name:'NOVA AMP',desc:'Nova: 35 de daño y recarga 13 s.',fx:b=>b.nova={d:35,cd:13}},
  {id:'u4',b:'sup',i:3,cost:{gold:1400},wave:8,tag:'REL',name:'RELATIVIDAD',desc:'Balas enemigas un 30% más lentas.',fx:b=>b.slow*=.7},
  {id:'u4b',b:'sup',i:3,cost:{gold:1400},wave:8,tag:'VOR',name:'VÓRTICE',desc:'Los enemigos a menos de 180 px son atraídos hacia arriba.',fx:b=>b.vortex=true},
@@ -1110,9 +1110,11 @@ let wave={type:'form',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:
 let bannerT=0,bannerTxt='',bannerSub='';const BANNER_LIFE=1.9;
 let curPicks=[],selNode=null,curRelics=[],relicChosen=false,ascConfirm=false;
 let lastWeeklyRec=null;
+/* NOVA de arranque: se otorga a mitad de la oleada 3 si no tienes ninguna */
+let freeNovaGiven=false;
 
 function mkPlayer(slot){return{
-  slot,x:0,y:0,hp:3,maxHp:3,dmg:2,fireRate:3,bullets:1,files:1,speed:1,pierce:0,crit:.05,magnet:1,
+  slot,x:0,y:0,hp:4,maxHp:4,dmg:2,fireRate:3,bullets:1,files:1,speed:1,pierce:0,crit:.05,magnet:1,
   regenRate:0,nova:null,slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,
   bounce:0,overdrive:false,drones:0,orbs:0,shield:false,shieldFast:false,phoenixCharges:0,
   vamp:false,frenzy:false,execute:false,presa:false,reflect:false,venge:false,secondWind:false,
@@ -1120,7 +1122,7 @@ function mkPlayer(slot){return{
   slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
-  touch:null /* estado de control táctil por jugador */
+  touch:null
 };}
 let players=[mkPlayer(0)];
 const P=players[0];
@@ -1160,7 +1162,7 @@ const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
 const amClient=()=>net.mode==='client';
 function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
 function peerReady(){ return typeof Peer!=='undefined'; }
-function mkPeerId(code){ return 'frg41-'+code; }
+function mkPeerId(code){ return 'frg42-'+code; }
 function destroyNet(){
   if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
   try{if(net.conn)net.conn.close();}catch(e){}
@@ -1172,7 +1174,7 @@ function destroyNet(){
   net.remoteStats={};net.lobbyDiff='normal';
 }
 function computeStatblock(){
-  const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:3,regenRate:0,nova:null,
+  const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
     slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,
     drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
     presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
@@ -1246,7 +1248,7 @@ function hostOnData(d){
   if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
   if(d.t==='inp'&&players[1]&&players[1].hp>0){
-    players[1].x=clamp(d.x,18,W-18); players[1].y=clamp(d.y,H*.55,H-36); return;
+    players[1].x=clamp(d.x,18,W-18); players[1].y=clamp(d.y,H*.5,H-36); return;
   }
   if(d.t==='nova'){ fireNovaSlot(1); return; }
   if(d.t==='emo'){ addEmoFx(1,'emo',d.e); return; }
@@ -1467,11 +1469,11 @@ function applySnap(d){
     const id=ed[0];seen.add(id);
     let e=cEnemies.get(id);
     if(!e){
-      const tk=TKLIST[ed[1]]||'orb';
+      const tk=TKLIST[ed[1]]||0]||'orb';
       e={id,tk,T:TYPES[tk]||TYPES.orb,elvl:ed[2],hp:ed[3],
         x:ed[4],y:ed[5],r:ed[6]/10,elite:!!ed[7],flash:0,
-        snake:ed[8]==null?null:ed[8],snIdx:ed[9]||0,wob:(id*2.39996)%TAU,
-        camp:ed[10]?CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null:null,CD:ed[10]?CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null:null};
+        snake:ed[8]==null?null:ed[8],snIdx:ed[9]||0,wob:(id*2.39996)%TAU};
+      if(ed[10]){e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;}
       cEnemies.set(id,e);
     }else{
       e.tx=ed[4];e.ty=ed[5];e.hp=ed[3];e.elvl=ed[2];e.r=ed[6]/10;e.elite=!!ed[7];
@@ -1500,7 +1502,7 @@ function applySnap(d){
 /* ============ recompute ============ */
 function recompute(){
   const mk=slot=>{
-    const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:3,regenRate:0,nova:null,
+    const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
       slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,
       heal:0,drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
       presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
@@ -1901,20 +1903,20 @@ function updWaveSpawns(dt){
   }
 }
 
-/* ============ GUARDIÁNES ============ */
+/* ============ GUARDIÁNES (DIFICULTAD PROGRESIVA) ============ */
 const BOSS_DEFS={
  MONOLITO:{name:'MONOLITO',shape:'square',color:'#C8CFD8',
-   mech:'4 láseres giratorios + abanicos',
+   mech:'3 láseres lentos + abanicos suaves',
    tip:'Quédate entre dos láseres y muévete siguiendo la rotación.',
-   hpM:1.0,speed:.55,r:46},
+   hpM:0.8,speed:.45,r:44,easy:true},
  AXIOMA:{name:'AXIOMA',shape:'diamond',color:'#64C7FF',
    mech:'2 clones con vida; disparan igual que el real',
    tip:'Los clones tienen contorno punteado: puedes matarlos o esquivarlos.',
-   hpM:0.9,speed:.6,r:44},
+   hpM:0.8,speed:.55,r:44,easy:true},
  OCTAHEDRO:{name:'OCTAHEDRO',shape:'diamond',color:'#FF7EB6',
-   mech:'Espiral doble de balas continua',
+   mech:'Espiral doble de balas (suave al inicio)',
    tip:'Colócate en el centro, entre los dos brazos de la hélice.',
-   hpM:1.05,speed:.5,r:45},
+   hpM:0.85,speed:.45,r:45,easy:true},
  VERTICE:{name:'VÉRTICE',shape:'tri',color:'#FFD166',
    mech:'Abre agujeros negros que arrastran tu nave y el oro',
    tip:'Suelta el oro lejos del agujero; muévete en diagonal contra la succión.',
@@ -1946,15 +1948,15 @@ function spawnBoss(L){
   const key=bossForWave(L);
   const D=BOSS_DEFS[key];
   bossName=D.name+'-'+String(L).padStart(2,'0');
-  const hp=Math.round(hpForLevel(maxLvlOf(L))*(16+L*2.2)*D.hpM);
+  const hp=Math.round(hpForLevel(maxLvlOf(L))*(14+L*2.2)*D.hpM);
   boss={x:W/2,y:-90,ty:Math.max(110,H*.16),hp,maxhp:hp,r:D.r,t:0,ph:1,rot:0,flash:0,
     kind:key,D,
-    fanT:2.4,aimT:3.2,sumT:4,ringT:3,
-    laT:2.5,clT:4,swT:2,swA:0,swDir:0,swT2:0,gnT:2.5,gxA:0,gyA:0,gnLife:0,shT:4,
+    fanT:2.8,aimT:3.4,sumT:5,ringT:3,
+    laT:3.2,clT:4,swT:2.5,swA:0,swDir:0,swT2:0,gnT:3,gxA:0,gyA:0,gnLife:0,shT:4,
     lemTp:0,gatherT:0,gather:null,gatherPhase:0,gatherPhaseT:0,
     clones:[],lasers:[],shields:[]};
   $('#bossName').textContent=bossName;
-  banner('GUARDIÁN: '+D.name,D.mech);
+  banner('GUARDIÁN: '+D.name,D.mech+(D.easy?' · UNA FASE':''));
 }
 function fanAtk(b){
   const n=5+Math.min(6,Math.floor(run.level/3));
@@ -1970,14 +1972,15 @@ function updBoss(dt){
   if(!boss)return;
   const b=boss;
   const coop=players.length===2&&net.mode==='host';
-  b.t+=dt;b.rot+=dt*(b.ph===2?1.6:.9);b.flash=Math.max(0,b.flash-dt*5);
+  const easy=!!b.D.easy;    /* los 3 primeros: sin fase 2 y más suaves */
+  b.t+=dt;b.rot+=dt*((b.ph===2?1.5:0.9));b.flash=Math.max(0,b.flash-dt*5);
   const K=b.kind;
   const isSenor=(K==='SEÑOR');
   if(K!=='LEMNISCATA'){
     b.y+=(b.ty-b.y)*Math.min(1,dt*2);
-    b.x=W/2+Math.sin(b.t*(b.ph===2?.9:.55)*b.D.speed*1.6)*(Math.max(60,W*.30-40));
+    b.x=W/2+Math.sin(b.t*(b.ph===2?.85:.5)*b.D.speed*1.6)*(Math.max(60,W*.30-40));
   }
-  if(b.ph===1&&b.hp<b.maxhp*.5){
+  if(!easy&&b.ph===1&&b.hp<b.maxhp*.5){
     b.ph=2;banner('FASE 2','El guardián se enfurece');
     rings.push({x:b.x,y:b.y,r:10,R:160,t:0,life:.5,color:'#FF4757'});
     hostRing(b.x,b.y,160,'#FF4757');
@@ -1985,11 +1988,12 @@ function updBoss(dt){
   }
   if(K==='MONOLITO'||isSenor){
     b.laT-=dt;
-    const nL=isSenor?6:4;
+    const nL=isSenor?6:(easy?3:4);
     if(b.laT<=0){
-      b.laT=b.ph===2?2.2:3.0;
+      b.laT=easy?(b.ph===2?3.0:3.6):(b.ph===2?2.2:3.0);
       const a0=rand(0,TAU);
-      for(let i=0;i<nL;i++)b.lasers.push({a:a0+i*TAU/nL,rot:(Math.random()<.5?1:-1)*(.5+(b.ph===2?.4:0)),t:0,life:2.2});
+      const rotSp=easy?.35:(.5+(b.ph===2?.4:0));
+      for(let i=0;i<nL;i++)b.lasers.push({a:a0+i*TAU/nL,rot:(Math.random()<.5?1:-1)*rotSp,t:0,life:2.2});
       SFX.laser();
     }
     for(const L of b.lasers){ L.a+=L.rot*dt; L.t+=dt; }
@@ -2001,10 +2005,22 @@ function updBoss(dt){
         if(d<b.r+6)continue;
         const ad=Math.atan2(pdy,pdx);
         const dd=Math.abs(Math.atan2(Math.sin(ad-L.a),Math.cos(ad-L.a)));
-        if(dd<0.09)hitPlayer(pl,1);
+        if(dd<(easy?0.065:0.09))hitPlayer(pl,1);
       }
     }
-    b.fanT-=dt;if(b.fanT<=0){b.fanT=b.ph===2?2.2:3.2;fanAtk(b);}
+    b.fanT-=dt;
+    if(b.fanT<=0){
+      b.fanT=easy?4.2:(b.ph===2?2.2:3.2);
+      /* MONOLITO fácil: abanico de 4 balas lentas */
+      const n=easy?4:(5+Math.min(6,Math.floor(run.level/3)));
+      const sp=Math.min(230,(110+run.level*2))*players[0].slow;
+      const span=1.5;
+      for(let i=0;i<n;i++){
+        const a=Math.PI/2-span/2+span*i/(n-1);
+        ebullets.push({x:b.x,y:b.y+20,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:b.D.color,dead:false});
+      }
+      tone(400,150,.12,'square',.04);
+    }
   }
   if(K==='AXIOMA'||isSenor){
     b.clT-=dt;
@@ -2036,12 +2052,12 @@ function updBoss(dt){
     if(b.swT<=0){
       b.swT=b.ph===2?2.2:3.0;
       b.swA=rand(0,TAU);
-      b.swDir=(Math.random()<.5?1:-1)*(b.ph===2?.35:.25);
+      b.swDir=(Math.random()<.5?1:-1)*((b.ph===2?.35:.25)*(easy?.7:1));
     }
     if(b.swDir){
       b.swA+=b.swDir*dt*4;
       b.swT2+=dt;
-      if(b.swT2>.09){
+      if(b.swT2>(easy?.13:.09)){
         b.swT2=0;
         const sp=Math.min(200,(100+run.level*2))*players[0].slow;
         for(const off of [0,Math.PI]){
@@ -2799,9 +2815,8 @@ function updPlayer(pl,dt){
   pl.invul=Math.max(0,pl.invul-dt);
   pl.vengeT=Math.max(0,pl.vengeT-dt);
   pl.dashCd=Math.max(0,pl.dashCd-dt);
-  /* CONTROL TÁCTIL: mientras hay dedo activo, la nave persigue el objetivo */
   if(pl.touch&&pl.touch.active){
-    const k=1-Math.exp(-30*dt);   /* seguimiento rápido pero estable */
+    const k=1-Math.exp(-30*dt);
     pl.x=lerp(pl.x,pl.touch.tx,k);
     pl.y=lerp(pl.y,pl.touch.ty,k);
   }
@@ -3771,6 +3786,7 @@ function resetRunCommon(){
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
   shake=0;bannerT=0;novaCdGlobal=0;
+  freeNovaGiven=false;
 }
 function primePlayers(){
   for(const pl of players){
@@ -3867,7 +3883,6 @@ function startRunClient(){
   banner('CO-OP CONECTADO','Dificultad: '+DIFF_LABEL[runDiff]);
   musStart();
 }
-/* función de avance de oleada */
 function nextWave(){
   ebullets=[];bullets=[];beams=[];
   const L=run.level;
@@ -3881,6 +3896,18 @@ function nextWave(){
   wrecks=[];
   for(const pl of players){pl.shieldLvl=true;pl.emerUsed=false;}
   if(P.secondWind&&L%5===0)for(const pl of players){pl.hp=pl.maxHp;floater(pl.x,pl.y-30,'SEGUNDO AIRE','#7FD1B9',13);}
+  /* NOVA de arranque: regala una Nova básica al llegar a la oleada 3
+     si el jugador aún no tiene ninguna (para el primer Guardián de la oleada 5) */
+  if(L>=3&&!freeNovaGiven){
+    freeNovaGiven=true;
+    for(const pl of players){
+      if(!pl.nova){
+        pl.nova={d:15,cd:18};
+        floater(pl.x,pl.y-40,'NOVA DE EMERGENCIA','#FFD166',14);
+      }
+    }
+    banner('NOVA DE EMERGENCIA','Prepárate: el primer Guardián llega en la oleada 5');
+  }
   formY=0;formT=0;
   buildWave(L);
   waveState='play';clearTimer=0;
@@ -4112,7 +4139,7 @@ function selectNode(id){
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
     mt.textContent=`${TREE.length} MEJORAS · 7 RAMAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Perfil LOCAL y ONLINE independientes. Exporta tu perfil abajo para pasarlo a otro dispositivo.';
+    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. La NOVA está al principio de SOPORTE. Perfil LOCAL y ONLINE independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
@@ -4199,21 +4226,13 @@ function refreshHUD(){
   }else nt.classList.add('hidden');
 }
 
-/* ============ CONTROL TÁCTIL (v4.1: directo y fiable) ============ */
-const DRAG_GAIN=1.6;      /* multiplicador del arrastre relativo */
-const TOUCH_LEAD=90;      /* la nave va 90 px por encima del dedo */
+/* ============ CONTROL TÁCTIL ============ */
+const DRAG_GAIN=1.6;
+const TOUCH_LEAD=90;
 function clampShip(pl,x,y){
   return{x:clamp(x,18,W-18),y:clamp(y,H*.5,H-36)};
 }
-function activeTouchFor(slot){
-  /* devuelve el toque asignado a este slot si sigue activo */
-  for(const id in activeTouches){
-    const t=activeTouches[id];
-    if(t.slot===slot)return t;
-  }
-  return null;
-}
-const activeTouches={}; /* pointerId -> {slot,x,y,px,py,lastMs} */
+const activeTouches={};
 function slotFromPointer(clientX){
   if(players.length>1)return clientX<W/2?0:1;
   return localSlot;
@@ -4225,7 +4244,6 @@ cv.addEventListener('pointerdown',e=>{
   const pl=players[slot];
   if(!pl||pl.hp<=0)return;
   activeTouches[e.pointerId]={slot,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,lastMs:performance.now()};
-  /* al tocar cerca de la nave, "enganchar" inmediatamente */
   if(Math.hypot(e.clientX-pl.x,e.clientY-pl.y)<130){
     const p=clampShip(pl,e.clientX,e.clientY-TOUCH_LEAD);
     pl.touch={active:true,tx:p.x,ty:p.y};
@@ -4240,7 +4258,6 @@ window.addEventListener('pointermove',e=>{
   const now=performance.now();
   const dx=e.clientX-t.px,dy=e.clientY-t.py;
   const dtm=now-t.lastMs;
-  /* dash por tirón rápido */
   if(pl.dash&&pl.dashCd<=0&&dtm<70&&Math.hypot(dx,dy)>30){
     const d=Math.hypot(dx,dy);
     pl.x=clamp(pl.x+dx/d*Math.min(120,d*2.6),18,W-18);
@@ -4249,7 +4266,6 @@ window.addEventListener('pointermove',e=>{
     floater(pl.x,pl.y-26,'DASH','#64C7FF',11);
     tone(900,300,.1,'sine',.04);
   }
-  /* objetivo: arrastre relativo amplificado */
   const target=clampShip(pl,pl.x+dx*DRAG_GAIN,pl.y+dy*DRAG_GAIN);
   pl.touch={active:true,tx:target.x,ty:target.y};
   t.px=e.clientX;t.py=e.clientY;t.lastMs=now;
@@ -4268,9 +4284,6 @@ function endTouch(e){
 }
 window.addEventListener('pointerup',endTouch);
 window.addEventListener('pointercancel',endTouch);
-window.addEventListener('pointerout',e=>{
-  /* si el dedo sale de la ventana, mantener el objetivo pero sin moverse */
-});
 document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},{passive:false});
 
 /* ---- LISTENERS ---- */
@@ -4479,7 +4492,6 @@ function loop(now){
       if(snapAcc>.08){snapAcc=0;sendSnap();}
     }
   }else if(state==='play'&&amClient()){
-    /* el cliente también persigue su objetivo táctil localmente */
     for(const pl of players){
       if(pl.slot===localSlot&&pl.touch&&pl.touch.active&&pl.hp>0){
         const k=1-Math.exp(-30*dt);
