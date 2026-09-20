@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v3.8 — purga geométrica infinita</title>
+<title>FRAGMENTA v3.9 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -100,6 +100,7 @@ button{font-family:inherit}
 .tagline b{color:var(--mint)}
 .menu-btns{width:min(290px,84vw);display:flex;flex-direction:column;gap:9px;margin-top:16px}
 .btn.week{border-color:var(--vio);color:var(--vio)}
+.btn.rankb{border-color:var(--sky);color:var(--sky)}
 .menu-stats{margin-top:14px;font-size:10.5px;color:var(--dim);letter-spacing:.14em;display:flex;gap:14px;
   align-items:center;flex-wrap:wrap;justify-content:center}
 .menu-stats span{display:flex;align-items:center;gap:5px}
@@ -116,7 +117,7 @@ button{font-family:inherit}
 #btnAscend{border-color:var(--vio)!important;color:var(--vio)!important}
 #btnInstall{border-color:var(--mint)!important;color:var(--mint)!important}
 
-.achbox{width:min(400px,94vw);max-height:80vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);
+.achbox{width:min(400px,94vw);max-height:82vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);
   padding:18px 14px;position:relative}
 .achbox::before{content:'';position:absolute;top:-1px;left:-1px;width:12px;height:12px;
   border-top:2px solid var(--amber);border-left:2px solid var(--amber)}
@@ -137,6 +138,34 @@ button{font-family:inherit}
 .grow .at b{font-size:12px;letter-spacing:.1em;display:block}
 .grow .at .gm{font-size:10px;color:var(--pink);margin-top:2px;display:block}
 .grow .at .gt{font-size:10px;color:var(--dim);margin-top:2px;display:block;line-height:1.4}
+
+/* ranking */
+#rankCard{width:min(360px,88vw);display:block;margin:0 auto 10px;border:1px solid var(--line);background:#07090D}
+.pilotbox{border:1px solid var(--sky);padding:10px 12px;margin-bottom:10px;text-align:center}
+.pilotbox small{display:block;font-size:8.5px;letter-spacing:.3em;color:var(--dim)}
+.pilotbox b{font-size:26px;letter-spacing:.36em;color:var(--sky);margin-left:.36em}
+.pilotbox .prec{font-size:9px;letter-spacing:.14em;color:var(--dim);margin-top:5px;word-break:break-all;line-height:1.6}
+.rentry{border:1px solid var(--line);padding:8px 10px;margin-bottom:7px;display:flex;align-items:center;gap:9px}
+.rentry .rk{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;color:var(--dim);border:1px solid var(--line)}
+.rentry.p1 .rk{background:var(--amber);color:#0A0C10;border-color:var(--amber)}
+.rentry.p2 .rk{background:#C8CFD8;color:#0A0C10;border-color:#C8CFD8}
+.rentry.p3 .rk{background:#C9805A;color:#0A0C10;border-color:#C9805A}
+.rentry .rt{flex:1;min-width:0}
+.rentry .rt b{font-size:13px;letter-spacing:.2em;color:var(--ink)}
+.rentry .rt small{display:block;font-size:9.5px;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+.rentry .rw{font-size:16px;font-weight:700;color:var(--amber);flex:none}
+.rentry .rw small{font-size:8px;letter-spacing:.14em;color:var(--dim);display:block;text-align:center}
+.rentry.unv{opacity:.6}
+.rentry .rdel{width:26px;height:26px;flex:none;border:1px solid var(--line);background:none;color:var(--coral);
+  cursor:pointer;font-weight:700}
+#recInput{width:100%;font-family:inherit;font-size:10.5px;letter-spacing:.06em;background:var(--panel);
+  border:1px solid var(--line);color:var(--ink);padding:10px;margin-bottom:8px;outline:none;
+  user-select:text;-webkit-user-select:text;word-break:break-all}
+#recInput:focus{border-color:var(--sky)}
+#rankMsg{font-size:9.5px;letter-spacing:.14em;color:var(--dim);min-height:16px;text-align:center;margin-bottom:8px}
+#rankMsg.err{color:var(--coral)}
+#rankMsg.ok{color:var(--mint)}
 
 .cbtn{display:block;width:100%;text-align:left;padding:12px 14px;border:1px solid var(--amber);background:rgba(12,16,22,.6);
   color:var(--ink);margin-top:9px;cursor:pointer}
@@ -234,6 +263,7 @@ button{font-family:inherit}
 #ovKeep{font-size:9.5px;letter-spacing:.14em;font-weight:700;text-align:center;line-height:1.8;margin:-4px 0 12px}
 #ovKeep .k1{color:var(--mint)}
 #ovKeep .k2{color:var(--coral)}
+#btnCopyRec{border-color:var(--sky)!important;color:var(--sky)!important}
 #relicHead{font-size:9px;letter-spacing:.4em;color:var(--vio);font-weight:700;text-align:center;margin-bottom:4px}
 .rbtn{display:block;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--vio);background:rgba(12,16,22,.6);
   color:var(--ink);margin-top:8px;cursor:pointer}
@@ -324,10 +354,10 @@ button{font-family:inherit}
 
 <div class="scr show" id="scrMenu">
   <div id="hero">
-    <canvas id="heroCv" width="640" height="250"></canvas>
+    <canvas id="heroCv" width="640" height="260"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">8 Guardiánes con mecánicas propias · 10 enemigos · cofres cada 10 oleadas · logros con <b>gemas</b> · <b>DESAFÍO SEMANAL</b>: la misma secuencia para todos. Al caer conservas tu arsenal, oro y gemas.</p>
+  <p class="tagline">8 Guardiánes con mecánicas propias · 10 enemigos · cofres cada 10 oleadas · logros con <b>gemas</b> · <b>DESAFÍO SEMANAL</b> con ranking por código de piloto. Al caer conservas tu arsenal, oro y gemas.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -338,6 +368,7 @@ button{font-family:inherit}
   <div class="menu-btns">
     <button class="btn primary" id="btnPlay">JUGAR · 1 JUGADOR</button>
     <button class="btn week" id="btnWeekly">DESAFÍO SEMANAL</button>
+    <button class="btn rankb" id="btnRank">RANKING SEMANAL</button>
     <button class="btn" id="btnHost">ONLINE · CREAR SALA</button>
     <button class="btn" id="btnJoin">ONLINE · UNIRSE</button>
     <button class="btn" id="btnArsenal">ARSENAL · ÁRBOL</button>
@@ -352,9 +383,30 @@ button{font-family:inherit}
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v3.8 · SEMANAL · MÚSICA · 8 GUARDIÁNES · CO-OP<br>
+  <div class="ver">FRAGMENTA v3.9 · RANKING SEMANAL · MÚSICA · 8 GUARDIÁNES · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio<br>
   PERSONALIZA · sube <b>logo.png</b> (800×300) junto a index.html y aparecerá arriba</div>
+</div>
+
+<!-- RANKING -->
+<div class="scr" id="scrRank">
+  <div class="achbox">
+    <h2>RANKING · SEM <span id="rankWeek"></span></h2>
+    <div class="pilotbox">
+      <small>TU CÓDIGO DE PILOTO</small>
+      <b id="pilotCode">----</b>
+      <div class="prec" id="pilotRec"></div>
+      <button class="btn" id="btnCopyMyRec" style="margin-top:8px;padding:9px">COPIAR MI REGISTRO</button>
+    </div>
+    <canvas id="rankCard" width="360" height="200"></canvas>
+    <div id="rankMsg"></div>
+    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin-bottom:8px">
+      PEGA AQUÍ EL REGISTRO DE UN AMIGO</div>
+    <input id="recInput" placeholder="FRG9.2025W23.K7X2.15.12.A3F1" autocomplete="off">
+    <button class="btn" id="btnAddRec" style="margin-bottom:12px;padding:11px">AÑADIR AL RANKING</button>
+    <div id="rankList"></div>
+    <button class="btn" id="btnRankBack" style="margin-top:6px">VOLVER</button>
+  </div>
 </div>
 
 <div class="scr" id="scrGuide">
@@ -475,6 +527,7 @@ button{font-family:inherit}
     <h2>SEÑAL PERDIDA</h2>
     <div class="stats" id="ovStats"></div>
     <div id="ovKeep"></div>
+    <button class="btn hidden" id="btnCopyRec">COPIAR REGISTRO SEMANAL</button>
     <button class="btn primary" id="btnRetry">REINTENTAR</button>
     <button class="btn" id="btnOShop">ARSENAL</button>
     <button class="btn" id="btnMenu">MENÚ</button>
@@ -510,11 +563,17 @@ function goFullscreen(){
     if(fn){const p=fn.call(el);if(p&&p.catch)p.catch(()=>{});}
   }catch(e){}
 }
+function copyText(t,msg){
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(
+    ()=>{if(msg)banner('COPIADO',msg);},()=>{if(msg)banner('COPIA MANUAL','Selecciona y copia el texto');}
+  ).catch(()=>{});}
+  else if(msg)banner('COPIA MANUAL','Selecciona y copia el texto');
+}
 
 /* ============ RNG determinista (modo semanal) ============ */
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function hashStr(s){let h=1779033703;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return h>>>0;}
-let R=Math.random;            /* RNG de estructura: Math.random normal, seed en semanal */
+let R=Math.random;
 let weeklyMode=false;
 function weekSeed(){const d=new Date();const start=new Date(d.getFullYear(),0,1);
   const w=Math.floor((d-start)/604800000)+1;return d.getFullYear()+'W'+w;}
@@ -582,9 +641,10 @@ window.addEventListener('appinstalled',()=>{
 });
 
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='3.8';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='3.9';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
-  ach:{},totElite:0,totRescue:0,totChest:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true};}
+  ach:{},totElite:0,totRescue:0,totChest:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
+  pilot:null,ranking:[]};}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));
@@ -611,6 +671,45 @@ function persist(){
   try{localStorage.setItem(saveProfile==='local'?KEY_LOCAL:KEY_NET,JSON.stringify(save));}catch(e){}
 }
 const has=id=>!!save.tree[id];
+
+/* ============ PILOTO Y RANKING ============ */
+function getPilot(){
+  if(!save.pilot){
+    const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let c='';for(let i=0;i<4;i++)c+=A[irand(0,A.length-1)];
+    save.pilot=c;persist();
+  }
+  return save.pilot;
+}
+function weekHash(seed,code,wave,ship){
+  const h=hashStr('FRG8|'+seed+'|'+code+'|'+wave+'|'+ship);
+  return h.toString(16).toUpperCase().padStart(8,'0').slice(0,4);
+}
+function makeRecordString(seed,code,wave,ship){
+  return 'FRG9.'+seed+'.'+code+'.'+wave+'.'+ship+'.'+weekHash(seed,code,wave,ship);
+}
+function parseRecordString(s){
+  const p=String(s||'').trim().split('.');
+  if(p.length!==6||p[0]!=='FRG9')return null;
+  const seed=p[1],code=p[2].toUpperCase();
+  const wave=parseInt(p[3],10),ship=parseInt(p[4],10);
+  if(!seed||!/^J?[A-Z0-9]{4}$/.test(code)||!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
+  return{seed,code,wave,ship,h:p[5].toUpperCase(),
+    ok:weekHash(seed,code,wave,ship)===p[5].toUpperCase()};
+}
+function addRankingEntry(entry){
+  if(!save.ranking)save.ranking=[];
+  const ex=save.ranking.find(r=>r.seed===entry.seed&&r.code===entry.code);
+  if(ex){
+    if(entry.wave>ex.wave){ex.wave=entry.wave;ex.ship=entry.ship;ex.h=entry.h;ex.ok=entry.ok;}
+  }else save.ranking.push(entry);
+  if(save.ranking.length>60)save.ranking=save.ranking.slice(-60);
+  persist();
+}
+function sortedRanking(){
+  return [...(save.ranking||[])].sort((a,b)=>
+    b.wave-a.wave||b.ship-a.ship||a.code.localeCompare(b.code));
+}
 
 /* ============ logros ============ */
 const ACHS=[
@@ -957,6 +1056,7 @@ let wave={type:'form',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:
 let bannerT=0,bannerTxt='',bannerSub='';const BANNER_LIFE=1.9;
 let curPicks=[],selNode=null,curRelics=[],relicChosen=false,ascConfirm=false;
 const GRIP=16;
+let lastWeeklyRec=null; /* registro semanal de la partida recién terminada */
 
 function mkPlayer(slot){return{
   slot,x:0,y:0,hp:3,maxHp:3,dmg:2,fireRate:3,bullets:1,files:1,speed:1,pierce:0,crit:.05,magnet:1,
@@ -1006,7 +1106,7 @@ const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
 const amClient=()=>net.mode==='client';
 function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
 function peerReady(){ return typeof Peer!=='undefined'; }
-function mkPeerId(code){ return 'frg38-'+code; }
+function mkPeerId(code){ return 'frg39-'+code; }
 function destroyNet(){
   if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
   try{if(net.conn)net.conn.close();}catch(e){}
@@ -1512,7 +1612,7 @@ function kamiExplode(e,damaging){
   killEnemy(e,0);
 }
 
-/* ============ oleadas (DIFICULTAD BASE SUBIDA) ============ */
+/* ============ oleadas ============ */
 const WAVE_NAME={form:'FORMACIÓN',drip:'GOTEO',snake:'CULEBRA',swarm:'ENJAMBRE',boss:'GUARDIÁN'};
 function pickWaveType(L){
   const pool=['form','form','drip','drip','snake','snake','swarm'];
@@ -1523,7 +1623,7 @@ function pickWaveType(L){
 function spawnFormation(L,f){
   f=f||1;
   const maxL=maxLvlOf(L),minL=minLvlOf(L);
-  const n=Math.max(5,Math.round(clamp(10+L*1.5,10,30)*f));   /* antes 8+L*1.2 (máx 24) */
+  const n=Math.max(5,Math.round(clamp(10+L*1.5,10,30)*f));
   const cols=Math.min(7,Math.ceil(Math.sqrt(n*1.6)));
   const rows=Math.ceil(n/cols);
   const sp=Math.min(46,(W-30)/cols);
@@ -1545,7 +1645,7 @@ function spawnSnake(L,f){
   f=f||1;
   const maxL=maxLvlOf(L),minL=minLvlOf(L);
   const nS=L>=18?3:L>=7?2:1;
-  let links=Math.round(clamp(7+Math.floor(L/2),7,16)*f);     /* antes 6+L/2 (máx 14) */
+  let links=Math.round(clamp(7+Math.floor(L/2),7,16)*f);
   links=Math.max(4,links);
   for(let s=0;s<nS;s++){
     const sn={s:0,spd:Math.min(.85,.5+L*.012),ph:rand(0,TAU)};
@@ -1610,7 +1710,7 @@ function buildWave(L){
   }
   let comps;
   if(L<=4)comps=[L===1?'form':L===2?'drip':L===3?'snake':'swarm'];
-  else if(R()<.34){                                          /* mixtas un poco más frecuentes */
+  else if(R()<.34){
     const all=shuffle(['form','drip','snake','swarm']);
     comps=all.slice(0,L>=12&&R()<.45?3:2);
   }else comps=[pickWaveType(L)];
@@ -1622,22 +1722,22 @@ function buildWave(L){
     if(t==='form')spawnFormation(L,f);
     else if(t==='snake')spawnSnake(L,f);
     else if(t==='drip'){
-      const n=Math.max(5,Math.round((11+L)*f));              /* antes 9+L*.8 */
+      const n=Math.max(5,Math.round((11+L)*f));
       const a=[];for(let i=0;i<n;i++)a.push('drip');
       wave.pending+=n;wave.total+=n;pools.push(a);
     }else{
-      const n=Math.max(6,Math.round((16+L*.9)*f));           /* antes 13+L*.7 */
+      const n=Math.max(6,Math.round((16+L*.9)*f));
       const a=[];for(let i=0;i<n;i++)a.push('swarm');
       wave.pending+=n;wave.total+=n;pools.push(a);
     }
   }
   if(pools.length)wave.pool=interleave(pools);
   if(L<=8){
-    const ex=irandR(2,4);                                    /* antes 1-3 */
+    const ex=irandR(2,4);
     for(let i=0;i<ex;i++)spawnExtra(L,i);
     wave.total+=ex;
   }
-  const eliteChance=Math.min(.65,.18+L*.025)+(coop?.12:0);   /* antes .16+L*.022 */
+  const eliteChance=Math.min(.65,.18+L*.025)+(coop?.12:0);
   let nE=(L>=14&&R()<.4)?2:1;
   if(coop&&L>=10)nE=Math.max(nE,2);
   if(L>=3&&R()<eliteChance){
@@ -2070,7 +2170,7 @@ function updEnemies(dt){
   formY=Math.min(formY+dt*4,H*.18);
   const offX=Math.sin(formT*.7)*(18+Math.min(24,run.level*1.2));
   let divers=0;for(const e of enemies)if(e.state==='dive')divers++;
-  const maxDivers=(1+Math.floor(run.level/3))*(players.length===2?1.5:1);  /* antes /4 */
+  const maxDivers=(1+Math.floor(run.level/3))*(players.length===2?1.5:1);
   for(const sn of wave.snakes)sn.s+=sn.spd*dt;
   for(const e of enemies){
     if(e.dead)continue;
@@ -2344,7 +2444,7 @@ function killEnemy(e,bySlot){
 function doSplit(e){
   if(e.elite||e.tk==='kami')return;
   if(e.elvl<5&&e.tk!=='hive')return;
-  const cap=players.length===2?52:40;                 /* antes 47/34 */
+  const cap=players.length===2?52:40;
   if(enemies.length>cap)return;
   const minL=minLvlOf(run.level);
   if(e.elvl<=minL&&e.tk!=='hive')return;
@@ -3169,37 +3269,9 @@ function renderMenuBG(dt){
   ctx.globalAlpha=1;
   drawHero();
 }
-/* LOGO animado del menú (o logo.png si el usuario lo sube) */
-function drawHero(){
-  const c=$('#heroCv');
-  if(!c||c.classList.contains('hidden'))return;
-  const g=c.getContext('2d');
-  const w=c.width,h=c.height,cx=w/2,cy=h*.46;
-  g.clearRect(0,0,w,h);
-  for(let i=0;i<8;i++){
-    const a=time*.22+i*TAU/8;
-    const x=cx+Math.cos(a)*w*.42,y=cy+Math.sin(a)*h*.34;
-    const D=BOSS_DEFS[BOSS_ORDER[i]];
-    g.save();g.translate(x,y);g.rotate(a+time*.4);
-    g.globalAlpha=.55;g.strokeStyle=D.color;g.lineWidth=2;
-    shapePath(g,D.shape,13);
-    g.stroke();
-    g.restore();
-  }
-  g.globalAlpha=1;
-  g.textAlign='center';g.textBaseline='middle';
-  const pulse=1+Math.sin(time*2)*.012;
-  g.save();g.translate(cx,cy);g.scale(pulse,pulse);
-  g.font='700 66px "Chakra Petch",monospace';
-  g.lineWidth=5;g.strokeStyle='rgba(255,209,102,.35)';
-  g.strokeText('FRAGMENTA',0,0);
-  g.fillStyle='#F2EFE6';
-  g.fillText('FRAGMENTA',0,0);
-  g.font='500 13px "Chakra Petch",monospace';
-  g.fillStyle='#8B93A1';
-  g.fillText('· PURGA GEOMÉTRICA INFINITA ·',0,48);
-  g.restore();
-  g.save();g.translate(cx,cy+92);g.scale(1.5,1.5);
+/* LOGO animado: título + nave + 8 Guardiánes orbitando, con brillos */
+function drawShipIcon(g,scale,core){
+  g.save();g.scale(scale,scale);
   g.strokeStyle='#FFD166';g.lineWidth=1.6;g.beginPath();
   const fl=6+Math.random()*5;
   g.moveTo(-2,9);g.lineTo(0,9+fl);g.lineTo(2,9);g.stroke();
@@ -3208,8 +3280,65 @@ function drawHero(){
   g.moveTo(0,-13);g.lineTo(4,-3);g.lineTo(11,7);g.lineTo(5,4.5);g.lineTo(3,10);
   g.lineTo(-3,10);g.lineTo(-5,4.5);g.lineTo(-11,7);g.lineTo(-4,-3);g.closePath();
   g.fill();g.stroke();
-  g.fillStyle='#7FD1B9';
+  g.fillStyle=core||'#7FD1B9';
   g.beginPath();g.moveTo(0,-5);g.lineTo(2.6,-1.4);g.lineTo(0,2.2);g.lineTo(-2.6,-1.4);g.closePath();g.fill();
+  g.restore();
+}
+function drawHero(){
+  const c=$('#heroCv');
+  if(!c||c.classList.contains('hidden'))return;
+  const g=c.getContext('2d');
+  const w=c.width,h=c.height,cx=w/2,cy=h*.45;
+  g.clearRect(0,0,w,h);
+  /* anillo de energía */
+  g.save();
+  g.strokeStyle='rgba(255,209,102,.14)';g.lineWidth=1;
+  g.beginPath();g.ellipse(cx,cy,w*.40,h*.30,0,0,TAU);g.stroke();
+  g.strokeStyle='rgba(127,209,185,.12)';
+  g.beginPath();g.ellipse(cx,cy,w*.44,h*.34,0,0,TAU);g.stroke();
+  g.restore();
+  /* los 8 Guardiánes orbitando con destello */
+  for(let i=0;i<8;i++){
+    const a=time*.22+i*TAU/8;
+    const x=cx+Math.cos(a)*w*.40,y=cy+Math.sin(a)*h*.30;
+    const D=BOSS_DEFS[BOSS_ORDER[i]];
+    g.save();
+    g.translate(x,y);g.rotate(a+time*.4);
+    g.shadowColor=D.color;g.shadowBlur=10;
+    g.globalAlpha=.6+Math.sin(time*3+i)*.15;
+    g.strokeStyle=D.color;g.lineWidth=2;
+    g.fillStyle='rgba(255,255,255,.04)';
+    shapePath(g,D.shape,13);
+    g.fill();g.stroke();
+    g.restore();
+  }
+  /* chispas orbitando */
+  for(let i=0;i<5;i++){
+    const a=-time*.5+i*TAU/5;
+    const x=cx+Math.cos(a)*w*.36,y=cy+Math.sin(a)*h*.27;
+    g.save();g.translate(x,y);
+    g.globalAlpha=.5;g.fillStyle='#FFD166';
+    g.fillRect(-1,-1,2,2);
+    g.restore();
+  }
+  /* título */
+  g.textAlign='center';g.textBaseline='middle';
+  const pulse=1+Math.sin(time*2)*.012;
+  g.save();g.translate(cx,cy);g.scale(pulse,pulse);
+  g.shadowColor='#FFD166';g.shadowBlur=16;
+  g.font='700 66px "Chakra Petch",monospace';
+  g.lineWidth=5;g.strokeStyle='rgba(255,209,102,.35)';
+  g.strokeText('FRAGMENTA',0,0);
+  g.fillStyle='#F2EFE6';
+  g.fillText('FRAGMENTA',0,0);
+  g.shadowBlur=0;
+  g.font='500 13px "Chakra Petch",monospace';
+  g.fillStyle='#8B93A1';
+  g.fillText('· PURGA GEOMÉTRICA INFINITA ·',0,48);
+  g.restore();
+  /* nave bajo el título */
+  g.save();g.translate(cx,cy+96);
+  drawShipIcon(g,1.5,'#7FD1B9');
   g.restore();
 }
 /* logo.png opcional */
@@ -3223,8 +3352,51 @@ try{
   im.src='logo.png';
 }catch(e){}
 
+/* ============ TARJETA DE RANKING (canvas) ============ */
+function drawRankCard(canvas,entry){
+  const g=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  g.clearRect(0,0,w,h);
+  g.fillStyle='#07090D';g.fillRect(0,0,w,h);
+  g.strokeStyle='#232B36';g.strokeRect(.5,.5,w-1,h-1);
+  /* guardias en miniatura orbitando */
+  const cx=w/2,cy=h*.36;
+  for(let i=0;i<8;i++){
+    const a=i*TAU/8+time*.3;
+    const x=cx+Math.cos(a)*w*.38,y=cy+Math.sin(a)*h*.2;
+    const D=BOSS_DEFS[BOSS_ORDER[i]];
+    g.save();g.translate(x,y);g.rotate(a);
+    g.globalAlpha=.7;g.strokeStyle=D.color;g.lineWidth=1.5;
+    shapePath(g,D.shape,7);
+    g.stroke();g.restore();
+  }
+  g.globalAlpha=1;
+  g.textAlign='center';g.textBaseline='middle';
+  g.font='700 30px "Chakra Petch",monospace';
+  g.fillStyle='#F2EFE6';
+  g.fillText('FRAGMENTA',cx,cy);
+  g.font='500 9px "Chakra Petch",monospace';
+  g.fillStyle='#8B93A1';
+  g.fillText('DESAFÍO SEMANAL · SEM '+entry.seed,cx,cy+24);
+  if(entry.code){
+    g.font='700 26px "Chakra Petch",monospace';
+    g.fillStyle='#64C7FF';
+    g.fillText(entry.code,cx,h*.62);
+    g.font='700 15px "Chakra Petch",monospace';
+    g.fillStyle='#FFD166';
+    g.fillText('OLEADA '+entry.wave,cx,h*.78);
+    g.font='500 10px "Chakra Petch",monospace';
+    g.fillStyle='#8B93A1';
+    g.fillText('NAVE NV '+entry.ship+(entry.ok?' · ✓ VERIFICADO':' · ≈ SIN VERIFICAR'),cx,h*.88);
+  }else{
+    g.font='500 11px "Chakra Petch",monospace';
+    g.fillStyle='#5C6572';
+    g.fillText('JUEGA EL DESAFÍO SEMANAL',cx,h*.7);
+  }
+}
+
 /* ============ pantallas ============ */
-const scr={menu:$('#scrMenu'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver')};
+const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
 function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
 function setChoiceNote(txt){
@@ -3257,13 +3429,87 @@ function refreshMenu(){
   $('#btnAch').textContent=`LOGROS (${na}/${ACHS.length})`;
   const ws=weekSeed();
   const wb=(save.weekly&&save.weekly.seed===ws)?save.weekly.best:0;
-  $('#btnWeekly').textContent=`DESAFÍO SEMANAL · SEM ${ws} · RÉCORD ${wb}`;
+  $('#btnWeekly').textContent=`DESAFÍO SEMANAL · RÉCORD ${wb}`;
+  const nr=(save.ranking||[]).length;
+  $('#btnRank').textContent=`RANKING SEMANAL (${nr})`;
   $('#diffName').textContent=DIFF_LABEL[save.diff]||'SOLO ×1';
   document.querySelectorAll('#diffRow button').forEach(b=>b.classList.toggle('on',b.dataset.d===save.diff));
   const asc=$('#btnAscend');
   asc.classList.toggle('hidden',save.bestAll<50);
   asc.textContent=ascConfirm?'¿SEGURO? TOCA DE NUEVO':`ASCENDER ×${save.prest+1} (+25% ORO)`;
 }
+/* ---- RANKING UI ---- */
+function openRank(){
+  useProfile(saveProfile);
+  const pilot=getPilot();
+  const ws=weekSeed();
+  $('#rankWeek').textContent=ws;
+  $('#pilotCode').textContent=pilot;
+  /* mi registro de la semana actual */
+  const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
+  const myStr=mine?makeRecordString(mine.seed,mine.code,mine.wave,mine.ship):null;
+  $('#pilotRec').innerHTML=mine
+    ?('OLEADA '+mine.wave+' · NAVE NV '+mine.ship+'<br>'+myStr)
+    :'Aún sin registro esta semana.<br>Juega el DESAFÍO SEMANAL para generarlo.';
+  $('#btnCopyMyRec').style.display=mine?'block':'none';
+  renderRankList();
+  showScr('rank');
+}
+function renderRankList(){
+  const box=$('#rankList');box.innerHTML='';
+  const list=sortedRanking();
+  if(list.length===0){
+    box.innerHTML='<div style="font-size:10px;letter-spacing:.2em;color:var(--dim);text-align:center;padding:10px 0">'+
+      'SIN REGISTROS · comparte tu código con<br>tus amigos y añade los suyos aquí</div>';
+    return;
+  }
+  list.forEach((r,i)=>{
+    const el=document.createElement('div');
+    el.className='rentry'+(i===0?' p1':i===1?' p2':i===2?' p3':'')+(r.ok?'':' unv');
+    const medal=i<3?['1','2','3'][i]:(i+1);
+    el.innerHTML=`<div class="rk">${medal}</div>`+
+      `<div class="rt"><b>${r.code}</b><small>${r.seed}${r.ok?'':' · sin verificar'}</small></div>`+
+      `<div class="rw">${r.wave}<small>OLEADA</small></div>`+
+      `<button class="rdel" data-c="${r.code}" data-s="${r.seed}">×</button>`;
+    box.appendChild(el);
+  });
+  box.querySelectorAll('.rdel').forEach(b=>{
+    b.addEventListener('click',()=>{
+      save.ranking=(save.ranking||[]).filter(r=>!(r.code===b.dataset.c&&r.seed===b.dataset.s));
+      persist();renderRankList();
+    });
+  });
+  /* tarjeta: mi registro de esta semana o el top 1 */
+  const ws=weekSeed();
+  const pilot=getPilot();
+  let card=sortedRanking().find(r=>r.seed===ws&&r.code===pilot);
+  if(!card)card=sortedRanking().find(r=>r.seed===ws);
+  drawRankCard($('#rankCard'),card||{seed:ws});
+}
+ $('#btnAddRec').addEventListener('click',()=>{
+  const s=$('#recInput').value;
+  const p=parseRecordString(s);
+  const m=$('#rankMsg');
+  if(!p){
+    m.className='err';m.textContent='Formato no válido. Debe ser: FRG9.SEMANA.CODIGO.OLEADA.NAVE.HASH';
+    return;
+  }
+  addRankingEntry(p);
+  $('#recInput').value='';
+  m.className='ok';
+  m.textContent=(p.ok?'✓ Registro verificado':'≈ Registro añadido (sin verificar)')+' · '+p.code+' · oleada '+p.wave;
+  renderRankList();
+  SFX.buy();
+});
+ $('#btnCopyMyRec').addEventListener('click',()=>{
+  const pilot=getPilot(),ws=weekSeed();
+  const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
+  if(!mine)return;
+  copyText(makeRecordString(mine.seed,mine.code,mine.wave,mine.ship),
+    'Envíalo a tus amigos para el ranking');
+});
+ $('#btnRank').addEventListener('click',openRank);
+ $('#btnRankBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
 function openGuide(){
   const box=$('#guideList');box.innerHTML='';
   for(const key of BOSS_ORDER){
@@ -3526,12 +3772,18 @@ function gameOver(){
   save.bestShip=Math.max(save.bestShip,run.shipLv);
   if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,run.level);
   let weeklyRec=false;
+  lastWeeklyRec=null;
   if(weeklyMode){
     const ws=weekSeed();
     if(save.weekly&&save.weekly.seed===ws){
       if(run.level>(save.weekly.best||0)){save.weekly.best=run.level;weeklyRec=true;}
     }
     save.weekBestAll=Math.max(save.weekBestAll||0,run.level);
+    /* registro para el ranking */
+    const pilot=getPilot();
+    lastWeeklyRec={seed:ws,code:pilot,wave:run.level,ship:run.shipLv,
+      h:weekHash(ws,pilot,run.level,run.shipLv),ok:true};
+    addRankingEntry(lastWeeklyRec);
   }
   checkAch();
   persist();
@@ -3548,6 +3800,14 @@ function gameOver(){
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
     `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
     `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
+  const cr=$('#btnCopyRec');
+  if(lastWeeklyRec){
+    cr.classList.remove('hidden');
+    cr.onclick=()=>{
+      copyText(makeRecordString(lastWeeklyRec.seed,lastWeeklyRec.code,lastWeeklyRec.wave,lastWeeklyRec.ship),
+        'Pégalo en el ranking de tus amigos');
+    };
+  }else cr.classList.add('hidden');
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');
   $('#bossBar').classList.add('hidden');
   closeEmoPanel();
