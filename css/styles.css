@@ -130,6 +130,17 @@ button{font-family:inherit}
 .pilotbox small{display:block;font-size:8.5px;letter-spacing:.3em;color:var(--dim)}
 .pilotbox b{font-size:26px;letter-spacing:.36em;color:var(--sky);margin-left:.36em}
 .pilotbox .prec{font-size:9px;letter-spacing:.14em;color:var(--dim);margin-top:5px;word-break:break-all;line-height:1.6}
+/* v4.11: editor del nombre de piloto */
+#btnEditPilot{margin-top:8px;font-size:9px;letter-spacing:.22em;font-weight:700;padding:6px 12px;
+  background:none;border:1px solid var(--sky);color:var(--sky);cursor:pointer}
+#pilotEdit{display:flex;gap:6px;margin-top:8px;justify-content:center;flex-wrap:wrap;align-items:center}
+#pilotInput{flex:1;min-width:120px;max-width:190px;background:#07090D;border:1px solid var(--line);
+  color:var(--sky);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:.2em;padding:8px 10px;
+  text-transform:uppercase;text-align:center;outline:none}
+#pilotInput:focus{border-color:var(--amber)}
+#pilotEdit button{font-size:9px;letter-spacing:.14em;font-weight:700;padding:8px 10px;
+  background:none;border:1px solid var(--line);color:var(--dim);cursor:pointer}
+#btnPilotSave{border-color:var(--mint)!important;color:var(--mint)!important}
 .rentry{border:1px solid var(--line);padding:8px 10px;margin-bottom:7px;display:flex;align-items:center;gap:9px}
 .rentry .rk{width:24px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;
   font-weight:700;font-size:12px;color:var(--dim);border:1px solid var(--line)}

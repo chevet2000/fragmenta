@@ -46,6 +46,10 @@ function openRank(){
   const ws=weekSeed();
   $('#rankWeek').textContent=ws;
   $('#pilotCode').textContent=pilot;
+  /* v4.11: editor de nombre cerrado por defecto */
+  const pe=$('#pilotEdit'),be=$('#btnEditPilot');
+  if(pe)pe.classList.add('hidden');
+  if(be)be.classList.remove('hidden');
   const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
   $('#pilotRec').innerHTML=mine
     ?('RÉCORD DE ESTA SEMANA<br>OLEADA '+mine.wave+' · NAVE NV '+mine.ship)
@@ -87,6 +91,31 @@ function renderRankList(){
     sincroniza automáticamente al conectar dos jugadores en el lobby co-op */
  bindEl('#btnRank', 'click',openRank);
  bindEl('#btnRankBack', 'click',()=>{refreshMenu();showScr('menu');});
+/* v4.11: editor del nombre de piloto — el nombre se usa en el ranking,
+   viaja en el co-op (lobby) y en la copia de perfil (FRGT2). Al cambiar,
+   tus récords guardados se renombran y re-firman al nuevo nombre. */
+function closePilotEdit(){
+  const pe=$('#pilotEdit'),be=$('#btnEditPilot');
+  if(pe)pe.classList.add('hidden');
+  if(be)be.classList.remove('hidden');
+}
+bindEl('#btnEditPilot','click',()=>{audio();
+  const pe=$('#pilotEdit'),be=$('#btnEditPilot'),i=$('#pilotInput');
+  if(pe)pe.classList.remove('hidden');
+  if(be)be.classList.add('hidden');
+  if(i){i.value=getPilot();setTimeout(()=>i.focus(),60);}
+});
+bindEl('#btnPilotCancel','click',()=>{audio();closePilotEdit();});
+function savePilotFromInput(){
+  audio();
+  const i=$('#pilotInput'),m=$('#rankMsg');
+  const err=setPilot(i?i.value:'');
+  if(err){if(m){m.textContent=err;m.classList.add('err');}return;}
+  if(m){m.textContent='';m.classList.remove('err');}
+  closePilotEdit();openRank();
+}
+bindEl('#btnPilotSave','click',savePilotFromInput);
+bindEl('#pilotInput','keydown',e=>{if(e.key==='Enter'){e.preventDefault();savePilotFromInput();}});
 function openGuide(){
   const box=$('#guideList');box.innerHTML='';
   for(const key of BOSS_ORDER){

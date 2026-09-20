@@ -3,7 +3,8 @@
 let pingTimer=null;
 const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
-  hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal'};
+  hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal',
+  remotePilot:null}; /* v4.11: nombre del rival para el lobby */
 const amClient=()=>net.mode==='client';
 function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
 function peerReady(){ return typeof Peer!=='undefined'; }
@@ -16,7 +17,7 @@ function destroyNet(){
   net.walletG=0;net.walletM=0;net.retries=0;net.ping=0;
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
-  net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;
+  net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;
 }
 function computeStatblock(){
   const b=blankStats();
@@ -67,9 +68,9 @@ function hostLobby(){
     net.conn=conn;
     conn.on('open',()=>{
       net.connected=true;net.retries=0;net.rankSent=true;
-      conn.send({t:'welcome',diff:net.lobbyDiff||'normal'});
-      conn.send({t:'rank',list:(save.ranking||[]).slice(-60)}); /* v4.8: el anfitrión también envía el suyo al conectar */
-      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Ranking sincronizado entre los dos</span>';
+      conn.send({t:'welcome',diff:net.lobbyDiff||'normal',name:getPilot()});
+      conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.8: el anfitrión también envía el suyo al conectar · v4.11: + nombre */
+      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Piloto rival: <b style="color:var(--sky)">'+(net.remotePilot?net.remotePilot:'sincronizando…')+'</b> · Ranking sincronizado</span>';
       $('#btnStartCoop').classList.remove('hidden');
       SFX.gem();vib(40);
     });
@@ -103,9 +104,13 @@ function hostOnData(d){
   if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
   if(d.t==='rank'){
+    /* v4.11: el mensaje de ranking trae el nombre del rival para el lobby */
+    const nm=normalizeName(d.name);if(nm)net.remotePilot=nm;
     const n=mergeRanking(d.list);
     if(n)banner('RANKING','+'+n+' récords nuevos del rival');
-    if(!net.rankSent){net.rankSent=true;sendMsg({t:'rank',list:(save.ranking||[]).slice(-60)});}
+    if(!net.rankSent){net.rankSent=true;sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});}
+    if(nm&&state==='lobby'&&!runActive)
+      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Piloto rival: <b style="color:var(--sky)">'+nm+'</b> · Ranking sincronizado</span>';
     return;
   }
   if(d.t==='inp'&&players[1]&&players[1].hp>0){
@@ -191,7 +196,7 @@ function connectAsClient(rejoin){
     conn.on('open',()=>{
       opened=true;net.connected=true;net.retries=0;
       conn.send({t:'stats',b:computeStatblock()});
-      conn.send({t:'rank',list:(save.ranking||[]).slice(-60)});
+      conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.11: + nombre */
       startPing();
       $('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Esperando al anfitrión…';
       if(rejoin){ $('#netWait').classList.add('hidden'); if(runActive)state='play'; }
@@ -256,7 +261,14 @@ function clientOnData(d){
   if(!d||typeof d!=='object')return;
   if(d.t==='pong'){ net.ping=Math.round(performance.now()-d.ts); return; }
   if(d.t==='ver'){ netEndLocal('El anfitrión tiene otra versión. Actualizad ambos a la misma.'); return; }
-  if(d.t==='welcome'){ runDiff=d.diff||'normal'; return; }
+  if(d.t==='welcome'){
+    runDiff=d.diff||'normal';
+    /* v4.11: nombre del anfitrión para el lobby del cliente */
+    const nm=normalizeName(d.name);
+    if(nm){net.remotePilot=nm;
+      if(state==='clientwait')$('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Anfitrión: <b style="color:var(--sky)">'+nm+'</b> — esperando el inicio…';}
+    return;
+  }
   if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); return; }
   if(d.t==='start'){ runDiff=d.diff||runDiff; startRunClient(); return; }
   if(d.t==='snap'){ applySnap(d); return; }

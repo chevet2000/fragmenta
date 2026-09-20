@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.10';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.11';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
@@ -40,6 +40,29 @@ function getPilot(){
   }
   return save.pilot;
 }
+/* v4.11: NOMBRE DE PILOTO personalizado — el usuario elige su nombre y ese
+   nombre aparece en el ranking (local y sincronizado) y en el lobby co-op.
+   Charset seguro (sin < > & . | para no romper códigos ni HTML), 2–12. */
+const NAME_RE=/[^A-Z0-9ÁÉÍÓÚÜÑ _-]/g;
+function normalizeName(s){
+  let n=String(s||'').toUpperCase().replace(/\s+/g,' ').replace(NAME_RE,'').trim();
+  if(n.length<2||n.length>12)return null;
+  return n;
+}
+function setPilot(raw){
+  const n=normalizeName(raw);
+  if(!n)return 'Nombre no válido: 2–12 (letras, números, espacio, _ -)';
+  const old=getPilot();
+  if(n===old)return null;
+  save.pilot=n;
+  /* los récords propios de TODAS las semanas viajan al nombre nuevo
+     (re-firmando su hash local, que es legítimo: son tus propios datos) */
+  for(const r of (save.ranking||[])){
+    if(r.code===old){r.code=n;r.h=weekHash(r.seed,n,r.wave,r.ship);r.ok=true;}
+  }
+  persist();
+  return null;
+}
 function weekHash(seed,code,wave,ship){
   const h=hashStr('FRG8|'+seed+'|'+code+'|'+wave+'|'+ship);
   return h.toString(16).toUpperCase().padStart(8,'0').slice(0,4);
@@ -52,7 +75,8 @@ function parseRecordString(s){
   if(p.length!==6||p[0]!=='FRG9')return null;
   const seed=p[1],code=p[2].toUpperCase();
   const wave=parseInt(p[3],10),ship=parseInt(p[4],10);
-  if(!seed||!/^J?[A-Z0-9]{4}$/.test(code)||!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
+  /* v4.11: acepta nombres personalizados (el punto no está permitido en el nombre) */
+  if(!seed||!/^J?[A-Z0-9ÁÉÍÓÚÜÑ _-]{2,12}$/.test(code)||!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
   return{seed,code,wave,ship,h:p[5].toUpperCase(),
     ok:weekHash(seed,code,wave,ship)===p[5].toUpperCase()};
 }
@@ -74,7 +98,8 @@ function sanitizeRankEntry(e){
   const seed=String(e.seed||''),code=String(e.code||'').toUpperCase(),h=String(e.h||'').toUpperCase();
   const wave=parseInt(e.wave,10),ship=parseInt(e.ship,10);
   if(!/^\d{4}W\d{1,2}$/.test(seed))return null;
-  if(!/^[A-Z0-9]{4}$/.test(code))return null;
+  /* v4.11: admite códigos de 4 letras Y nombres personalizados (2–12 seguro) */
+  if(!/^[A-Z0-9ÁÉÍÓÚÜÑ _-]{2,12}$/.test(code))return null;
   if(!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
   if(!/^[0-9A-F]{4}$/.test(h))return null;
   if(weekHash(seed,code,wave,ship)!==h)return null;
@@ -97,18 +122,20 @@ function mergeRanking(list){
 }
 
 /* ============ EXPORTAR / IMPORTAR PERFIL ============ */
+/* v4.11: FRGT2 añade el nombre de piloto (FRGT1 antiguo sigue funcionando) */
 function exportProfile(){
   let bits='';
   for(const nd of TREE)bits+=has(nd.id)?'1':'0';
   let v=0n;
   for(const ch of bits)v=v*2n+(ch==='1'?1n:0n);
   const treeB=v.toString(36);
-  return 'FRGT1|'+save.gold+'|'+save.gems+'|'+save.bestAll+'|'+save.bestShip+'|'+
-    save.prest+'|'+save.totKills+'|'+(save.bestHard||0)+'|'+treeB;
+  return 'FRGT2|'+save.gold+'|'+save.gems+'|'+save.bestAll+'|'+save.bestShip+'|'+
+    save.prest+'|'+save.totKills+'|'+(save.bestHard||0)+'|'+treeB+'|'+getPilot();
 }
 function importProfile(str){
   const p=String(str||'').trim().split('|');
-  if(p.length!==9||p[0]!=='FRGT1')return 'Formato no válido.';
+  const is2=p[0]==='FRGT2';
+  if(p.length!==(is2?10:9)||(p[0]!=='FRGT1'&&p[0]!=='FRGT2'))return 'Formato no válido.';
   const gold=parseInt(p[1],10),gems=parseInt(p[2],10),bestAll=parseInt(p[3],10),
     bestShip=parseInt(p[4],10),prest=parseInt(p[5],10),totKills=parseInt(p[6],10),
     bestHard=parseInt(p[7],10);
@@ -129,6 +156,7 @@ function importProfile(str){
   save.prest=prest;save.totKills=totKills;save.bestHard=bestHard;
   save.tree={};
   TREE.forEach((nd,i)=>{if(bits[bits.length-1-i]==='1')save.tree[nd.id]=1;});
+  if(is2){const n=normalizeName(p[9]);if(n)save.pilot=n;}
   persist();
   return null;
 }

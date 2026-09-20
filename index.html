@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.10">
+<html lang="es" data-v="4.11">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.10 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.11 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.10">
+<link rel="stylesheet" href="css/styles.css?v=4.11">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -121,7 +121,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.10 · DAÑO 5–15 CON CRÍTICOS · ORO POR PARTES AL GOLPEAR · MÚSICA DE MENÚ MÁS ALTA · ENEMIGOS NV 100 · ALIADO BOT (GEMAS) · MODO FRENÉTICO ∞ · MERCADO DE GEMAS · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.11 · TU NOMBRE EN EL RANKING · DAÑO 5–15 CON CRÍTICOS · ORO POR PARTES · ENEMIGOS NV 100 · ALIADO BOT (GEMAS) · MODO FRENÉTICO ∞ · MERCADO DE GEMAS · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -129,8 +129,14 @@
   <div class="achbox">
     <h2>RANKING · SEM <span id="rankWeek"></span></h2>
     <div class="pilotbox">
-      <small>TU CÓDIGO DE PILOTO</small>
+      <small>TU NOMBRE DE PILOTO</small>
       <b id="pilotCode">----</b>
+      <button id="btnEditPilot">✏ CAMBIAR NOMBRE</button>
+      <div id="pilotEdit" class="hidden">
+        <input id="pilotInput" maxlength="12" placeholder="TU NOMBRE" autocomplete="off" autocapitalize="characters">
+        <button id="btnPilotSave">GUARDAR</button>
+        <button id="btnPilotCancel">CANCELAR</button>
+      </div>
       <div class="prec" id="pilotRec"></div>
     </div>
     <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin:10px 0">
@@ -277,30 +283,30 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.10"></script>
-<script src="js/profile.js?v=4.10"></script>
-<script src="js/achievements.js?v=4.10"></script>
-<script src="js/audio.js?v=4.10"></script>
-<script src="js/config.js?v=4.10"></script>
-<script src="js/tree.js?v=4.10"></script>
-<script src="js/relics.js?v=4.10"></script>
-<script src="js/state.js?v=4.10"></script>
-<script src="js/net.js?v=4.10"></script>
-<script src="js/core.js?v=4.10"></script>
-<script src="js/enemies.js?v=4.10"></script>
-<script src="js/waves.js?v=4.10"></script>
-<script src="js/boss.js?v=4.10"></script>
-<script src="js/loot.js?v=4.10"></script>
-<script src="js/player.js?v=4.10"></script>
-<script src="js/azar.js?v=4.10"></script>
-<script src="js/chests.js?v=4.10"></script>
-<script src="js/netsync.js?v=4.10"></script>
-<script src="js/render.js?v=4.10"></script>
-<script src="js/screens.js?v=4.10"></script>
-<script src="js/treeui.js?v=4.10"></script>
-<script src="js/hud.js?v=4.10"></script>
-<script src="js/input.js?v=4.10"></script>
-<script src="js/game.js?v=4.10"></script>
-<script src="js/update.js?v=4.10"></script>
+<script src="js/utils.js?v=4.11"></script>
+<script src="js/profile.js?v=4.11"></script>
+<script src="js/achievements.js?v=4.11"></script>
+<script src="js/audio.js?v=4.11"></script>
+<script src="js/config.js?v=4.11"></script>
+<script src="js/tree.js?v=4.11"></script>
+<script src="js/relics.js?v=4.11"></script>
+<script src="js/state.js?v=4.11"></script>
+<script src="js/net.js?v=4.11"></script>
+<script src="js/core.js?v=4.11"></script>
+<script src="js/enemies.js?v=4.11"></script>
+<script src="js/waves.js?v=4.11"></script>
+<script src="js/boss.js?v=4.11"></script>
+<script src="js/loot.js?v=4.11"></script>
+<script src="js/player.js?v=4.11"></script>
+<script src="js/azar.js?v=4.11"></script>
+<script src="js/chests.js?v=4.11"></script>
+<script src="js/netsync.js?v=4.11"></script>
+<script src="js/render.js?v=4.11"></script>
+<script src="js/screens.js?v=4.11"></script>
+<script src="js/treeui.js?v=4.11"></script>
+<script src="js/hud.js?v=4.11"></script>
+<script src="js/input.js?v=4.11"></script>
+<script src="js/game.js?v=4.11"></script>
+<script src="js/update.js?v=4.11"></script>
 </body>
 </html>
