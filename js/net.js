@@ -98,7 +98,7 @@ function hostOnData(d){
   if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
   if(d.t==='inp'&&players[1]&&players[1].hp>0){
-    players[1].x=clamp(d.x,18,W-18); players[1].y=clamp(d.y,H*.45,H-20); return;
+    players[1].x=clamp(d.x,16,W-16); players[1].y=clamp(d.y,16,H-16); return;
   }
   if(d.t==='nova'){ fireNovaSlot(1); return; }
   if(d.t==='emo'){ addEmoFx(1,'emo',d.e); return; }

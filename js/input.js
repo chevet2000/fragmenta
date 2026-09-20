@@ -1,9 +1,9 @@
 'use strict';
 /* ============ CONTROL TÁCTIL ============ */
-const DRAG_GAIN=2.3;
+const DRAG_GAIN=2.5;
 const TOUCH_LEAD=70;
 function clampShip(pl,x,y){
-  return{x:clamp(x,18,W-18),y:clamp(y,H*.45,H-20)};
+  return{x:clamp(x,16,W-16),y:clamp(y,16,H-16)};
 }
 const activeTouches={};
 function slotFromPointer(clientX){
@@ -16,11 +16,9 @@ cv.addEventListener('pointerdown',e=>{
   const slot=amClient()?localSlot:slotFromPointer(e.clientX);
   const pl=players[slot];
   if(!pl||pl.hp<=0)return;
-  activeTouches[e.pointerId]={slot,x:e.clientX,y:e.clientY,px:e.clientX,py:e.clientY,lastMs:performance.now()};
-  if(Math.hypot(e.clientX-pl.x,e.clientY-pl.y)<130){
-    const p=clampShip(pl,e.clientX,e.clientY-TOUCH_LEAD);
-    pl.touch={active:true,tx:p.x,ty:p.y};
-  }
+  activeTouches[e.pointerId]={slot,ax:e.clientX,ay:e.clientY,sx:pl.x,sy:pl.y,px:e.clientX,py:e.clientY,lastMs:performance.now()};
+  const p=clampShip(pl,e.clientX,e.clientY-TOUCH_LEAD);
+  pl.touch={active:true,tx:p.x,ty:p.y};
 });
 window.addEventListener('pointermove',e=>{
   if(state!=='play')return;
@@ -33,13 +31,14 @@ window.addEventListener('pointermove',e=>{
   const dtm=now-t.lastMs;
   if(pl.dash&&pl.dashCd<=0&&dtm<70&&Math.hypot(dx,dy)>30){
     const d=Math.hypot(dx,dy);
-    pl.x=clamp(pl.x+dx/d*Math.min(120,d*2.6),18,W-18);
-    pl.y=clamp(pl.y+dy/d*Math.min(70,d*1.4),H*.45,H-20);
+    pl.x=clamp(pl.x+dx/d*Math.min(120,d*2.6),16,W-16);
+    pl.y=clamp(pl.y+dy/d*Math.min(70,d*1.4),16,H-16);
     pl.invul=Math.max(pl.invul,.35);pl.dashCd=pl.dashFast?1.2:2.2;
     floater(pl.x,pl.y-26,'DASH','#64C7FF',11);
     tone(900,300,.1,'sine',.04);
+    t.ax=e.clientX;t.ay=e.clientY;t.sx=pl.x;t.sy=pl.y;
   }
-  const target=clampShip(pl,pl.x+dx*DRAG_GAIN,pl.y+dy*DRAG_GAIN);
+  const target=clampShip(pl,t.sx+(e.clientX-t.ax)*DRAG_GAIN,t.sy+(e.clientY-t.ay)*DRAG_GAIN);
   pl.touch={active:true,tx:target.x,ty:target.y};
   t.px=e.clientX;t.py=e.clientY;t.lastMs=now;
   t.x=e.clientX;t.y=e.clientY;

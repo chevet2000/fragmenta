@@ -31,7 +31,7 @@ function loop(now){
   }else if(state==='play'&&amClient()){
     for(const pl of players){
       if(pl.slot===localSlot&&pl.touch&&pl.touch.active&&pl.hp>0){
-        const k=1-Math.exp(-30*dt);
+        const k=1-Math.exp(-42*dt);
         pl.x=lerp(pl.x,pl.touch.tx,k);
         pl.y=lerp(pl.y,pl.touch.ty,k);
       }

@@ -109,7 +109,7 @@ function updPlayer(pl,dt){
   pl.vengeT=Math.max(0,pl.vengeT-dt);
   pl.dashCd=Math.max(0,pl.dashCd-dt);
   if(pl.touch&&pl.touch.active){
-    const k=1-Math.exp(-30*dt);
+    const k=1-Math.exp(-42*dt);
     pl.x=lerp(pl.x,pl.touch.tx,k);
     pl.y=lerp(pl.y,pl.touch.ty,k);
   }
