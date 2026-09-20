@@ -23,7 +23,8 @@ let lastHitS=0,lastCoinS=0,lastCritS=0;
 const SFX={
   shoot(){tone(680,300,.06,'triangle',.012)},
   hit(){const n=performance.now();if(n-lastHitS<50)return;lastHitS=n;tone(300,190,.045,'square',.03)},
-  kill(){tone(320,55,.18,'sawtooth',.05)},
+  kill(m){m=m||1; /* v4.18: tono en ESCALERA — cada baja seguida sube el tono (×1–×1.8) */
+    tone(320*m,55,.18,'sawtooth',.05)},
   coin(){const n=performance.now();if(n-lastCoinS<70)return;lastCoinS=n;tone(1100,1650,.08,'sine',.045)},
   gem(){tone(900,1800,.1,'sine',.05);tone(1350,2400,.1,'sine',.035,.06)},
   hurt(){tone(210,55,.25,'sawtooth',.09)},
@@ -44,6 +45,9 @@ const SFX={
   freeze(){tone(1200,500,.15,'sine',.04)},
   whoosh(){tone(300,700,.2,'sine',.04)},
   ignite(){tone(200,90,.25,'sawtooth',.05)},
+  /* v4.18: fanfarria del cofre LEGENDARIO de la Fortuna */
+  legend(){[523,784,1047,1568].forEach((f,i)=>tone(f,f*1.02,.22,'square',.05,i*.09));
+    tone(2093,1400,.42,'sine',.04,.38);tone(65,50,.5,'sawtooth',.06)},
 };
 /* v4.10: campanita aguda de CRÍTICO (con tope anti-spam de 70 ms) */
 function critPing(){
@@ -93,9 +97,11 @@ function musSched(){
       if(st%4===0)musNote(ch[0],spb*3.2,'sawtooth',.045,MUS.nextT);
       if(bossOn&&st%4===2)musNote(ch[0]/2,spb*1.8,'square',.05,MUS.nextT);
       const arp=[ch[1],ch[2],ch[3],ch[2]*2];
-      const inten=bossOn?.9:(run.level>=8?.6:.35);
-      if(st%2===1&&Math.random()<inten)musNote(arp[irand(0,3)],spb*1.4,'square',.026,MUS.nextT);
-      if(st%2===0)musHat(MUS.nextT,bossOn?.05:.028);
+      /* v4.18: el COMBO calienta la música — arpegio más denso y hi-hat más vivo */
+      const cmbI=Math.min(.3,(run.comboN||0)*.006);
+      const inten=(bossOn?.9:(run.level>=8?.6:.35))+cmbI;
+      if(st%2===1&&Math.random()<Math.min(.95,inten))musNote(arp[irand(0,3)],spb*1.4,'square',.026,MUS.nextT);
+      if(st%2===0)musHat(MUS.nextT,(bossOn?.05:.028)+Math.min(.02,cmbI*.07));
       if(bossOn&&st%8===4)musNote(ch[3]*2,spb*2,'triangle',.04,MUS.nextT);
     }else if(!runActive){
       /* v4.8: MÚSICA DEL MENÚ — Ambiente tranquilo y espacial a 84 bpm

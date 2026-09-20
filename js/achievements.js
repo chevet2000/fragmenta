@@ -48,6 +48,9 @@ const ACHS=[
 /* v4.17: las maldiciones y los resucitados */
 {id:'mld', name:'MALDITO',            desc:'Sufre 15 maldiciones del HECHICERO',   rw:4, ck:()=>(save.totCurses||0)>=15},
 {id:'exo', name:'EXORCISTA',          desc:'Destruye 10 esbirros RESUCITADOS',     rw:4, ck:()=>(save.totRevKills||0)>=10},
+/* v4.18: dopamina — cofres de la Fortuna y oleadas doradas */
+{id:'luck',name:'SUERTE DORADA',      desc:'Abre un cofre LEGENDARIO de la Fortuna',rw:5, ck:()=>(save.totLucky||0)>=1},
+{id:'gld3',name:'FIEBRE DEL ORO',     desc:'Sobrevive a 3 OLEADAS DORADAS',        rw:4, ck:()=>(save.totGolden||0)>=3},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

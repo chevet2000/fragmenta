@@ -26,6 +26,8 @@ function spawnEnemy(tk,elvl,o){
      pero ahora se reparte: 4 tramos del 12,5% durante la pelea + resto al morir */
   const gPieces=(1+(elvl>=106?1:0)+(elvl>=114?1:0))+(T.magnet?1:0);
   e.goldTotal=Math.max(1,Math.round((.25+run.level*.15)*(players[0]?players[0].goldMul:1)))*gPieces;
+  /* v4.18: en la OLEADA DORADA todo el mundo suelta +60% de oro */
+  if(goldenWave)e.goldTotal=Math.round(e.goldTotal*1.6);
   /* v4.12: BESTIARIO — la figura queda registrada al aparecer (bandera, sin persistir aquí) */
   if(!save.seen)save.seen={};
   save.seen[tk]=1;

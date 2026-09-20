@@ -866,6 +866,9 @@ function updPickups(dt){
         SFX.gem();floater(pl.x,pl.y-26,'+1 GEMA','#64C7FF',11);
       }else if(p.t==='chest'){
         openChest(pl.slot,p.kind);
+      }else if(p.t==='lchest'){
+        /* v4.18: cofre de la Fortuna — recompensa instantánea según rareza */
+        openLucky(pl.slot,p.rar,remote);
       }else if(p.t==='minichest'){
         SFX.chest();
         if(R()<.6){

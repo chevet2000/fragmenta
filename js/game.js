@@ -5,6 +5,9 @@ function loop(now){
   requestAnimationFrame(loop);
   let dt=(now-last)/1000;last=now;
   dt=Math.min(dt,.05);
+  /* v4.18: JUICE — hit-stop: al matar el tiempo se frena a un 12% unos
+     milisegundos (micro cámara lenta) y cada golpe se SIENTE físico */
+  if(hitStopT>0){hitStopT-=dt;dt*=.12;}
   time+=dt;
   updBiome(dt); /* v4.14: biomas visuales */
   if(state==='play'&&!amClient()){

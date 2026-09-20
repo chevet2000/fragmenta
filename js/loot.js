@@ -1,5 +1,7 @@
 'use strict';
 /* ============ botín ============ */
+/* v4.18: JUICE — racha de tono (cada baja seguida en <1.1 s sube el tono) */
+let kcN=0,kcLast=-9;
 /* v4.10: ORO POR PARTES — el enemigo ya no guarda TODO su oro para el final:
    suelta trozos cada vez que le bajas un 20% de vida y el resto (la última
    mitad) al matarlo. El total que acaba dando es el mismo de siempre.
@@ -9,6 +11,14 @@ function dropLoot(e){
   const rem=Math.max(0,(e.goldTotal||0)-(e.goldDropped||0));
   if(rem>0&&pickups.length<250)
     pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-40),val:rem});
+  /* v4.18: COFRE DE LA FORTUNA — 2% al matar (nunca de élites/campistas, ya
+     pagan lo suyo). Rareza al azar: común 58% · raro 25% · épico 12% ·
+     LEGENDARIO 5% (con reliquia). El cerebro se engancha a lo impredecible. */
+  if(!e.elite&&!e.camp&&pickups.length<240&&Math.random()<.02){
+    const r=Math.random(),rar=r<.58?'c':r<.83?'r':r<.95?'e':'l';
+    pickups.push({t:'lchest',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-140,-50),rar});
+    if(rar==='l')floater(e.x,e.y-30,'¿¡COFRE LEGENDARIO!?','#FFD166',14);
+  }
   /* v4.9: gemas y corazones más raros */
   let gr=.02+run.level*.0012;
   if(players.some(pl=>pl.gemLuck))gr*=1.9;
@@ -25,17 +35,22 @@ function killEnemy(e,bySlot){
   const pl=players[bySlot]||players[0];
   burst(e.x,e.y,e.camp?'#FFD166':e.T.color,e.r>18?20:12,e.r>18?180:120);
   shake=Math.min(14,shake+(e.r>18?5:1.5));
-  SFX.kill();
+  /* v4.18: JUICE — tono en escalera por racha + micro cámara lenta al matar */
+  if(time-kcLast<1.1)kcN++;else kcN=1;kcLast=time;
+  SFX.kill(1+Math.min(14,kcN-1)*.055);
+  hitStopT=Math.max(hitStopT,(e.r>18||e.elite)?.09:.04);
   dropLoot(e);
   if(e.tk==='hive')hiveBurst(e);
   doSplit(e);
   /* v4.8: XP según el nivel máximo de la oleada (1-5 por baja) */
-  gainExp(Math.round(waveXp()*pl.expMul));
-  missionTick('kills',1);
   /* v4.12: COMBOS — cada baja en menos de 3 s mantiene la racha.
      Hitos 10/25/50/100 pagan oro (y gemas a partir de ×50). */
   run.comboN=(run.comboN||0)+1;run.comboT=3;
-  if(run.comboN>(save.bestCombo||0))save.bestCombo=run.comboN;
+  if(run.comboN>(save.bestCombo||0)){save.bestCombo=run.comboN;run.newComboRec=true;}
+  /* v4.18: los combos PAGAN — hasta +50% de exp con racha de 50 */
+  const cmbB=1+Math.min(.5,Math.max(0,run.comboN-4)*.012);
+  gainExp(waveXp()*pl.expMul*cmbB);
+  missionTick('kills',1);
   const CB={10:15,25:40,50:100,100:250};
   if(CB[run.comboN]){
     grantGold(bySlot,CB[run.comboN]);
@@ -155,6 +170,7 @@ function damageEnemy(e,dmg,crit,bySlot){
   /* v4.10: los críticos se notan — número grande y sonido agudo */
   if(crit){
     floater(e.x+rand(-8,8),e.y-e.r-8,'¡'+Math.round(dmg)+'!','#FFD166',16);
+    shake=Math.min(14,shake+1.1); /* v4.18: el crítico también se siente */
     critPing();
   }else floater(e.x+rand(-8,8),e.y-e.r-6,'-'+dmg,'#F2EFE6',11);
   /* v4.10: ORO POR PARTES — cada 20% de vida perdida suelta ~12,5% de su oro
@@ -191,6 +207,7 @@ function killBoss(){
   rings.push({x:b.x,y:b.y,r:10,R:220,t:0,life:.6,color:b.D.color});
   hostRing(b.x,b.y,220,b.D.color);
   shake=20;vib(120);
+  hitStopT=.16; /* v4.18: la muerte del Guardián se congela un instante */
   tone(500,60,.5,'sawtooth',.1);tone(300,40,.6,'square',.08,.1);
   const gMul=players[0].goldMul;
   const gn=5+run.level; /* v4.9: menos oro de jefes */

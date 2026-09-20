@@ -9,7 +9,12 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   /* v4.14: FANTASMA del ranking — trazas de la mejor partida frenética */
   ghostTrail:[],ghostAcc:0,ghostPassed:false,ghostRef:null,
   /* v4.17: LAS MALDICIONES del HECHICERO — cada una afecta solo una cosa */
-  curses:[]};
+  curses:[],
+  /* v4.18: ¿se batió el récord de combo en esta incursión? */
+  newComboRec:false};
+/* v4.18: DOPAMINA — hit-stop (micro cámara lenta al matar) y OLEADA DORADA */
+let hitStopT=0;
+let goldenWave=false,lastGolden=-9;
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let dailyMode=false; /* v4.12: reto diario */
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[],ultBeams=[]; /* v4.13: ultBeams = rayos del Aniquilador */

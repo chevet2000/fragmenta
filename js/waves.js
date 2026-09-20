@@ -121,11 +121,13 @@ function buildWave(L){
   if(frenzyMode){
     wave.type='frenzy';
     wave.pending=30;wave.pool=Array(30).fill('fz');
+    goldenWave=false; /* v4.18: el frenético tiene su propia economía */
     banner('FRENÉTICO','Oleada infinita · acechan desde arriba · sobrevive');
     return;
   }
   if(L%5===0){
     wave.type='boss';wave.wasBoss=true;wave.total=1;
+    goldenWave=false; /* v4.18: la dorada no pisa al Guardián */
     run.bossDmgTaken=false;
     spawnBoss(L);SFX.boss();
     return;
@@ -136,6 +138,14 @@ function buildWave(L){
     const all=shuffle(['form','drip','snake','swarm']);
     comps=all.slice(0,L>=12&&R()<.45?3:2);
   }else comps=[pickWaveType(L)];
+  /* ---- v4.18: la OLEADA DORADA se decide ANTES de invocar a nadie, para
+     que TODOS los enemigos de la oleada nazcan con su botín +60%. Cada 5+
+     oleadas de distancia hay un 40% de que toque (no en jefes ni frenético). ---- */
+  const willGolden=L>=3&&L-lastGolden>=5&&R()<.4;
+  if(willGolden){
+    goldenWave=true;lastGolden=L;
+    save.totGolden=(save.totGolden||0)+1;
+  }else goldenWave=false;
   wave.type=comps.length>1?'mix':comps[0];
   wave.types=comps;lastWaveType=comps[0];
   const f=1/Math.sqrt(comps.length);
@@ -179,6 +189,10 @@ function buildWave(L){
   }
   const names=comps.map(t=>WAVE_NAME[t]).join(' + ');
   banner('OLEADA '+L+(comps.length>1?' · MIXTA':''),names+' · nv '+minLvlOf(L)+'–'+maxLvlOf(L)+' · '+DIFF_LABEL[runDiff]);
+  if(willGolden){
+    banner('¡OLEADA DORADA!','LLUVIA DE ORO · botín +60% durante toda la oleada');
+    SFX.relic();checkAch();
+  }
   /* ---- cofre blindado cada 2 oleadas ---- */
   if(L>=2&&L%2===0&&L%5!==0&&!pickups.some(p=>p.t==='schest')){
     /* escudo = 2x la vida del enemigo de nivel más alto de la oleada (nunca menor que la fórmula antigua) */
@@ -242,6 +256,19 @@ function updWaveSpawns(dt){
     return;
   }
   if(wave.pool.length===0)return;
+  /* v4.18: LLUVIA DE ORO — durante ~6,5 s caen monedas del cielo en la oleada dorada */
+  if(goldenWave){
+    if(wave.goldT==null)wave.goldT=6.5;
+    if(wave.goldT>0){
+      wave.goldT-=dt;
+      wave.coinT=(wave.coinT==null)?.25:wave.coinT-dt;
+      if(wave.coinT<=0&&pickups.length<240){
+        wave.coinT=rand(.3,.55);
+        pickups.push({t:'gold',x:rand(30,W-30),y:-14,vx:rand(-14,14),vy:rand(30,80),
+          val:Math.max(2,Math.round((1+run.level*.24)*(players[0]?players[0].goldMul:1)))});
+      }
+    }
+  }
   /* v4.8: nunca más de 110 enemigos vivos a la vez — el resto espera en cola
      (mata el lag del desafío semanal en oleadas altas) */
   if(enemies.length>=110){wave.spawnT=Math.max(wave.spawnT,.4);return;}

@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.17';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.18';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},achClaimed:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
@@ -10,7 +10,9 @@ function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:
   /* v4.14: fantasma del ranking, devorados por el agujero negro y biomas visitados */
   ghost:null,totDevour:0,biomesSeen:{},ghostBeat:false,
   /* v4.17: maldiciones sufridas y resucitados destruidos */
-  totCurses:0,totRevKills:0};}
+  totCurses:0,totRevKills:0,
+  /* v4.18: cofres LEGENDARIOS abiertos y oleadas doradas sobrevividas */
+  totLucky:0,totGolden:0};}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));

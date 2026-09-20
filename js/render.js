@@ -651,6 +651,10 @@ function drawRadar(){
 }
 function renderGame(dt){
   drawBiomeBg(dt); /* v4.14: fondo por bioma */
+  /* v4.18: tinte dorado de la OLEADA DORADA */
+  if(goldenWave&&state==='play'){
+    ctx.fillStyle='rgba(255,209,102,.045)';ctx.fillRect(0,0,W,H);
+  }
   drawHoles(); /* v4.14: agujeros negros bajo el resto */
   ctx.save();
   if(shake>.2)ctx.translate(rand(-shake,shake)*.5,rand(-shake,shake)*.5);
@@ -709,6 +713,24 @@ function renderGame(dt){
       ctx.closePath();ctx.stroke();
       ctx.globalAlpha=.85;ctx.lineWidth=2.5;
       ctx.beginPath();ctx.arc(0,0,30,-Math.PI/2,-Math.PI/2+TAU*frac);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
+    else if(p.t==='lchest'){ /* v4.18: cofre de la Fortuna — brillo según rareza */
+      const col=p.rar==='c'?'#F2EFE6':p.rar==='r'?'#64C7FF':p.rar==='e'?'#B388FF':'#FFD166';
+      const leg=p.rar==='l';
+      ctx.strokeStyle=col;ctx.lineWidth=2;
+      ctx.strokeRect(-7,-5,14,10);
+      ctx.beginPath();ctx.moveTo(-7,-1);ctx.lineTo(7,-1);ctx.stroke();
+      ctx.font='700 9px "Chakra Petch",monospace';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=col;ctx.fillText(leg?'★':'?',0,5);
+      ctx.globalAlpha=(leg?.45:.3)+Math.sin(time*(leg?9:5))*.2;
+      ctx.strokeStyle=col;ctx.lineWidth=leg?2.5:1.5;
+      ctx.beginPath();ctx.arc(0,0,leg?20:14,0,TAU);ctx.stroke();
+      if(leg){
+        ctx.globalAlpha=.25+Math.sin(time*11)*.15;
+        ctx.beginPath();ctx.arc(0,0,27,0,TAU);ctx.stroke();
+      }
       ctx.globalAlpha=1;
     }
     else{ctx.fillStyle='#FF6B6B';

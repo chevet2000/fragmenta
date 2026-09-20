@@ -25,6 +25,55 @@ function grantGems(slot,v){
   walletGems(slot,v);
   run.gemsRun+=v;
 }
+/* ============ v4.18: COFRE DE LA FORTUNA ============
+   Cofre de rareza al azar que sueltan los enemigos (2%): COMÚN (blanca) ·
+   RARO (azul) · ÉPICO (morado) · LEGENDARIO (dorado + reliquia).
+   Recompensa INSTANTÁNEA al tocarlo (sin pantalla de elección) — la
+   gratificación debe ser inmediata. En co-op paga a la billetera del slot. */
+const LUCK_NAME={c:'COMÚN',r:'RARO',e:'ÉPICO',l:'¡LEGENDARIO!'};
+const LUCK_COL={c:'#F2EFE6',r:'#64C7FF',e:'#B388FF',l:'#FFD166'};
+function openLucky(slot,rar,remote){
+  save.totChest=(save.totChest||0)+1;
+  if(rar==='l')save.totLucky=(save.totLucky||0)+1;
+  const pl=players[slot]||players[0];
+  const lv=run.level;
+  let gold=0,gems=0,relicMsg='';
+  if(rar==='c')gold=25+lv*4;
+  else if(rar==='r'){gold=70+lv*10;gems=1;}
+  else if(rar==='e'){gold=150+lv*16;gems=3;}
+  else{gold=320+lv*22;gems=5;}
+  gold=Math.max(1,Math.round(gold*(players[0]?players[0].goldMul:1)*curseGoldMul()));
+  if(remote)walletGold(slot,gold);else save.gold+=gold;
+  run.goldRun+=gold;save.totGold=(save.totGold||0)+gold;
+  if(gems){
+    if(remote)walletGems(slot,gems);else save.gems+=gems;
+    run.gemsRun+=gems;save.totGems=(save.totGems||0)+gems;
+  }
+  if(rar==='l'){
+    const pool=RELICS.filter(r=>!run.relics.includes(r.id));
+    if(pool.length){
+      const r=pool[irand(0,pool.length-1)];
+      run.relics.push(r.id);recompute();
+      if(r.id==='hierro')healPlayerOnce(slot||0,3);
+      relicMsg=' · RELIQUIA: '+r.name;
+    }else{
+      const v=200;
+      if(remote)walletGold(slot,v);else save.gold+=v;
+      run.goldRun+=v;relicMsg=' · +200 ORO (sin reliquias libres)';
+    }
+  }
+  burst(pl.x,pl.y,LUCK_COL[rar],rar==='l'?28:14,rar==='l'?210:130);
+  floater(pl.x,pl.y-42,'COFRE '+LUCK_NAME[rar],LUCK_COL[rar],rar==='l'?16:13);
+  if(rar==='l'){
+    SFX.legend();shake=Math.min(16,shake+7);hitStopT=Math.max(hitStopT,.09);vib(90);
+    rings.push({x:pl.x,y:pl.y,r:10,R:150,t:0,life:.55,color:'#FFD166'});
+    if(net.mode==='host')hostRing(pl.x,pl.y,150,'#FFD166');
+  }else if(rar==='e'){SFX.chest();vib(45);}
+  else SFX.coin();
+  banner('COFRE DE LA FORTUNA · '+LUCK_NAME[rar],
+    '+'+gold+' de oro'+(gems?' · +'+gems+' gema'+(gems>1?'s':''):'')+relicMsg);
+  checkAch();persist();
+}
 function openChest(slot,kind){
   kind=kind||'boss';
   save.totChest=(save.totChest||0)+1;

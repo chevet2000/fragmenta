@@ -307,6 +307,8 @@ function openStats(){
     ['BIOMAS VISITADOS',Object.keys(save.biomesSeen||{}).length+' / '+BIOMES.length],
     ['MALDICIONES SUFRIDAS',save.totCurses||0],
     ['RESUCITADOS DESTRUIDOS',save.totRevKills||0],
+    ['COFRES LEGENDARIOS',save.totLucky||0],
+    ['OLEADAS DORADAS',save.totGolden||0],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -370,6 +372,8 @@ function resetRunCommon(){
   /* v4.14: fantasma desactivado por defecto (startFrenzy lo activa si hay traza) */
   run.ghostTrail=[];run.ghostAcc=0;run.ghostPassed=false;run.ghostRef=null;run.ghostLead=0;
   run.curses=[]; /* v4.17: sin maldiciones al empezar */
+  run.newComboRec=false; /* v4.18: sin récord de combo todavía */
+  hitStopT=0;goldenWave=false;lastGolden=-9;kcN=0;kcLast=-9; /* v4.18: dopamina a cero */
   bots=[]; /* v4.9: sin aliados al empezar */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
@@ -704,7 +708,10 @@ function showPostBoss(){
 function gameOver(){
   state='over';
   shake=18;vib(200);
+  hitStopT=0;
   musStop();
+  /* v4.18: captura del récord ANTES de actualizarlo — para el gancho "TAN CERCA" */
+  const prevBest=save.best.lvl||0;
   save.mShots=(save.mShots||0)+run.stShots;
   save.mHits=(save.mHits||0)+run.stHits;
   save.mDmg=(save.mDmg||0)+Math.round(run.stDmg);
@@ -780,7 +787,25 @@ function gameOver(){
   $('#ovMast').innerHTML=
     `<div><small>PRECISIÓN</small><b>${acc}%</b></div>`+
     `<div><small>DAÑO TOTAL</small><b>${Math.round(run.stDmg)}</b></div>`+
-    `<div><small>JEFES SIN DAÑO</small><b>${run.stPerfect}</b></div>`;
+    `<div><small>JEFES SIN DAÑO</small><b>${run.stPerfect}</b></div>`+
+    `<div><small>MEJOR COMBO</small><b>×${save.bestCombo||0}</b></div>`;
+  /* v4.18: PANTALLA DE MUERTE-GANCHO — morir no es el final, es la invitación:
+     récord de combo, récord personal superado o el "TAN CERCA" que pide revancha */
+  const kick=$('#ovKick');
+  const gap=prevBest-run.level;
+  if(kick){
+    if(run.level>prevBest&&prevBest>0)kick.textContent='¡RÉCORD NUEVO!';
+    else if(gap>=1&&gap<=2)kick.textContent='¡ESTUVISTE TAN CERCA!';
+    else kick.textContent='TRANSMISIÓN TERMINADA';
+  }
+  let hook='';
+  if(run.newComboRec&&save.bestCombo>=10)
+    hook+=`<span class="k1">★ ¡NUEVO RÉCORD DE COMBO ×${save.bestCombo}!</span><br>`;
+  if(run.level>prevBest&&prevBest>0)
+    hook+=`<span class="k1">★ RÉCORD PERSONAL SUPERADO · OLEADA ${run.level} (antes ${prevBest})</span><br>`;
+  else if(gap>=1&&gap<=2)
+    hook+=`<span class="k1">⚡ A ${gap} oleada${gap>1?'s':''} de tu récord (${prevBest}) · ¿LA REVANCHA?</span><br>`;
+  $('#ovHook').innerHTML=hook;
   const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
     (ghostLine||'')+

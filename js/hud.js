@@ -47,6 +47,17 @@ function refreshHUD(){
       ct.style.color=run.comboN>=50?'#FF6B6B':(run.comboN>=25?'#FF7EB6':'#FFD166');
     }else ct.classList.add('hidden');
   }
+  /* v4.18: BRILLO DE COMBO — con racha 15+ el borde de la pantalla arde
+     (dorado) y a partir de 40 se pone ROJO. Se apaga si la racha muere. */
+  const cg=$('#comboGlow');
+  if(cg){
+    const n=(runActive&&state==='play'&&!amClient())?run.comboN:0;
+    if(n>=15){
+      cg.classList.remove('hidden');
+      cg.style.opacity=String(Math.min(1,(n-15)/40)*.9);
+      cg.classList.toggle('hot',n>=40);
+    }else{cg.classList.add('hidden');cg.style.opacity='0';}
+  }
   /* v4.14: marcador del FANTASMA del ranking (solo frenético con traza) */
   const gt=$('#ghostTag');
   if(gt){
