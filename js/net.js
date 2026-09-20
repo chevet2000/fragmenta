@@ -16,7 +16,7 @@ function destroyNet(){
   net.walletG=0;net.walletM=0;net.retries=0;net.ping=0;
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
-  net.remoteStats={};net.lobbyDiff='normal';
+  net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;
 }
 function computeStatblock(){
   const b=blankStats();
@@ -97,6 +97,12 @@ function hostOnData(d){
   if(!d||typeof d!=='object')return;
   if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
+  if(d.t==='rank'){
+    const n=mergeRanking(d.list);
+    if(n)banner('RANKING','+'+n+' récords nuevos del rival');
+    if(!net.rankSent){net.rankSent=true;sendMsg({t:'rank',list:(save.ranking||[]).slice(-60)});}
+    return;
+  }
   if(d.t==='inp'&&players[1]&&players[1].hp>0){
     players[1].x=clamp(d.x,16,W-16); players[1].y=clamp(d.y,16,H-16); return;
   }
@@ -175,6 +181,7 @@ function connectAsClient(rejoin){
     conn.on('open',()=>{
       opened=true;net.connected=true;net.retries=0;
       conn.send({t:'stats',b:computeStatblock()});
+      conn.send({t:'rank',list:(save.ranking||[]).slice(-60)});
       startPing();
       $('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Esperando al anfitrión…';
       if(rejoin){ $('#netWait').classList.add('hidden'); if(runActive)state='play'; }
@@ -240,6 +247,7 @@ function clientOnData(d){
   if(d.t==='pong'){ net.ping=Math.round(performance.now()-d.ts); return; }
   if(d.t==='ver'){ netEndLocal('El anfitrión tiene otra versión. Actualizad ambos a la misma.'); return; }
   if(d.t==='welcome'){ runDiff=d.diff||'normal'; return; }
+  if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); return; }
   if(d.t==='start'){ runDiff=d.diff||runDiff; startRunClient(); return; }
   if(d.t==='snap'){ applySnap(d); return; }
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }

@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.5';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.6';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
@@ -68,6 +68,32 @@ function addRankingEntry(entry){
 function sortedRanking(){
   return [...(save.ranking||[])].sort((a,b)=>
     b.wave-a.wave||b.ship-a.ship||a.code.localeCompare(b.code));
+}
+function sanitizeRankEntry(e){
+  if(!e||typeof e!=='object')return null;
+  const seed=String(e.seed||''),code=String(e.code||'').toUpperCase(),h=String(e.h||'').toUpperCase();
+  const wave=parseInt(e.wave,10),ship=parseInt(e.ship,10);
+  if(!/^\d{4}W\d{1,2}$/.test(seed))return null;
+  if(!/^[A-Z0-9]{4}$/.test(code))return null;
+  if(!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
+  if(!/^[0-9A-F]{4}$/.test(h))return null;
+  if(weekHash(seed,code,wave,ship)!==h)return null;
+  return{seed,code,wave,ship,h,ok:true};
+}
+function mergeRanking(list){
+  if(!Array.isArray(list))return 0;
+  if(!save.ranking)save.ranking=[];
+  const had={};for(const r of save.ranking)had[r.seed+'|'+r.code]=r;
+  let n=0;
+  for(const raw of list){
+    const e=sanitizeRankEntry(raw);if(!e)continue;
+    const key=e.seed+'|'+e.code,ex=had[key];
+    if(!ex){save.ranking.push(e);had[key]=e;n++;}
+    else if(e.wave>ex.wave){ex.wave=e.wave;ex.ship=e.ship;ex.h=e.h;ex.ok=true;n++;}
+  }
+  if(save.ranking.length>60)save.ranking=save.ranking.slice(-60);
+  if(n)persist();
+  return n;
 }
 
 /* ============ EXPORTAR / IMPORTAR PERFIL ============ */

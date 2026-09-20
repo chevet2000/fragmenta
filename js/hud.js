@@ -3,7 +3,8 @@
 function refreshHUD(){
   $('#hudGold').textContent=save.gold;
   $('#hudGems').textContent=save.gems;
-  $('#hpTxt').textContent=players.map(p=>(players.length>1?'P'+(p.slot+1)+' ':'')+p.hp+'/'+p.maxHp).join(' · ');
+  const fmtHp=v=>Number.isInteger(v)?String(v):v.toFixed(1);
+  $('#hpTxt').textContent=players.map(p=>(players.length>1?'P'+(p.slot+1)+' ':'')+fmtHp(p.hp)+'/'+p.maxHp).join(' · ');
   const myP=players[localSlot]||players[0];
   const tbn=(run.tempBuffs&&run.tempBuffs.length)?' · ✦'+run.tempBuffs.length:'';
   $('#dmgTxt').textContent='DAÑO '+myP.dmg+(weeklyMode?' · SEM':'')+tbn;

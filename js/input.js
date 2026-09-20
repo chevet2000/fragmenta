@@ -100,6 +100,8 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
   $('#btnInstall').classList.add('hidden');
 });
  $('#btnPbGo').addEventListener('click',()=>{
+  if(state!=='postboss')return;
+  if(net.mode==='client')return;
   if(net.mode==='host'&&players.length===2){
     if(!(net.hostRelic&&net.clientRelic)){
       const pu=$('#pbUnlock');
@@ -108,11 +110,13 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
       return;
     }
     showScr(null);
+    state='play';
     run.level++;nextWave();
     sendMsg({t:'ev',k:'resume'});
     return;
   }
   showScr(null);
+  state='play';
   run.level++;nextWave();
 });
  $('#btnSound').addEventListener('click',()=>{muted=!muted;updSoundBtns();});

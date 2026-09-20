@@ -116,9 +116,10 @@ function updPlayer(pl,dt){
   const desperate=pl.desperate&&pl.hp<=1?1.5:1;
   pl.fireAcc+=dt*pl.fireRate*(frenzyT>0?1.5:1)*(pl.vengeT>0?1.3:1)*desperate;
   while(pl.fireAcc>=1){pl.fireAcc-=1;shoot(pl);}
-  if(pl.regenRate>0){
-    pl.regAcc+=dt*pl.regenRate;
-    if(pl.regAcc>=1&&pl.hp<pl.maxHp&&pl.hp>0){pl.regAcc-=1;pl.hp++;floater(pl.x,pl.y-24,'+1','#7DFF9E',12);}
+  if(pl.regenRate>0&&pl.hp>0&&pl.hp<pl.maxHp){
+    const prev=pl.hp;
+    pl.hp=Math.min(pl.maxHp,pl.hp+pl.regenRate*dt);
+    if(Math.floor(pl.hp)>Math.floor(prev))floater(pl.x,pl.y-24,'+1','#7DFF9E',12);
   }
   if(pl.aura){
     for(const e of enemies){if(!e.dead&&Math.hypot(e.x-pl.x,e.y-pl.y)<75){
