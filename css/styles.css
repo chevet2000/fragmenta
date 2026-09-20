@@ -424,3 +424,14 @@ button{font-family:inherit}
 /* Gancho de la pantalla de muerte */
 #ovHook{min-height:0;margin:-6px 0 12px;text-align:center;font-size:10.5px;letter-spacing:.12em;line-height:1.75}
 #ovHook:empty{display:none;margin:0}
+
+/* ============ v4.19: ACTUALIZADOR EN EL MENÚ + RACHA DE MISIONES ============ */
+/* Botón de actualización compacto en la pantalla principal (antes vivía en ⚙ AJUSTES) */
+.btn.updb{padding:8px;font-size:9px;letter-spacing:.22em;color:var(--dim);border-style:dashed}
+.btn.updb:active{color:var(--amber);border-color:var(--amber)}
+/* Cabecera de la racha de misiones diarias (día 1, 2, 3…) */
+.streakrow{border:1px dashed var(--line);padding:9px 10px;margin-bottom:8px;text-align:center}
+.streakrow b{display:block;font-size:11px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px}
+.streakrow small{font-size:8.5px;letter-spacing:.13em;color:var(--dim);line-height:1.55;display:block}
+.streakrow.on{border-color:var(--amber);background:rgba(255,209,102,.05)}
+.streakrow.on b{color:var(--amber)}

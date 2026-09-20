@@ -30,6 +30,7 @@ async function checkUpdate(manual){
       if(bu){
         bu.classList.remove('hidden');
         bu.textContent='⟳ NUEVA VERSIÓN v'+rv+' · TOCA PARA ACTUALIZAR';
+        bu.classList.add('pulse'); /* v4.19: late para que no se pase por alto */
       }
       if(b)b.textContent='HAY VERSIÓN NUEVA v'+rv;
       if(manual)banner('ACTUALIZACIÓN DISPONIBLE','Toca el botón para instalar v'+rv);

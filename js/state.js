@@ -19,6 +19,7 @@ let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let dailyMode=false; /* v4.12: reto diario */
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[],ultBeams=[]; /* v4.13: ultBeams = rayos del Aniquilador */
 let holes=[]; /* v4.14: agujeros negros de la 2ª definitiva */
+let meteors=[],meteorT=rand(16,30),meteorWarned=false; /* v4.19: meteoritos dorados que cruzan la pantalla */
 let wrecks=[];
 let emosFx=[];
 let bots=[]; /* v4.9: aliados bot de combate */

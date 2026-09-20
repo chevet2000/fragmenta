@@ -48,6 +48,8 @@ const SFX={
   /* v4.18: fanfarria del cofre LEGENDARIO de la Fortuna */
   legend(){[523,784,1047,1568].forEach((f,i)=>tone(f,f*1.02,.22,'square',.05,i*.09));
     tone(2093,1400,.42,'sine',.04,.38);tone(65,50,.5,'sawtooth',.06)},
+  /* v4.19: silbido descendente del METEORITO DORADO al entrar */
+  meteor(){tone(1500,240,.55,'sawtooth',.028);tone(320,920,.4,'sine',.02,.12)},
 };
 /* v4.10: campanita aguda de CRÍTICO (con tope anti-spam de 70 ms) */
 function critPing(){

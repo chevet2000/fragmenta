@@ -173,6 +173,8 @@ let wipeArm=false,wipeT=null;
   /* v4.14–4.17: contadores y trazas nuevas también se reinician */
   save.totDevour=0;save.biomesSeen={};save.ghost=null;save.ghostBeat=false;save.totPhase5=0;save.totMage=0;
   save.totCurses=0;save.totRevKills=0;
+  /* v4.19: racha de misiones y meteoritos */
+  save.streak=0;save.streakBest=0;save.streakLast='';save.totMeteor=0;
   save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}

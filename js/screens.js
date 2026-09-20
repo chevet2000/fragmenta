@@ -42,7 +42,8 @@ function refreshMenu(){
   const db=(save.daily&&save.daily.seed===daySeed())?(save.daily.best||0):0;
   $('#btnDaily').textContent=`RETO DIARIO · RÉCORD ${db}`;
   ensureDailyM();
-  $('#btnMissions').textContent=`MISIONES (${dailyMDone()}/3)`;
+  const es=effStreak(); /* v4.19: racha de misiones junto al contador */
+  $('#btnMissions').textContent=`MISIONES (${dailyMDone()}/3)`+(es>0?` · ★DÍA ${es}`:'');
   const sk=getSkin();
   $('#btnHangar').textContent=`HANGAR (${sk.name})`;
   const nr=(save.ranking||[]).length;
@@ -267,6 +268,16 @@ function openHangar(){
 function openMissions(){
   ensureDailyM();
   const box=$('#missList');box.innerHTML='';
+  /* v4.19: cabecera de RACHA — día 1, 2, 3… completando las 3 cada día */
+  const st=effStreak(),bs=Math.max(save.streakBest||0,st);
+  const head=document.createElement('div');
+  head.className='streakrow'+(st>0?' on':'');
+  head.innerHTML=st>0
+    ?`<b>★ RACHA DE MISIONES · DÍA ${st}</b>`+
+     `<small>MEJOR RACHA · ${bs} ${bs===1?'DÍA':'DÍAS'} · COMPLETA LAS 3 CADA DÍA PARA NO PERDERLA<br>BONO DE HOY YA PAGADO · MAÑANA +${Math.min(7,st+1)} GEMA${Math.min(7,st+1)>1?'S':''} (TOPE +7)</small>`
+    :`<b>SIN RACHA ACTIVA</b>`+
+     `<small>COMPLETA LAS 3 MISIONES DE HOY Y ENCIENDES EL DÍA 1 · CADA DÍA SEGUIDO PAGA +1 GEMA MÁS (TOPE +7)${bs>0?'<br>TU MEJOR RACHA · '+bs+' '+(bs===1?'DÍA':'DÍAS'):''}</small>`;
+  box.appendChild(head);
   for(const m of save.dailyM.l){
     const el=document.createElement('div');
     el.className='arow'+(m.done?' done':'');
@@ -309,6 +320,8 @@ function openStats(){
     ['RESUCITADOS DESTRUIDOS',save.totRevKills||0],
     ['COFRES LEGENDARIOS',save.totLucky||0],
     ['OLEADAS DORADAS',save.totGolden||0],
+    ['RACHA DE MISIONES',(effStreak()||0)+' DÍA(S) · MEJOR '+(save.streakBest||0)],
+    ['METEORITOS REVENTADOS',save.totMeteor||0],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -374,6 +387,7 @@ function resetRunCommon(){
   run.curses=[]; /* v4.17: sin maldiciones al empezar */
   run.newComboRec=false; /* v4.18: sin récord de combo todavía */
   hitStopT=0;goldenWave=false;lastGolden=-9;kcN=0;kcLast=-9; /* v4.18: dopamina a cero */
+  meteors=[];meteorT=rand(16,30);meteorWarned=false; /* v4.19: meteoritos a cero */
   bots=[]; /* v4.9: sin aliados al empezar */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();

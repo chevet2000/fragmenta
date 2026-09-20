@@ -737,6 +737,27 @@ function renderGame(dt){
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();}
     ctx.restore();
   }
+  /* v4.19: METEORITOS DORADOS — roca incandescente con halo y grietas */
+  for(const m of meteors){
+    ctx.save();ctx.translate(m.x,m.y);
+    ctx.globalAlpha=.22+Math.sin(time*9)*.08;
+    ctx.fillStyle='#FFD166';
+    ctx.beginPath();ctx.arc(0,0,m.r+8,0,TAU);ctx.fill();
+    ctx.globalAlpha=1;ctx.rotate(m.rot);
+    ctx.fillStyle='#8A5A22';ctx.strokeStyle='#FFD166';ctx.lineWidth=2.2;
+    ctx.beginPath();
+    for(let i=0;i<7;i++){const a=TAU*i/7,rr=m.r*m.verts[i];
+      i?ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}
+    ctx.closePath();ctx.fill();ctx.stroke();
+    if(m.hp<m.maxhp){ /* grietas según el daño recibido */
+      ctx.strokeStyle='#FFE9B0';ctx.lineWidth=1.4;ctx.globalAlpha=.85;
+      const cr=m.maxhp-m.hp;
+      for(let i=0;i<cr;i++){const a=TAU*(i+.5)/cr;
+        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*m.r*.82,Math.sin(a)*m.r*.82);ctx.stroke();}
+      ctx.globalAlpha=1;
+    }
+    ctx.restore();
+  }
   if(amClient()){
     drawSnakeLinks([...cEnemies.values()]);
     for(const [,e] of cEnemies)drawEnemy(e);

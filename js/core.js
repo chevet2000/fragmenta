@@ -166,10 +166,40 @@ function dailyMissionTick(kind,amt){
       banner('MISIÓN DIARIA CUMPLIDA','+'+m.rw+' de oro'+(m.gem?' · +'+m.gem+' gema':''));
       SFX.relic();vib(50);
       checkAch();persist();
+      dailyStreakCheck(); /* v4.19: ¿eran las 3? sube la racha del día */
     }
   }
 }
 function sendMiss(){ if(net.mode==='host')sendMsg({t:'ev',k:'miss',l:run.missions.map(m=>({txt:m.txt,p:m.p,n:m.n,done:!!m.done}))}); }
+/* ============ v4.19: RACHA DE MISIONES DIARIAS (día 1, 2, 3…) ============
+   Completa las 3 misiones del MISMO DÍA y la racha sube: día 1, día 2…
+   Si un día se falla, la racha vuelve a empezar. Cada día de racha paga
+   un bono de gemas (+1 por día, tope +7) — motivo para volver mañana.
+   La evaluación es perezosa: se comprueba al completar la 3ª misión,
+   así no hace falta ningún temporizador de medianoche. */
+function daySeedOffset(off){
+  const d=new Date();d.setDate(d.getDate()-(off||0));
+  return 'D'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+/* racha vigente: solo cuenta si el último día completado fue hoy o ayer */
+function effStreak(){
+  const s=save.streakLast;
+  if(s===daySeed()||s===daySeedOffset(1))return save.streak||0;
+  return 0;
+}
+function dailyStreakCheck(){
+  if(dailyMDone()<3)return;               /* aún no están las 3 de hoy */
+  if(save.streakLast===daySeed())return;  /* hoy ya contó */
+  save.streak=(save.streakLast===daySeedOffset(1))?(save.streak||0)+1:1;
+  save.streakLast=daySeed();
+  save.streakBest=Math.max(save.streakBest||0,save.streak);
+  const bonus=Math.min(7,save.streak);
+  save.gems+=bonus;save.totGems=(save.totGems||0)+bonus;
+  banner('★ RACHA DE MISIONES · DÍA '+save.streak,
+    '+'+bonus+' gema'+(bonus>1?'s':'')+' de bono · vuelve mañana para seguirla');
+  SFX.relic();vib(70);
+  checkAch();persist();
+}
 function missionTick(kind,amt){
   dailyMissionTick(kind,amt); /* v4.12: las diarias comparten los mismos contadores */
   for(const m of run.missions){

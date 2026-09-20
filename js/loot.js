@@ -227,3 +227,71 @@ function killBoss(){
   banner('GUARDIÁN DESTRUIDO',run.level%10===0?'Recoge el cofre y el botín':'Recoge las recompensas');
 }
 
+/* ============ v4.19: METEORITOS DORADOS ============
+   Cada 20–36 s un meteorito DORADO cruza la pantalla. Revéntalo a
+   disparos antes de que escape y suelta una lluvia de oro (+ gema y
+   corazón a veces). Es un premio que se ESCAPA si no reaccionas:
+   ventanas de recompensa impredecibles durante la partida. */
+function spawnMeteor(){
+  const m={x:0,y:0,vx:0,vy:0,r:15,hp:4,maxhp:4,rot:rand(0,TAU),vr:rand(-2.2,2.2),t:0,dead:false,
+    verts:Array.from({length:7},()=>rand(.74,1))};
+  const style=Math.random();
+  if(style<.55){ /* cruza en diagonal desde un lateral superior */
+    const side=Math.random()<.5;
+    m.x=side?-30:W+30;m.y=rand(30,Math.max(80,H*.3));
+    m.vx=(side?1:-1)*rand(105,165);m.vy=rand(55,105);
+  }else{ /* cae en diagonal desde arriba */
+    m.x=rand(W*.15,W*.85);m.y=-30;
+    m.vx=rand(-85,85);m.vy=rand(115,175);
+  }
+  meteors.push(m);
+  SFX.meteor();
+  if(!meteorWarned){meteorWarned=true;
+    banner('★ METEORITO DORADO','¡Revéntalo a tiempo y llévate su oro!');}
+}
+function updMeteors(dt){
+  if(state!=='play')return;
+  meteorT-=dt;
+  if(meteorT<=0&&meteors.length<2){spawnMeteor();meteorT=rand(20,36);}
+  for(const m of meteors){
+    m.t+=dt;m.x+=m.vx*dt;m.y+=m.vy*dt;m.rot+=m.vr*dt;
+    /* estela dorada */
+    if(Math.random()<.8&&parts.length<250)
+      parts.push({x:m.x+rand(-4,4),y:m.y+rand(-4,4),vx:-m.vx*.12+rand(-24,24),vy:-m.vy*.12+rand(-24,24),
+        rot:rand(0,TAU),vr:rand(-7,7),life:rand(.22,.48),t:0,
+        color:Math.random()<.55?'#FFD166':'#FF9F43',kind:Math.random()<.6?'tri':'line',size:rand(1.6,3.4)});
+    /* colisión con balas del jugador */
+    for(const b of bullets){
+      if(b.dead)continue;
+      const rr=m.r+b.r;
+      if((b.x-m.x)**2+(b.y-m.y)**2<rr*rr){
+        b.dead=true;m.hp--;
+        tone(560+irand(0,240),250,.07,'square',.045);
+        burst(b.x,b.y,'#FFE9B0',5,110);
+        if(m.hp<=0){popMeteor(m);break;}
+      }
+    }
+    if(m.t>26||m.y>H+70||m.x<-90||m.x>W+90)m.dead=true; /* se escapa… */
+  }
+  meteors=meteors.filter(m=>!m.dead);
+}
+function popMeteor(m){
+  m.dead=true;
+  save.totMeteor=(save.totMeteor||0)+1;
+  const gMul=players[0]?players[0].goldMul:1;
+  const n=irand(6,9);
+  for(let i=0;i<n;i++)
+    pickups.push({t:'gold',x:m.x,y:m.y,vx:rand(-140,140),vy:rand(-230,-60),
+      val:Math.max(2,Math.round((3+run.level*.75)*gMul))});
+  if(Math.random()<.4)pickups.push({t:'gem',x:m.x,y:m.y,vx:rand(-90,90),vy:rand(-200,-60)});
+  if(Math.random()<.18)pickups.push({t:'heart',x:m.x,y:m.y,vx:rand(-60,60),vy:rand(-160,-60)});
+  burst(m.x,m.y,'#FFD166',26,240);burst(m.x,m.y,'#FF9F43',14,170);
+  rings.push({x:m.x,y:m.y,r:8,R:120,t:0,life:.5,color:'#FFD166'});
+  hostRing(m.x,m.y,120,'#FFD166');
+  floater(m.x,m.y-26,'¡METEORITO!','#FFD166',15);
+  SFX.chest();tone(170,55,.32,'sawtooth',.09);
+  shake=Math.min(16,shake+4);hitStopT=Math.max(hitStopT,.05);vib(60);
+  banner('★ ¡METEORITO REVENTADO!','Lluvia de oro · recógela antes de que caiga');
+  checkAch();persist();
+}
+

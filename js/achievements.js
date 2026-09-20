@@ -51,6 +51,9 @@ const ACHS=[
 /* v4.18: dopamina — cofres de la Fortuna y oleadas doradas */
 {id:'luck',name:'SUERTE DORADA',      desc:'Abre un cofre LEGENDARIO de la Fortuna',rw:5, ck:()=>(save.totLucky||0)>=1},
 {id:'gld3',name:'FIEBRE DEL ORO',     desc:'Sobrevive a 3 OLEADAS DORADAS',        rw:4, ck:()=>(save.totGolden||0)>=3},
+/* v4.19: racha de misiones diarias y meteoritos dorados */
+{id:'rac3',name:'RACHA DE FUEGO',     desc:'Completa las 3 misiones diarias 3 días SEGUIDOS',rw:6, ck:()=>(save.streakBest||0)>=3},
+{id:'met3',name:'CAZAMETEOROS',       desc:'Revienta 3 METEORITOS DORADOS',        rw:4, ck:()=>(save.totMeteor||0)>=3},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

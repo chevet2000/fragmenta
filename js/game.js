@@ -16,6 +16,7 @@ function loop(now){
     updBots(dt); /* v4.9: aliado bot de combate */
     updBullets(dt);
     updWaveSpawns(dt);
+    updMeteors(dt); /* v4.19: meteoritos dorados que cruzan la pantalla */
     updEnemies(dt);
     updBoss(dt);
     updHoles(dt); /* v4.14: agujeros negros */
