@@ -37,7 +37,9 @@ function blankStats(){
     elec:null,ice:null,iceTop:false,wind:null,fire:null,
     overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
     /* v4.9: ALIADO · bot de combate */
-    bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0};
+    bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0,
+    /* v4.13: DEFINITIVA · Cañón Aniquilador */
+    ult:false,ultCd:14,ultDmg:10,ultAim:false,ultBurn:false,ultShock:false};
 }
 function hostLobby(){
   if(!peerReady()){
@@ -275,6 +277,7 @@ function clientOnData(d){
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }
   if(d.t==='fxr'){ rings.push({x:d.x,y:d.y,r:10,R:d.R,t:0,life:.45,color:d.c}); return; }
   if(d.t==='fxb'){ beams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.18}); return; }
+  if(d.t==='fxu'){ ultBeams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.55}); return; } /* v4.13: rayo del Aniquilador */
   if(d.t==='fxf'){ floats.push({x:d.x,y:d.y,txt:d.txt,color:d.c,size:d.s,t:0,life:.65}); return; }
   if(d.t==='emo'){ addEmoFx(0,'emo',d.e); return; }
   if(d.t==='call'){

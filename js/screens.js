@@ -302,9 +302,10 @@ function resetRunCommon(){
   run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
   run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;run.comboN=0;run.comboT=0;run.tempBuffs=[];rollMissions();
   run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
-  pendingShipLevels=0;frenzyT=0;expFrac=0;run.frenzyBossT=30;frenzyMode=false;
+  pendingShipLevels=0;frenzyT=0;expFrac=0;run.frenzyBossT=50;frenzyMode=false; /* v4.13: primer jefe a 50 s */
+  run.frenzyEliteT=rand(20,35); /* v4.13: élites al azar */
   bots=[]; /* v4.9: sin aliados al empezar */
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];wrecks=[];emosFx=[];
   closeEmoPanel();
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
@@ -444,7 +445,7 @@ function startRunClient(){
   ];
   pendingShipLevels=0;frenzyT=0;
   players=[mkPlayer(0),mkPlayer(1)];localSlot=1;
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];wrecks=[];emosFx=[];
   closeEmoPanel();
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
   recompute();
@@ -459,7 +460,7 @@ function startRunClient(){
   musStart();
 }
 function nextWave(){
-  ebullets=[];bullets=[];beams=[];
+  ebullets=[];bullets=[];beams=[];ultBeams=[];
   const L=run.level;
   if(net.mode!=='client'){
     if(L>save.best.lvl)save.best.lvl=L;

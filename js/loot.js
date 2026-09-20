@@ -91,11 +91,20 @@ function doSplit(e){
   const base=Math.round(e.elvl*.85);
   for(let i=0;i<k;i++){
     const cl=clamp(base-irand(0,8),1,Math.max(1,e.elvl-1));
-    const c=spawnEnemy(typeForLevel(cl),cl,{after:'roam',delay:i*.06});
+    /* v4.13: en FRENÉTICO los hijos vuelven ARRIBA a la banda de acecho y,
+       en niveles bajos del frenesí, su figura es suave (sin centinelas ni
+       kamikazes al segundo 10); en el resto del juego, igual que siempre */
+    const c=spawnEnemy(frenzyMode&&run.level<=4?frenzyType():typeForLevel(cl),cl,
+      {after:frenzyMode?'form':'roam',delay:i*.06});
     c.sx=e.x+rand(-8,8);c.sy=e.y+rand(-8,8);
-    c.fx=clamp(e.x+rand(-120,120),30,W-30);
-    c.fy=clamp(e.y-rand(30,120),70,H*.5);
-    c.cx=e.x+rand(-80,80);c.cy=e.y-rand(20,80);
+    if(frenzyMode){
+      c.fx=rand(40,W-40);c.fy=rand(H*.08,H*.32);
+      c.cx=e.x+rand(-80,80);c.cy=clamp(e.y-rand(60,140),-30,H*.3);
+    }else{
+      c.fx=clamp(e.x+rand(-120,120),30,W-30);
+      c.fy=clamp(e.y-rand(30,120),70,H*.5);
+      c.cx=e.x+rand(-80,80);c.cy=e.y-rand(20,80);
+    }
     c.x=c.sx;c.y=c.sy;
   }
   rings.push({x:e.x,y:e.y,r:6,R:70,t:0,life:.4,color:e.T.color});

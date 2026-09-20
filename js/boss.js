@@ -710,6 +710,9 @@ function updFx(dt){
   rings=rings.filter(r=>r.t<r.life);
   for(const bm of beams)bm.t+=dt;
   beams=beams.filter(bm=>bm.t<bm.life);
+  /* v4.13: rayos del Aniquilador */
+  for(const ub of ultBeams)ub.t+=dt;
+  ultBeams=ultBeams.filter(b=>b.t<b.life);
   for(const em of emosFx){em.t+=dt;em.y-=24*dt;}
   emosFx=emosFx.filter(em=>em.t<em.life);
   shake=Math.max(0,shake-dt*34);

@@ -18,6 +18,12 @@ const lerp=(a,b,k)=>a+(b-a)*k;
 const TAU=Math.PI*2;
 const easeOut=t=>1-Math.pow(1-t,3);
 function qbez(x0,y0,x1,y1,x2,y2,t){const u=1-t;return{x:u*u*x0+2*u*t*x1+t*t*x2,y:u*u*y0+2*u*t*y1+t*t*y2};}
+/* v4.13: distancia de un punto al segmento (para el rayo del Aniquilador) */
+function distToSeg(px,py,x1,y1,x2,y2){
+  const dx=x2-x1,dy=y2-y1,L2=dx*dx+dy*dy;
+  let t=L2?((px-x1)*dx+(py-y1)*dy)/L2:0;t=clamp(t,0,1);
+  return Math.hypot(px-(x1+dx*t),py-(y1+dy*t));
+}
 function vib(ms){ if(navigator.vibrate){ try{navigator.vibrate(ms)}catch(e){} } }
 const fmtT=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=irand(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}

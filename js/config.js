@@ -23,6 +23,10 @@ const SKINS=[
  {id:'lila',   name:'LILA',     color:'#B388FF', cost:1000},
  {id:'hielo',  name:'HIELO',    color:'#B0F2FF', cost:1000},
  {id:'marfil', name:'MARFIL',   color:'#F2EFE6', cost:1500},
+ /* v4.13: 3 aspectos nuevos */
+ {id:'esmeralda',name:'ESMERALDA',color:'#50E3A4',cost:1200},
+ {id:'vulcano',  name:'VULCANO',  color:'#FF9F43',cost:1200},
+ {id:'obsidiana',name:'OBSIDIANA',color:'#9AA6B5',cost:2000},
  {id:'prisma', name:'PRISMA ∞', color:'prisma',  cost:2500},
 ];
 

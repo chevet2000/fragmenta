@@ -1,7 +1,7 @@
 'use strict';
 /* ============ árbol: nodos, 12 ramas + fusiones ============ */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',mrg:'FUSIÓN'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195};
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',mrg:'FUSIÓN'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -167,6 +167,12 @@ const TREE=[
  {id:'b3',b:'bot',i:3,cost:{gems:55},wave:18,req:'b2',tag:'BMI',name:'MISILES DEL ALIADO',desc:'Cada 4.5 s el bot lanza un misil rastreador (daño x3).',fx:b=>b.botMsl=true},
  {id:'b4',b:'bot',i:4,cost:{gems:75},wave:22,req:'b3',tag:'BGE',name:'NÚCLEO GEMELO',desc:'+1 bot de combate adicional.',fx:b=>b.botTwin++},
  {id:'b5',b:'bot',i:5,cost:{gems:100},wave:26,req:'b4',tag:'BDE',name:'DEVASTADOR',desc:'El bot hace x2.5 de daño y sus balas perforan +2 enemigos.',fx:b=>{b.botDmg*=2.5;b.botPrc+=2}},
+ /* ===== v4.13: rama DEFINITIVA — el arma suprema; mejoras con gemas ===== */
+ {id:'df0',b:'dfn',i:0,cost:{gold:1500,gems:20},wave:8,tag:'ANI',name:'CAÑÓN ANIQUILADOR',desc:'ARMA DEFINITIVA: cada 14 s dispara un rayo gigante que atraviesa a TODOS los enemigos de su línea (x10 de tu daño).',fx:b=>{b.ult=true;b.ultCd=14;b.ultDmg=10;b.ultAim=false;b.ultBurn=false;b.ultShock=false}},
+ {id:'df1',b:'dfn',i:1,req:'df0',cost:{gems:30},wave:12,tag:'MIR',name:'MIRILLA TÁCTICA',desc:'El Aniquilador busca solo al enemigo con MÁS vida (élites y jefes primero).',fx:b=>b.ultAim=true},
+ {id:'df2',b:'dfn',i:2,req:'df1',cost:{gems:40},wave:16,tag:'CRG',name:'CARGA RÁPIDA',desc:'El Aniquilador se recarga en 10 s en vez de 14.',fx:b=>b.ultCd=10},
+ {id:'df3',b:'dfn',i:3,req:'df2',cost:{gems:55},wave:20,tag:'NCL',name:'NÚCLEO DENSO',desc:'Daño del rayo x10 → x16 y además incendia (12 de daño/s durante 4 s).',fx:b=>{b.ultDmg=16;b.ultBurn=true}},
+ {id:'df4',b:'dfn',i:4,req:'df3',cost:{gems:75},wave:24,tag:'SRC',name:'SOBRECARGA TOTAL',desc:'TOPE · Cada disparo estalla en una onda (x4 de daño en radio 150) y borra todas las balas enemigas de la pantalla.',fx:b=>b.ultShock=true},
 ];
 TREE.forEach(nd=>{
   if(nd.b==='mrg')return;

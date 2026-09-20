@@ -149,6 +149,7 @@ function updPlayer(pl,dt){
     }
   }
   updAbilities(pl,dt);
+  updUltimate(pl,dt); /* v4.13: arma definitiva */
 }
 function nearestEnemy(x,y,excl,range){
   range=range||300;
@@ -231,6 +232,55 @@ function updAbilities(pl,dt){
       }
     }
   }
+}
+
+/* ============ v4.13: ARMA DEFINITIVA · CAÑÓN ANIQUILADOR ============
+   Se desbloquea en la rama DEFINITIVA del árbol (mejoras con gemas).
+   Cada X s dispara un rayo gigante que atraviesa a todos los enemigos de
+   la línea. Mejorable: MIRILLA (busca al más duro), CARGA RÁPIDA (CD),
+   NÚCLEO DENSO (daño + quemadura) y SOBRECARGA (onda + limpia balas). */
+function updUltimate(pl,dt){
+  if(!pl.ult||pl.hp<=0)return;
+  pl.ultT-=dt;
+  if(pl.ultT>0)return;
+  let t=null;
+  if(pl.ultAim){ /* busca al enemigo con MÁS vida (jefes primero) */
+    let bd=-1;
+    for(const e of enemies){if(!e.dead&&e.hp>bd){bd=e.hp;t=e;}}
+    if(boss&&(boss.hp>bd||!t))t=boss;
+  }else{
+    t=nearestEnemy(pl.x,pl.y,[],640);
+    if(!t&&boss&&Math.hypot(boss.x-pl.x,boss.y-pl.y)<660)t=boss;
+  }
+  if(!t){pl.ultT=.6;return;} /* sin objetivos: reintenta enseguida */
+  fireUltimate(pl,t);
+  pl.ultT=pl.ultCdMax;
+}
+function fireUltimate(pl,t){
+  const a=Math.atan2(t.y-pl.y,t.x-pl.x);
+  const ex=pl.x+Math.cos(a)*1700,ey=pl.y+Math.sin(a)*1700;
+  const dmg=Math.max(5,Math.round(pl.dmg*pl.ultDmgMul));
+  for(const e of enemies){
+    if(e.dead)continue;
+    if(distToSeg(e.x,e.y,pl.x,pl.y,ex,ey)<36+e.r){
+      damageEnemy(e,dmg,true,pl.slot);
+      if(pl.ultBurn)applyBurn(e,{dps:12,dur:4,spread:0,boom:false},pl.slot);
+    }
+  }
+  if(boss&&distToSeg(boss.x,boss.y,pl.x,pl.y,ex,ey)<36+boss.r){
+    damageBoss(dmg,true,pl.slot);
+    if(pl.ultBurn)boss.burn={dps:12,t:4,spread:0,boom:false,slot:pl.slot};
+  }
+  ultBeams.push({x1:pl.x,y1:pl.y-8,x2:ex,y2:ey,t:0,life:.55});
+  hostUltBeam(pl.x,pl.y-8,ex,ey);
+  if(pl.ultShock){
+    shockNova(pl,150,Math.max(5,Math.round(pl.dmg*4)),'#B388FF',pl.slot);
+    for(const eb of ebullets)eb.dead=true;
+    ebullets=ebullets.filter(b=>!b.dead);
+  }
+  shake=Math.min(16,shake+10);
+  SFX.ult();vib(60);
+  floater(pl.x,pl.y-42,'¡ANIQ!','#B388FF',14);
 }
 
 /* ============ rescate ============ */

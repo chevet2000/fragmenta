@@ -317,6 +317,76 @@ function drawShip(pl,isLocal){
   g.fill();g.stroke();
   g.fillStyle=core;
   g.beginPath();g.moveTo(0,-7);g.lineTo(3.4,-2);g.lineTo(0,3);g.lineTo(-3.4,-2);g.closePath();g.fill();
+  /* ===== v4.13: EVOLUCIÓN VISUAL — la nave luce cada arma que compras =====
+     Pistolas gemelas, cañón central, filas extra, punta perforadora,
+     lanzamisiles, cañón prisma, mira crítica, antena imán, núcleo en
+     llamas, bobinas del Aniquilador y refuerzos por nivel de nave. */
+  const hvm='#B9C4D0'; /* metal de los cañones */
+  const tier=Math.min(3,Math.floor(((run.shipLv||1)-1)/4)); /* 0–3 por nivel de nave */
+  if(tier>=1){ /* refuerzos de ala */
+    g.strokeStyle=hvm;g.lineWidth=1.3;
+    g.beginPath();g.moveTo(-14,8);g.lineTo(-6,-2);g.moveTo(14,8);g.lineTo(6,-2);g.stroke();
+  }
+  if(tier>=2){ /* paneles exteriores */
+    g.beginPath();g.moveTo(-15,9);g.lineTo(-11,1);g.moveTo(15,9);g.lineTo(11,1);g.stroke();
+  }
+  if(tier>=3){ /* quilla dorsal */
+    g.fillStyle=hvm;g.fillRect(-1.2,-13,2.4,8);
+  }
+  if(pl.bullets>=2){ /* pistolas gemelas en las alas */
+    g.fillStyle=hvm;g.fillRect(-14,-11,3,8);g.fillRect(11,-11,3,8);
+    g.fillStyle='#FFD166';g.fillRect(-14,-12,3,2);g.fillRect(11,-12,3,2);
+  }
+  if(pl.bullets>=3){ /* tercer cañón central */
+    g.fillStyle=hvm;g.fillRect(-1.5,-17,3,6);
+  }
+  if(pl.files>=2){ /* pods de fila paralela */
+    g.fillStyle=hvm;g.fillRect(-10,-5,3,9);g.fillRect(7,-5,3,9);
+  }
+  if(pl.files>=3){ /* aletas de la tercera fila */
+    g.fillStyle=hvm;g.fillRect(-6,-15,12,2.5);
+  }
+  if(pl.pierce>0){ /* punta perforadora dorada */
+    g.strokeStyle='#FFD166';g.lineWidth=1.6;
+    g.beginPath();g.moveTo(0,-17);g.lineTo(0,-25);g.stroke();
+  }
+  if(pl.homing){ /* lanzamisiles laterales */
+    g.fillStyle=hvm;g.fillRect(-18,-2,4,7);g.fillRect(14,-2,4,7);
+    g.fillStyle='#FF7EB6';g.fillRect(-17,-3,2,2);g.fillRect(15,-3,2,2);
+  }
+  if(pl.prism){ /* cañón prisma montado en el morro */
+    g.strokeStyle='#B0F2FF';g.lineWidth=1.5;
+    g.beginPath();g.arc(0,-12,4+Math.sin(time*6)*.8,0,TAU);g.stroke();
+    g.fillStyle='#B0F2FF';g.fillRect(-1,-21,2,7);
+  }
+  if(pl.overdrive){ /* núcleo sobrecargado en llamas */
+    g.strokeStyle='rgba(255,107,107,.85)';g.lineWidth=1.5;
+    g.beginPath();g.arc(0,-2,6+Math.sin(time*9)*1.2,0,TAU);g.stroke();
+  }
+  if(pl.crit>=.2){ /* mira dorada de crítico */
+    g.strokeStyle='#FFD166';g.lineWidth=1.2;
+    g.beginPath();g.arc(0,-2,9,-.5,1.2);g.stroke();
+    g.beginPath();g.arc(0,-2,9,Math.PI-.5,Math.PI+1.2);g.stroke();
+  }
+  if(pl.magnet>=1.8){ /* antena del imán */
+    g.strokeStyle='#C9A0FF';g.lineWidth=1.4;
+    g.beginPath();g.moveTo(0,-13);g.lineTo(0,-20);g.stroke();
+    g.beginPath();g.arc(0,-21,2.5,0,TAU);g.stroke();
+  }
+  if(pl.ult){ /* bobinas del Aniquilador en la cola (giran sobre sí mismas) */
+    g.strokeStyle='rgba(179,136,255,.9)';g.lineWidth=1.4;
+    g.save();g.translate(-6,10);g.rotate(time*2.5);g.strokeRect(-2.5,-2.5,5,5);g.restore();
+    g.save();g.translate(6,10);g.rotate(-time*2.5);g.strokeRect(-2.5,-2.5,5,5);g.restore();
+  }
+  if(pl.regenRate>0){ /* halo verde de regeneración */
+    g.globalAlpha=.35+Math.sin(time*4)*.15;g.strokeStyle='#7DFF9E';g.lineWidth=1.2;
+    g.beginPath();g.arc(0,-2,8,0,TAU);g.stroke();
+    g.globalAlpha=blink?.35:1;
+  }
+  if(pl.bounce>0){ /* aletas de rebote */
+    g.strokeStyle=hvm;g.lineWidth=1.5;
+    g.beginPath();g.moveTo(-15,9);g.lineTo(-20,13);g.moveTo(15,9);g.lineTo(20,13);g.stroke();
+  }
   if(pl.field&&pl.shieldLvl){g.strokeStyle='rgba(100,199,255,.6)';g.beginPath();g.arc(0,0,20,0,TAU);g.stroke();}
   if(pl.shield&&pl.shieldUp){
     g.strokeStyle='rgba(100,199,255,.85)';g.lineWidth=2;
@@ -504,6 +574,20 @@ function renderGame(dt){
     ctx.beginPath();ctx.moveTo(bm.x1,bm.y1);ctx.lineTo(bm.x2,bm.y2);ctx.stroke();
     ctx.globalAlpha=a*.5;ctx.strokeStyle='#FFD166';ctx.lineWidth=5;
     ctx.beginPath();ctx.moveTo(bm.x1,bm.y1);ctx.lineTo(bm.x2,bm.y2);ctx.stroke();
+  }
+  /* v4.13: rayo del CAÑÓN ANIQUILADOR — haz grueso violeta con núcleo blanco */
+  for(const ub of ultBeams){
+    const k=ub.t/ub.life,a=1-k,w=(1-k*.55)*26;
+    ctx.save();
+    ctx.globalAlpha=a*.22;ctx.strokeStyle='#B388FF';ctx.lineWidth=w*2.4;
+    ctx.beginPath();ctx.moveTo(ub.x1,ub.y1);ctx.lineTo(ub.x2,ub.y2);ctx.stroke();
+    ctx.globalAlpha=a*.6;ctx.strokeStyle='#B388FF';ctx.lineWidth=w;
+    ctx.beginPath();ctx.moveTo(ub.x1,ub.y1);ctx.lineTo(ub.x2,ub.y2);ctx.stroke();
+    ctx.globalAlpha=a;ctx.strokeStyle='#FFFFFF';ctx.lineWidth=Math.max(2,w*.26);
+    ctx.beginPath();ctx.moveTo(ub.x1,ub.y1);ctx.lineTo(ub.x2,ub.y2);ctx.stroke();
+    ctx.globalAlpha=a*.8;ctx.fillStyle='#FFFFFF';
+    ctx.beginPath();ctx.arc(ub.x1,ub.y1,10*(1-k*.5),0,TAU);ctx.fill();
+    ctx.restore();
   }
   ctx.globalAlpha=1;
   for(const pl of players){

@@ -66,7 +66,7 @@ function selectNode(id){
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
     mt.textContent=`${TREE.length} MEJORAS · ${Object.keys(BX).length} RAMAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Nuevas ramas IMÁN, PROSPERIDAD, AZAR y ENLACE. Los nodos de FUSIÓN (línea punteada) se alcanzan por cualquiera de sus dos ramas. Pellizca o usa +/− para hacer zoom. Perfil LOCAL y ONLINE independientes.';
+    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Nuevas ramas IMÁN, PROSPERIDAD, AZAR, ENLACE, ALIADO y DEFINITIVA (el CAÑÓN ANIQUILADOR). Los nodos de FUSIÓN (línea punteada) se alcanzan por cualquiera de sus dos ramas. Pellizca o usa +/− para hacer zoom. Perfil LOCAL y ONLINE independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
@@ -111,7 +111,7 @@ function openShop(from){
 }
 
 /* ============ zoom del arsenal ============ */
-const TREE_W=1330, TREE_H=1420;
+const TREE_W=1420, TREE_H=1420; /* v4.13: +90 px por la rama DEFINITIVA */
 let treeZoom=1;
 function applyZoom(){
   const svg=$('#treeSvg');if(!svg)return;

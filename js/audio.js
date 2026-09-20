@@ -39,6 +39,8 @@ const SFX={
   laser(){tone(1400,200,.4,'sawtooth',.05)},
   warp(){tone(200,1200,.3,'sine',.05)},
   zap(){tone(1500,300,.1,'sawtooth',.045)},
+  /* v4.13: disparo del CAÑÓN ANIQUILADOR (arma definitiva) */
+  ult(){tone(1800,120,.5,'sawtooth',.09);tone(70,45,.55,'square',.08);tone(2400,300,.3,'sine',.05,.05)},
   freeze(){tone(1200,500,.15,'sine',.04)},
   whoosh(){tone(300,700,.2,'sine',.04)},
   ignite(){tone(200,90,.25,'sawtooth',.05)},
@@ -97,11 +99,16 @@ function musSched(){
       if(bossOn&&st%8===4)musNote(ch[3]*2,spb*2,'triangle',.04,MUS.nextT);
     }else if(!runActive){
       /* v4.8: MÚSICA DEL MENÚ — Ambiente tranquilo y espacial a 84 bpm
-         v4.10: volumen subido x2.5 a petición del piloto */
-      if(st%16===0)musNote(ch[0]/2,spb*12,'sine',.075,MUS.nextT);
-      if(st%16===8)musNote(ch[1],spb*9,'triangle',.045,MUS.nextT);
-      if(st%4===2&&Math.random()<.4)musNote(ch[2]*(Math.random()<.5?1:2),spb*2.4,'sine',.036,MUS.nextT);
-      if(st%8===6&&Math.random()<.25)musNote(ch[3]*2,spb*3,'triangle',.028,MUS.nextT);
+         v4.10: volumen subido x2.5 a petición del piloto
+         v4.13: OTRO SALTO de volumen (x2) y más cuerpo: bajo reforzado,
+         pedal constante, arpegio SIEMPRE (ya no al azar), destello y un
+         pulso de hi-hat muy suave para que la melodía se sostenga. */
+      if(st%16===0){musNote(ch[0]/2,spb*15,'sine',.15,MUS.nextT);
+        musNote(ch[0],spb*15,'triangle',.055,MUS.nextT);}
+      if(st%16===8)musNote(ch[1],spb*9,'triangle',.085,MUS.nextT);
+      if(st%4===2)musNote(ch[2]*(st%16===10?2:1),spb*2.6,'sine',.055,MUS.nextT);
+      if(st%8===6&&Math.random()<.7)musNote(ch[3]*2,spb*3,'triangle',.04,MUS.nextT);
+      if(st%4===0)musHat(MUS.nextT,.012);
     }
     MUS.step++;
     MUS.nextT+=spb;

@@ -8,7 +8,7 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false};
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let dailyMode=false; /* v4.12: reto diario */
-let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[];
+let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[],ultBeams=[]; /* v4.13: ultBeams = rayos del Aniquilador */
 let wrecks=[];
 let emosFx=[];
 let bots=[]; /* v4.9: aliados bot de combate */
@@ -34,6 +34,8 @@ function mkPlayer(slot){return{
   elec:null,ice:null,iceTop:false,wind:null,fire:null,linkHeal:0,linkRate:5,linkT:0,
   overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
   bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0,
+  /* v4.13: ARMA DEFINITIVA · Cañón Aniquilador */
+  ult:false,ultAim:false,ultBurn:false,ultShock:false,ultCdMax:14,ultDmgMul:10,ultT:0,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   touch:null

@@ -76,6 +76,29 @@ function spawnExtra(L,i){
   e.fx=rand(40,W-40);e.fy=rand(70,H*.5);
   e.x=e.sx;e.y=e.sy;
 }
+/* ============ v4.13: FRENÉTICO REHECHO ============
+   Los enemigos se POSENCIONAN en la banda superior y patrullan ahí.
+   Solo ALGUNOS se lanzan en picado (tope simultáneo según nivel) y, al
+   salir por abajo, vuelven a entrar POR ARRIBA hacia su puesto. Nada de
+   cascada infinita. El tipo de figura escala con el nivel de frenesí. */
+function frenzyType(){
+  const lv=run.level,r=R();
+  if(lv<=2)return r<.45?'orb':r<.75?'dart':'block';
+  if(lv<=4)return r<.25?'orb':r<.5?'dart':r<.72?'block':r<.88?'sentry':'medic';
+  if(lv<=7)return r<.2?'dart':r<.4?'block':r<.58?'sentry':r<.72?'reflect':r<.84?'medic':'hive';
+  return typeForLevel(12); /* nivel alto: mezcla completa (ya con kamikazes) */
+}
+function spawnFrenzyOne(){
+  const maxL=maxLvlOf(run.level),minL=minLvlOf(run.level);
+  const elvl=irandR(Math.max(minL,Math.ceil(maxL*.55)),maxL);
+  const e=spawnEnemy(frenzyType(),elvl,{after:'form',delay:rand(0,.35)});
+  e.fx=rand(40,W-40);
+  e.fy=rand(H*.08,H*.32); /* banda superior: al entrar se asientan arriba */
+  e.sx=R()<.5?-40:W+40;e.sy=rand(-40,60);
+  e.cx=W/2+rand(-120,120);e.cy=rand(-30,H*.18);
+  e.x=e.sx;e.y=e.sy;
+  e.diveT=rand(5.5,9.5); /* los primeros ataques tardan: respiro al empezar */
+}
 function makeElite(L,delay){
   const maxL=maxLvlOf(L);
   const elvl=maxL+irandR(2,5);
@@ -94,8 +117,8 @@ function buildWave(L){
      (run.level sube con el tiempo en updWaveSpawns) y jefes periódicos */
   if(frenzyMode){
     wave.type='frenzy';
-    wave.pending=40;wave.pool=Array(40).fill('swarm');
-    banner('FRENÉTICO','Oleada infinita · jefes cada 45 s · sobrevive');
+    wave.pending=30;wave.pool=Array(30).fill('fz');
+    banner('FRENÉTICO','Oleada infinita · acechan desde arriba · sobrevive');
     return;
   }
   if(L%5===0){
@@ -165,7 +188,8 @@ function buildWave(L){
 }
 function updWaveSpawns(dt){
   /* v4.9: rama del MODO FRENÉTICO — aparición continua, nivel creciente cada
-     25 s, élites periódicos y un jefe cada 45 s; respeta el tope de 110 vivos */
+     25 s, élites AL AZAR y un jefe cada 60 s; tope dinámico de vivos.
+     v4.13: los enemigos se asientan ARRIBA y solo algunos bajan (spawnFrenzyOne). */
   if(frenzyMode){
     const nl=1+Math.floor(run.time/25);
     if(nl>run.level){
@@ -173,22 +197,33 @@ function updWaveSpawns(dt){
       save.best.lvl=Math.max(save.best.lvl,nl);save.bestAll=Math.max(save.bestAll,nl);
       if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,nl);
       floater(P.x,P.y-40,'NIVEL '+nl+' · MÁS FUERTES','#FF9F43',14);
-      if(nl%2===0){makeElite(nl,1.5);wave.total++;}
+      if(R()<.42){makeElite(nl,1.5);wave.total++;} /* v4.13: élite al azar, no siempre */
     }
-    if(run.frenzyBossT==null)run.frenzyBossT=30;
+    /* v4.13: élites sueltos al azar cada 20–35 s (máx. 2 a la vez) */
+    if(run.frenzyEliteT==null)run.frenzyEliteT=rand(20,35);
+    run.frenzyEliteT-=dt;
+    if(run.frenzyEliteT<=0){
+      run.frenzyEliteT=rand(20,35);
+      const nEl=enemies.reduce((n,e)=>n+(e.elite&&!e.dead?1:0),0);
+      if(nEl<2&&R()<.65){makeElite(run.level,1);wave.total++;}
+    }
+    /* v4.13: primer jefe a los 50 s y luego cada 60 s (antes 30/45 — asfixiante) */
+    if(run.frenzyBossT==null)run.frenzyBossT=50;
     run.frenzyBossT-=dt;
     if(run.frenzyBossT<=0&&!boss){
-      run.frenzyBossT=45;
+      run.frenzyBossT=60;
       spawnBoss(run.level);SFX.boss();
       banner('¡JEFE!','Guardián frenético nv '+maxLvlOf(run.level));
     }
-    if(enemies.length>=110){wave.spawnT=Math.max(wave.spawnT,.4);return;}
+    /* v4.13: tope DINÁMICO de vivos (antes 110 — inundaba la pantalla) */
+    const cap=Math.min(64,22+run.level*3);
+    if(enemies.length>=cap){wave.spawnT=Math.max(wave.spawnT,.4);return;}
     wave.spawnT-=dt;
     if(wave.spawnT<=0){
-      if(wave.pool.length<8)wave.pool=wave.pool.concat(Array(20).fill('swarm'));
+      if(wave.pool.length<8)wave.pool=wave.pool.concat(Array(20).fill('fz'));
       wave.pool.shift();wave.pending--;
-      spawnSwarmOne();
-      wave.spawnT=Math.max(.24,.8-run.time*.004)*rand(.8,1.2);
+      spawnFrenzyOne();
+      wave.spawnT=Math.max(.55,1.5-run.time*.004)*rand(.8,1.2);
     }
     return;
   }
