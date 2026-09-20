@@ -1,13 +1,14 @@
 'use strict';
 /* ============ botín ============ */
+/* v4.10: ORO POR PARTES — el enemigo ya no guarda TODO su oro para el final:
+   suelta trozos cada vez que le bajas un 20% de vida y el resto (la última
+   mitad) al matarlo. El total que acaba dando es el mismo de siempre.
+   El presupuesto se fija al aparecer (spawnEnemy) en e.goldTotal. */
 function dropLoot(e){
-  const gMul=players[0].goldMul;
-  const g=(1+(e.elvl>=106?1:0)+(e.elvl>=114?1:0))+(e.T.magnet?1:0);
-  const pkCap=pickups.length<250; /* v4.8: tope de botín para evitar lag extremo */
-  if(pkCap)for(let i=0;i<g;i++)
-    pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-40),
-      /* v4.9: oro según la OLEADA (el nivel del enemigo ya empieza en ~100) y reducido */
-      val:Math.max(1,Math.round((.25+run.level*.15)*gMul))});
+  /* v4.10: al morir suelta el RESTO de su oro (≈50% si soltó los 4 tramos) */
+  const rem=Math.max(0,(e.goldTotal||0)-(e.goldDropped||0));
+  if(rem>0&&pickups.length<250)
+    pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-40),val:rem});
   /* v4.9: gemas y corazones más raros */
   let gr=.02+run.level*.0012;
   if(players.some(pl=>pl.gemLuck))gr*=1.9;
@@ -109,7 +110,24 @@ function damageEnemy(e,dmg,crit,bySlot){
   if(th>0&&e.hp<=e.maxhp*th)dmg*=3;
   e.hp-=dmg;e.flash=1;
   run.stDmg+=dmg;
-  floater(e.x+rand(-8,8),e.y-e.r-6,'-'+dmg,crit?'#FFD166':'#F2EFE6',crit?14:11);
+  /* v4.10: los críticos se notan — número grande y sonido agudo */
+  if(crit){
+    floater(e.x+rand(-8,8),e.y-e.r-8,'¡'+Math.round(dmg)+'!','#FFD166',16);
+    critPing();
+  }else floater(e.x+rand(-8,8),e.y-e.r-6,'-'+dmg,'#F2EFE6',11);
+  /* v4.10: ORO POR PARTES — cada 20% de vida perdida suelta ~12,5% de su oro
+     (4 tramos = 50%); al morir cae el resto. Solo si vale la pena partirlo. */
+  if(e.goldTotal>=3){
+    while(e.goldMark>0&&e.hp<=e.maxhp*e.goldMark){
+      e.goldMark-=.2;
+      const val=Math.min(Math.max(1,Math.round(e.goldTotal*.125)),e.goldTotal-e.goldDropped);
+      if(val>0&&pickups.length<250){
+        pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-80,80),vy:rand(-170,-60),val});
+        e.goldDropped+=val;
+      }
+      if(e.goldDropped>=e.goldTotal)break;
+    }
+  }
   SFX.hit();
   if(e.hp<=0)killEnemy(e,bySlot);
 }
@@ -117,7 +135,8 @@ function damageBoss(d,crit,bySlot){
   if(!boss)return;
   boss.hp-=d;boss.flash=1;
   run.stDmg+=d;
-  floater(boss.x+rand(-20,20),boss.y-boss.r-8,'-'+d,crit?'#FFD166':'#F2EFE6',crit?15:12);
+  if(crit){floater(boss.x+rand(-20,20),boss.y-boss.r-10,'¡'+Math.round(d)+'!','#FFD166',18);critPing();}
+  else floater(boss.x+rand(-20,20),boss.y-boss.r-8,'-'+d,'#F2EFE6',12);
   SFX.hit();
   if(boss.hp<=0)killBoss();
 }

@@ -14,8 +14,14 @@ function spawnEnemy(tk,elvl,o){
     inT:0,inDelay:0,dvy:0,sx:0,sy:0,cx:0,cy:0,fx:0,fy:0,tx:0,ty:0,dead:false,
     refCD:0,kamArm:tk==='kami'?rand(1.2,2.6):0,kamT:0,kamV:0,
     camp:o.camp||null,CD:null,campT:2.2,beam:null,
-    frozen:0,burn:null,shockT:0};
+    frozen:0,burn:null,shockT:0,
+    /* v4.10: ORO POR PARTES — presupuesto total fijado al aparecer */
+    goldTotal:0,goldDropped:0,goldMark:.8};
   if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
+  /* v4.10: presupuesto de oro = el mismo total que daba antes al morir,
+     pero ahora se reparte: 4 tramos del 12,5% durante la pelea + resto al morir */
+  const gPieces=(1+(elvl>=106?1:0)+(elvl>=114?1:0))+(T.magnet?1:0);
+  e.goldTotal=Math.max(1,Math.round((.25+run.level*.15)*(players[0]?players[0].goldMul:1)))*gPieces;
   enemies.push(e);return e;
 }
 function pickRoamTarget(e){e.tx=rand(40,W-40);e.ty=rand(70,H*.52);e.rt=rand(1.6,3);}

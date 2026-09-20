@@ -21,7 +21,8 @@ let lastWeeklyRec=null;
 let freeNovaGiven=false;
 
 function mkPlayer(slot){return{
-  slot,x:0,y:0,hp:4,maxHp:4,dmg:2,fireRate:3,bullets:1,files:1,speed:1,pierce:0,crit:.05,magnet:1,
+  /* v4.10: daño base 10 (dispara 5–15 con variación) y 8% de crítico */
+  slot,x:0,y:0,hp:4,maxHp:4,dmg:10,fireRate:3,bullets:1,files:1,speed:1,pierce:0,crit:.08,magnet:1,
   regenRate:0,nova:null,slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,
   bounce:0,overdrive:false,drones:0,orbs:0,shield:false,shieldFast:false,phoenixCharges:0,
   vamp:false,frenzy:false,execute:false,presa:false,reflect:false,venge:false,secondWind:false,

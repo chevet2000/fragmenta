@@ -75,7 +75,10 @@ function shoot(pl){
     for(let i=0;i<pl.bullets;i++){
       const a=-Math.PI/2+(i-(pl.bullets-1)/2)*.11;
       const crit=Math.random()<pl.crit;
-      let dmg=pl.dmg*(crit?2.5:1);
+      /* v4.10: cada disparo varía ±50% (base 10 => 5–15 por bala),
+         los críticos (x2.5) y los disparos pesados (x3) se calculan encima */
+      let dmg=Math.max(1,Math.round(pl.dmg*(.5+Math.random())));
+      dmg*=crit?2.5:1;
       if(heavy)dmg*=3;
       bullets.push({x:pl.x+ox,y:pl.y-16,vx:Math.cos(a)*540,vy:Math.sin(a)*540,
         dmg,r:heavy?7:4,crit,pierce:pl.pierce,hits:[],bounce:pl.bounce,heavy,slot:pl.slot,dead:false});

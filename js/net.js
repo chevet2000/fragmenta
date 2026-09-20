@@ -25,7 +25,9 @@ function computeStatblock(){
   return b;
 }
 function blankStats(){
-  return{dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
+  /* v4.10: la nave pega de verdad desde el inicio — dmg base 10 con
+     variación aleatoria ±50% en cada disparo (5–15) y 8% de crítico (x2.5). */
+  return{dmg:10,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.08,magnet:1,maxHp:4,regenRate:0,nova:null,
     slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,linkHeal:0,linkRate:5,azar:false,azarBonus:0,
     drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
     presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
