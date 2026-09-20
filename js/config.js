@@ -10,6 +10,51 @@ const multHP=()=>DIFFS[runDiff]||1;
    financia las mejoras del ALIADO (que se pagan con gemas). */
 const GEMX_COST=1500, GEMX_GEMS=10;
 
+/* ============ v4.12: HANGAR — aspectos de nave ============ */
+/* Solo cosmético: cambia el color del casco y del núcleo de TU nave.
+   'prisma' cicla todos los colores con el tiempo. El primero es el de serie. */
+const SKINS=[
+ {id:'menta',  name:'MENTA',    color:'#7FD1B9', cost:0},
+ {id:'coral',  name:'CORAL',    color:'#FF6B6B', cost:400},
+ {id:'cielo',  name:'CIELO',    color:'#64C7FF', cost:400},
+ {id:'ambar',  name:'ÁMBAR',    color:'#FFD166', cost:600},
+ {id:'rosa',   name:'ROSA',     color:'#FF7EB6', cost:800},
+ {id:'lima',   name:'LIMA',     color:'#7DFF9E', cost:800},
+ {id:'lila',   name:'LILA',     color:'#B388FF', cost:1000},
+ {id:'hielo',  name:'HIELO',    color:'#B0F2FF', cost:1000},
+ {id:'marfil', name:'MARFIL',   color:'#F2EFE6', cost:1500},
+ {id:'prisma', name:'PRISMA ∞', color:'prisma',  cost:2500},
+];
+
+/* ============ v4.12: MISIONES DIARIAS ============ */
+/* Cada día se sortean 3 (determinista por fecha, iguales para todos).
+   El progreso se comparte entre partidas y caduca a medianoche. */
+const DAILY_POOL=[
+ {k:'kills',txt:'Elimina 150 enemigos', n:150,rw:100,gem:1},
+ {k:'gold', txt:'Recoge 400 de oro',    n:400,rw:120,gem:1},
+ {k:'elite',txt:'Caza 4 élites',        n:4,  rw:130,gem:2},
+ {k:'boss', txt:'Derrota 2 Guardianes', n:2,  rw:160,gem:2},
+ {k:'kills',txt:'Elimina 250 enemigos', n:250,rw:160,gem:2},
+ {k:'gold', txt:'Recoge 700 de oro',    n:700,rw:180,gem:2},
+ {k:'elite',txt:'Caza 8 élites',        n:8,  rw:220,gem:3},
+ {k:'boss', txt:'Derrota 3 Guardianes', n:3,  rw:240,gem:3},
+];
+
+/* ============ v4.12: BESTIARIO ============ */
+/* Datos de cada figura: se revelan al enfrentarte a ellas (save.seen). */
+const BESTIARY={
+ orb:   {name:'ORBE',      desc:'La figura básica: vida y velocidad justas. Aparece desde la primera oleada y en enjambres.'},
+ dart:  {name:'DARDO',     desc:'Frágil (×0.7 de vida) pero rapidísimo (×1.5). Se lanza en picado: elimínalo antes de que te atraviese.'},
+ block: {name:'BLOQUE',    desc:'Blindaje 1+nivel/10 (resta a cada impacto) y ×1.35 de vida. Ideal para perforación y críticos.'},
+ dash:  {name:'ROMBO',     desc:'Velocidad ×1.7 y poca vida. Se cuela por los huecos de la formación: no lo dejes acercarse.'},
+ sentry:{name:'CENTINELA', desc:'Dispara proyectiles enemigos desde su posición. Es la prioridad número uno de cada oleada.'},
+ medic: {name:'MÉDICO',    desc:'Cada 3.6 s cura a las figuras cercanas con un pulso verde. Mátalo primero o la oleada se eterniza.'},
+ hive:  {name:'COLMENA',   desc:'Grande (×1.18) y dura (×1.5). Al morir estalla en 8 proyectiles radiales y se divide con más frecuencia.'},
+ reflect:{name:'REFLEJO',  desc:'Al recibir el golpe que lo destruiría devuelve un disparo hacia ti. Usa misiles, drones o el prisma.'},
+ magnet:{name:'IMÁN',      desc:'Atrae el oro del suelo hacia sí mismo (radio 160) y suelta el doble de botín. Cázalo rápido o te vaciará la pantalla.'},
+ kami:  {name:'KAMIKAZE',  desc:'Se lanza contra ti y explota dañando todo en radio 70. Media vida, máxima agresividad.'},
+};
+
 /* ============ niveles de enemigo ============ */
 /* v4.9: DIFICULTAD BRUTAL — desde la PRIMERA oleada los enemigos son de
    nivel ~100 (nv 96–100) y la vida sigue creciendo x1.055 por nivel.

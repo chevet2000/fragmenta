@@ -298,3 +298,46 @@ button{font-family:inherit}
 .buffbar .bicon i{font-style:normal;font-size:8px;color:var(--dim);letter-spacing:0}
 /* ==== v4.8: botón de borrado en estado de confirmación ==== */
 .btn.danger{border-color:var(--coral)!important;color:var(--coral)!important;animation:blink 1s infinite}
+
+/* ==== v4.11: editor del nombre de piloto ==== */
+#pilotEdit{display:flex;gap:6px;margin-top:7px}
+#pilotEdit.hidden{display:none}
+#pilotInput{flex:1;min-width:0;background:#0B0F15;border:1px solid var(--line);color:var(--ink);
+  font:700 13px "Chakra Petch",monospace;letter-spacing:.14em;padding:8px 9px;text-transform:uppercase}
+#pilotInput:focus{outline:none;border-color:var(--mint)}
+#pilotEdit button{padding:8px 10px;font-size:10px}
+#btnEditPilot{margin-top:5px;padding:6px 10px;font-size:9px;letter-spacing:.18em}
+#rankMsg.err{color:var(--coral);font-size:10px;letter-spacing:.08em;margin-top:6px;text-align:center}
+
+/* ==== v4.12: combo de bajas (HUD) ==== */
+#comboTag{pointer-events:none;font-weight:700;font-size:13px;letter-spacing:.16em;
+  color:var(--amber);text-shadow:0 0 10px rgba(255,209,102,.55);margin-top:2px;
+  transition:opacity .15s linear}
+#comboTag.hidden{display:none}
+
+/* ==== v4.12: hangar de aspectos ==== */
+.skrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+  padding:7px 9px;margin-top:7px;background:rgba(12,16,22,.55)}
+.skrow.eq{border-color:var(--mint);box-shadow:0 0 10px rgba(127,209,185,.18)}
+.skrow canvas{flex:0 0 56px}
+.skrow .at{flex:1;min-width:0}
+.skrow .at b{font-size:12.5px;letter-spacing:.14em}
+.skrow .at small{display:block;font-size:9px;color:var(--dim);letter-spacing:.12em;margin-top:3px}
+.skbtn{padding:8px 12px;font-size:9.5px;letter-spacing:.16em;border:1px solid var(--amber);
+  color:var(--amber);background:rgba(255,209,102,.07);cursor:pointer;font-family:inherit}
+.skbtn.on{border-color:var(--mint);color:var(--mint);background:rgba(127,209,185,.08)}
+
+/* ==== v4.12: misiones diarias (barra de progreso) ==== */
+.mbar{height:5px;border:1px solid var(--line);margin-top:6px;background:rgba(7,9,13,.7);position:relative;overflow:hidden}
+.mbar i{display:block;height:100%;background:linear-gradient(90deg,rgba(255,209,102,.5),#FFD166)}
+
+/* ==== v4.12: perfil de piloto (filas de estadísticas) ==== */
+.strow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  border-bottom:1px dashed rgba(59,70,84,.55);padding:6px 2px}
+.strow small{font-size:8.5px;letter-spacing:.2em;color:var(--dim)}
+.strow b{font-size:11.5px;letter-spacing:.08em;text-align:right;color:var(--ink)}
+.strow:last-child{border-bottom:none}
+
+/* ==== v4.12: bestiario (entradas sin registrar atenuadas) ==== */
+.arow.unk{opacity:.62}
+.arow.unk .at b{color:var(--dim)!important}

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.11">
+<html lang="es" data-v="4.12">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.11 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.12 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.11">
+<link rel="stylesheet" href="css/styles.css?v=4.12">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -30,6 +30,7 @@
     <div id="shipRow"><b id="shipTxt">NV 1</b><div class="expbar"><i id="expFill"></i></div></div>
     <div class="buffbar hidden" id="buffBar"></div>
     <div class="wavebar"><i id="waveFill"></i></div>
+    <div id="comboTag" class="hidden"></div>
     <div id="netTag" class="hidden"></div>
   </div>
   <button id="btnPause" aria-label="Pausa"><svg viewBox="0 0 14 14"><rect x="1.5" y="1" width="4" height="12" fill="#F2EFE6"/><rect x="8.5" y="1" width="4" height="12" fill="#F2EFE6"/></svg></button>
@@ -91,7 +92,7 @@
     <canvas id="heroCv" width="640" height="340"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">La <b>GRAN PURGA</b>: enemigos mucho más duros, experiencia reequilibrada (1-5 por baja · niveles 100/150/200…), tope de 10 cartas por tipo, iconos de poderes en pantalla, música de menú, ranking 100% automático en co-op y botón para borrar tu partida. ¿Hasta qué oleada llegas ahora?</p>
+  <p class="tagline">La <b>v4.12</b> llega cargada: <b>RETO DIARIO</b> con semilla nueva cada día, <b>MISIONES DEL DÍA</b> con recompensas, <b>HANGAR</b> de aspectos para tu nave (se paga con oro), <b>COMBOS</b> de bajas con bonus, <b>BESTIARIO</b> que registra cada figura y <b>PERFIL</b> con todas tus estadísticas. ¿Cuántas misiones cumples hoy?</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -102,13 +103,18 @@
   <div class="menu-btns">
     <button class="btn primary" id="btnPlay">JUGAR · 1 JUGADOR</button>
     <button class="btn week" id="btnWeekly">DESAFÍO SEMANAL</button>
+    <button class="btn week" id="btnDaily">RETO DIARIO</button>
     <button class="btn" id="btnFrenzy" style="border-color:#FF6B6B;color:#FF6B6B">FRENÉTICO · OLEADA INFINITA</button>
     <button class="btn rankb" id="btnRank">RANKING SEMANAL</button>
+    <button class="btn" id="btnMissions">MISIONES DEL DÍA</button>
     <button class="btn" id="btnHost">ONLINE · CREAR SALA</button>
     <button class="btn" id="btnJoin">ONLINE · UNIRSE</button>
     <button class="btn" id="btnArsenal">ARSENAL · ÁRBOL</button>
+    <button class="btn" id="btnHangar">HANGAR · NAVE</button>
     <button class="btn" id="btnGuide">GUÍA · GUARDIÁNES</button>
+    <button class="btn" id="btnBest">BESTIARIO · FIGURAS</button>
     <button class="btn" id="btnAch">LOGROS</button>
+    <button class="btn" id="btnStats">PERFIL · ESTADÍSTICAS</button>
     <button class="btn" id="btnWipe">BORRAR PARTIDA</button>
     <button class="btn hidden" id="btnInstall">INSTALAR APP</button>
     <button class="btn hidden" id="btnAscend">ASCENDER</button>
@@ -121,7 +127,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.11 · TU NOMBRE EN EL RANKING · DAÑO 5–15 CON CRÍTICOS · ORO POR PARTES · ENEMIGOS NV 100 · ALIADO BOT (GEMAS) · MODO FRENÉTICO ∞ · MERCADO DE GEMAS · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.12 · RETO DIARIO · MISIONES DEL DÍA · HANGAR DE NAVES · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ORO POR PARTES · ALIADO BOT · FRENÉTICO ∞ · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -161,6 +167,41 @@
     <h2>LOGROS</h2>
     <div id="achList"></div>
     <button class="btn" id="btnAchBack" style="margin-top:6px">VOLVER</button>
+  </div>
+</div>
+
+<div class="scr" id="scrHangar">
+  <div class="achbox">
+    <h2>HANGAR · ASPECTOS</h2>
+    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin:4px 0 8px">SOLO COSMÉTICO · TU NAVE, TU COLOR · SE PAGA CON ORO<br>EN CO-OP CADA PILOTO VE EL SUYO</div>
+    <div id="hangarList"></div>
+    <button class="btn" id="btnHangarBack" style="margin-top:6px">VOLVER</button>
+  </div>
+</div>
+
+<div class="scr" id="scrMissions">
+  <div class="achbox">
+    <h2>MISIONES DEL DÍA</h2>
+    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin:4px 0 8px">3 MISIONES NUEVAS CADA DÍA · EL PROGRESO SE COMPARTE ENTRE PARTIDAS<br>AVANZAN EN PARTIDAS DE UN JUGADOR, SEMANAL, DIARIO Y FRENÉTICO</div>
+    <div id="missList"></div>
+    <button class="btn" id="btnMissionsBack" style="margin-top:6px">VOLVER</button>
+  </div>
+</div>
+
+<div class="scr" id="scrStats">
+  <div class="achbox">
+    <h2>PERFIL DE PILOTO</h2>
+    <div id="statsList"></div>
+    <button class="btn" id="btnStatsBack" style="margin-top:6px">VOLVER</button>
+  </div>
+</div>
+
+<div class="scr" id="scrBest">
+  <div class="achbox">
+    <h2>BESTIARIO</h2>
+    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin:4px 0 8px">CADA FIGURA SE REGISTRA LA PRIMERA VEZ QUE TE ENFRENTAS A ELLA</div>
+    <div id="bestList"></div>
+    <button class="btn" id="btnBestBack" style="margin-top:6px">VOLVER</button>
   </div>
 </div>
 
@@ -283,30 +324,30 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.11"></script>
-<script src="js/profile.js?v=4.11"></script>
-<script src="js/achievements.js?v=4.11"></script>
-<script src="js/audio.js?v=4.11"></script>
-<script src="js/config.js?v=4.11"></script>
-<script src="js/tree.js?v=4.11"></script>
-<script src="js/relics.js?v=4.11"></script>
-<script src="js/state.js?v=4.11"></script>
-<script src="js/net.js?v=4.11"></script>
-<script src="js/core.js?v=4.11"></script>
-<script src="js/enemies.js?v=4.11"></script>
-<script src="js/waves.js?v=4.11"></script>
-<script src="js/boss.js?v=4.11"></script>
-<script src="js/loot.js?v=4.11"></script>
-<script src="js/player.js?v=4.11"></script>
-<script src="js/azar.js?v=4.11"></script>
-<script src="js/chests.js?v=4.11"></script>
-<script src="js/netsync.js?v=4.11"></script>
-<script src="js/render.js?v=4.11"></script>
-<script src="js/screens.js?v=4.11"></script>
-<script src="js/treeui.js?v=4.11"></script>
-<script src="js/hud.js?v=4.11"></script>
-<script src="js/input.js?v=4.11"></script>
-<script src="js/game.js?v=4.11"></script>
-<script src="js/update.js?v=4.11"></script>
+<script src="js/utils.js?v=4.12"></script>
+<script src="js/profile.js?v=4.12"></script>
+<script src="js/achievements.js?v=4.12"></script>
+<script src="js/audio.js?v=4.12"></script>
+<script src="js/config.js?v=4.12"></script>
+<script src="js/tree.js?v=4.12"></script>
+<script src="js/relics.js?v=4.12"></script>
+<script src="js/state.js?v=4.12"></script>
+<script src="js/net.js?v=4.12"></script>
+<script src="js/core.js?v=4.12"></script>
+<script src="js/enemies.js?v=4.12"></script>
+<script src="js/waves.js?v=4.12"></script>
+<script src="js/boss.js?v=4.12"></script>
+<script src="js/loot.js?v=4.12"></script>
+<script src="js/player.js?v=4.12"></script>
+<script src="js/azar.js?v=4.12"></script>
+<script src="js/chests.js?v=4.12"></script>
+<script src="js/netsync.js?v=4.12"></script>
+<script src="js/render.js?v=4.12"></script>
+<script src="js/screens.js?v=4.12"></script>
+<script src="js/treeui.js?v=4.12"></script>
+<script src="js/hud.js?v=4.12"></script>
+<script src="js/input.js?v=4.12"></script>
+<script src="js/game.js?v=4.12"></script>
+<script src="js/update.js?v=4.12"></script>
 </body>
 </html>

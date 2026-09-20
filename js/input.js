@@ -73,7 +73,17 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  bindEl('#btnPause', 'click',()=>{if(state==='play')pauseGame();});
  bindEl('#btnPlay', 'click',()=>{destroyNet();startRun();});
  bindEl('#btnWeekly', 'click',()=>{destroyNet();startWeekly();});
+ bindEl('#btnDaily', 'click',()=>{destroyNet();startDaily();}); /* v4.12: reto diario */
  bindEl('#btnFrenzy', 'click',()=>{destroyNet();startFrenzy();}); /* v4.9: modo frenético */
+ /* v4.12: pantallas nuevas del menú */
+ bindEl('#btnHangar', 'click',openHangar);
+ bindEl('#btnHangarBack', 'click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnMissions', 'click',openMissions);
+ bindEl('#btnMissionsBack', 'click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnStats', 'click',openStats);
+ bindEl('#btnStatsBack', 'click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnBest', 'click',openBestiary);
+ bindEl('#btnBestBack', 'click',()=>{refreshMenu();showScr('menu');});
  bindEl('#btnGemX', 'click',()=>{ /* v4.9: mercado de gemas */
   if(save.gold<GEMX_COST){banner('ORO INSUFICIENTE','Necesitas '+GEMX_COST+' de oro');return;}
   save.gold-=GEMX_COST;save.gems+=GEMX_GEMS;persist();SFX.buy();vib(25);
@@ -82,7 +92,9 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  });
  bindEl('#btnRetry', 'click',()=>{
   if(net.mode){netEndLocal(null);return;}
-  if(weeklyMode)startWeekly();else startRun();
+  if(dailyMode)startDaily(); /* v4.12 */
+  else if(weeklyMode)startWeekly();
+  else startRun();
 });
  bindEl('#btnResume', 'click',()=>{state='play';showScr(null);});
  bindEl('#btnQuit', 'click',()=>{
@@ -117,6 +129,9 @@ let wipeArm=false,wipeT=null;
   save.prest=0;save.totKills=0;save.runs=0;save.ach={};save.totElite=0;save.totRescue=0;
   save.totChest=0;save.totCamp=0;save.bestHard=0;save.bossKills={};save.weekly=null;save.weekBestAll=0;
   save.ranking=[];save.mShots=0;save.mHits=0;save.mDmg=0;save.mTaken=0;save.mPerfect=0;
+  /* v4.12: también se reinician diario, misiones, hangar, combos, stats y bestiario */
+  save.daily={seed:null,best:0};save.dailyBest=0;save.dailyM=null;
+  save.skins={owned:['menta'],eq:null};save.bestCombo=0;save.totGold=0;save.totGems=0;save.seen={};
   save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}

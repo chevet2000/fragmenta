@@ -2,12 +2,12 @@
 /* ============ cofres ============ */
 function grantGold(slot,v){
   if(slot===1&&net.mode==='host')net.walletG+=v;
-  else save.gold+=v;
+  else{save.gold+=v;save.totGold=(save.totGold||0)+v;} /* v4.12: estadística */
   run.goldRun+=v;
 }
 function grantGems(slot,v){
   if(slot===1&&net.mode==='host')net.walletM+=v;
-  else save.gems+=v;
+  else{save.gems+=v;save.totGems=(save.totGems||0)+v;} /* v4.12: estadística */
   run.gemsRun+=v;
 }
 function openChest(slot,kind){

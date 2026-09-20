@@ -3,8 +3,11 @@
 let state='menu',runActive=false,shopReturn='menu',lastWaveType='';
 const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]],relics:[],
   shipLv:1,exp:0,missions:[],combo:0,tempBuffs:[],
+  /* v4.12: COMBOS — racha de bajas (comboN) y su cuenta atrás (comboT) */
+  comboN:0,comboT:0,
   stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false};
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
+let dailyMode=false; /* v4.12: reto diario */
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[];
 let wrecks=[];
 let emosFx=[];

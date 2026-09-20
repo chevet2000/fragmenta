@@ -672,11 +672,11 @@ function updPickups(dt){
       const remote=pl.slot===1&&net.mode==='host';
       if(p.t==='gold'){
         if(remote)net.walletG+=p.val;
-        else{save.gold+=p.val;run.goldRun+=p.val;}
+        else{save.gold+=p.val;run.goldRun+=p.val;save.totGold=(save.totGold||0)+p.val;} /* v4.12 */
         missionTick('gold',p.val);SFX.coin();
       }else if(p.t==='gem'){
         if(remote)net.walletM+=1;
-        else{save.gems++;run.gemsRun++;}
+        else{save.gems++;run.gemsRun++;save.totGems=(save.totGems||0)+1;} /* v4.12 */
         SFX.gem();floater(pl.x,pl.y-26,'+1 GEMA','#64C7FF',11);
       }else if(p.t==='chest'){
         openChest(pl.slot,p.kind);
@@ -684,11 +684,11 @@ function updPickups(dt){
         SFX.chest();
         if(R()<.6){
           const v=Math.round((80+run.level*10)*players[0].goldMul);
-          if(remote)net.walletG+=v;else{save.gold+=v;run.goldRun+=v;}
+          if(remote)net.walletG+=v;else{save.gold+=v;run.goldRun+=v;save.totGold=(save.totGold||0)+v;} /* v4.12 */
           banner('COFRE PEQUEÑO','+'+v+' DE ORO');
         }else{
           const v=2;
-          if(remote)net.walletM+=v;else{save.gems+=v;run.gemsRun+=v;}
+          if(remote)net.walletM+=v;else{save.gems+=v;run.gemsRun+=v;save.totGems=(save.totGems||0)+v;} /* v4.12 */
           banner('COFRE PEQUEÑO','+'+v+' GEMAS');
         }
         persist();
@@ -716,6 +716,8 @@ function updFx(dt){
   bannerT=Math.max(0,bannerT-dt);
   frenzyT=Math.max(0,frenzyT-dt);
   if(frenzyT<=0)run.combo=0;
+  /* v4.12: el combo de bajas caduca tras 3 s sin matar */
+  if(run.comboT>0){run.comboT-=dt;if(run.comboT<=0)run.comboN=0;}
   if(novaCdGlobal>0)novaCdGlobal=Math.max(0,novaCdGlobal-dt);
 }
 function checkClear(dt){

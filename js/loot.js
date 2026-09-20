@@ -32,6 +32,18 @@ function killEnemy(e,bySlot){
   /* v4.8: XP según el nivel máximo de la oleada (1-5 por baja) */
   gainExp(Math.round(waveXp()*pl.expMul));
   missionTick('kills',1);
+  /* v4.12: COMBOS — cada baja en menos de 3 s mantiene la racha.
+     Hitos 10/25/50/100 pagan oro (y gemas a partir de ×50). */
+  run.comboN=(run.comboN||0)+1;run.comboT=3;
+  if(run.comboN>(save.bestCombo||0))save.bestCombo=run.comboN;
+  const CB={10:15,25:40,50:100,100:250};
+  if(CB[run.comboN]){
+    grantGold(bySlot,CB[run.comboN]);
+    if(run.comboN>=50)grantGems(bySlot,run.comboN>=100?2:1);
+    floater(pl.x,pl.y-48,'¡COMBO ×'+run.comboN+'! +'+CB[run.comboN]+' ORO','#FFD166',15);
+    tone(880,1400,.15,'square',.05);vib(40);
+    checkAch();
+  }
   if(pl.frenzy){run.combo++;
     if(run.combo>=6&&frenzyT<=0){frenzyT=5;floater(pl.x,pl.y-34,'¡FRENESÍ!','#FFD166',14);}}
   if(pl.vamp&&players.some(q=>q.hp<q.maxHp&&q.hp>0)&&Math.random()<.12){
@@ -163,6 +175,7 @@ function killBoss(){
     floater(b.x,b.y-60,'¡COFRE! ATRÁPALO','#FFD166',15);
   }
   gainExp(Math.round(waveXp()*8*players[0].expMul)); /* v4.9: jefe x8 (antes x12) */
+  missionTick('boss',1); /* v4.12: misiones diarias de Guardianes */
   banner('GUARDIÁN DESTRUIDO',run.level%10===0?'Recoge el cofre y el botín':'Recoge las recompensas');
 }
 

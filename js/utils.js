@@ -45,6 +45,12 @@ let R=Math.random;
 let weeklyMode=false;
 function weekSeed(){const d=new Date();const start=new Date(d.getFullYear(),0,1);
   const w=Math.floor((d-start)/604800000)+1;return d.getFullYear()+'W'+w;}
+/* v4.12: semilla DIARIA para el Reto Diario (cambia a medianoche local) */
+function daySeed(){const d=new Date();
+  return 'D'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+/* v4.12: #RRGGBB + alfa → rgba(...) para rellenos de nave con aspecto */
+function hexA(hex,a){try{const n=parseInt(hex.slice(1),16);
+  return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}catch(e){return 'rgba(242,239,230,'+a+')';}}
 const rrand=(a,b)=>a+R()*(b-a);
 const irandR=(a,b)=>Math.floor(a+R()*(b-a+1));
 

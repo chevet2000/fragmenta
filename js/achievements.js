@@ -28,6 +28,11 @@ const ACHS=[
  {id:'ice',  name:'ERA GLACIAL',      desc:'Desbloquea el tope de HIELO',          rw:4, ck:()=>has('e6')},
  {id:'wind', name:'SEÑOR DEL VIENTO', desc:'Desbloquea el tope de VIENTO',         rw:4, ck:()=>has('e9')},
  {id:'fire', name:'PIROMANÍACO',      desc:'Desbloquea el tope de FUEGO',          rw:4, ck:()=>has('e12')},
+ /* v4.12: combos, hangar y reto diario */
+ {id:'cb25', name:'EN CADENA',        desc:'Consigue un combo de 25 bajas',        rw:4, ck:()=>(save.bestCombo||0)>=25},
+ {id:'cb50', name:'IMPARABLE',        desc:'Consigue un combo de 50 bajas',        rw:8, ck:()=>(save.bestCombo||0)>=50},
+ {id:'skin1',name:'ESTILO PROPIO',    desc:'Compra un aspecto de nave en el HANGAR',rw:3, ck:()=>save.skins&&(save.skins.owned||[]).length>=2},
+ {id:'dly10',name:'RUTA DIARIA',      desc:'Alcanza la oleada 10 en el Reto Diario',rw:5, ck:()=>(save.dailyBest||0)>=10},
 ];
 function checkAch(){
   let got=false;

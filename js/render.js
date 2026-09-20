@@ -261,8 +261,15 @@ function drawBossCommon(){
 function drawShip(pl,isLocal){
   const g=ctx;
   if(pl.hp<=0)return;
-  /* v4.8: nave del JUGADOR 2 en rosa para distinguirla de la del JUGADOR 1 (menta) */
-  const core=pl.slot===0?'#7FD1B9':'#FF7EB6';
+  /* v4.12: HANGAR — TU nave lleva el aspecto equipado del hangar.
+     En co-op cada dispositivo pinta el suyo; el rival conserva su color.
+     'prisma' cicla todos los colores con el tiempo. */
+  const mine=pl.slot===localSlot;
+  const sk=mine?getSkin():null;
+  const skOn=sk&&sk.color!=='menta';
+  const skc=skOn?(sk.color==='prisma'?'hsl('+Math.floor((time*40)%360)+',85%,66%)':sk.color):null;
+  const skHex=skOn&&sk.color!=='prisma'?sk.color:null;
+  const core=skc||(pl.slot===0?'#7FD1B9':'#FF7EB6');
   const blink=pl.invul>0&&Math.floor(time*18)%2===0;
   if(pl.orbs>0){
     const ot=(pl.orbT||time*2.4);
@@ -301,7 +308,9 @@ function drawShip(pl,isLocal){
     g.beginPath();g.arc(0,0,pl.wind.rad,time*.8,time*.8+TAU);g.stroke();
     g.setLineDash([]);g.globalAlpha=blink?.35:1;
   }
-  g.strokeStyle='#F2EFE6';g.fillStyle='rgba(242,239,230,.12)';g.lineWidth=2;
+  g.strokeStyle=skc||'#F2EFE6';
+  g.fillStyle=skHex?hexA(skHex,.16):(skc?'rgba(255,255,255,.10)':'rgba(242,239,230,.12)');
+  g.lineWidth=2;
   g.beginPath();
   g.moveTo(0,-17);g.lineTo(5,-4);g.lineTo(15,9);g.lineTo(6,6);g.lineTo(4,13);
   g.lineTo(-4,13);g.lineTo(-6,6);g.lineTo(-15,9);g.lineTo(-5,-4);g.closePath();
@@ -558,12 +567,15 @@ function renderMenuBG(dt){
   ctx.globalAlpha=1;
   drawHero();
 }
-function drawShipIcon(g,scale,core){
+function drawShipIcon(g,scale,core,hull){
   g.save();g.scale(scale,scale);
   g.strokeStyle='#FFD166';g.lineWidth=1.6;g.beginPath();
   const fl=6+Math.random()*5;
   g.moveTo(-2,9);g.lineTo(0,9+fl);g.lineTo(2,9);g.stroke();
-  g.strokeStyle='#F2EFE6';g.fillStyle='rgba(242,239,230,.12)';g.lineWidth=1.6;
+  /* v4.12: casco opcional con color de aspecto (vista previa del hangar) */
+  g.strokeStyle=hull||'#F2EFE6';
+  g.fillStyle=hull?hexA(hull,.16):'rgba(242,239,230,.12)';
+  g.lineWidth=1.6;
   g.beginPath();
   g.moveTo(0,-13);g.lineTo(4,-3);g.lineTo(11,7);g.lineTo(5,4.5);g.lineTo(3,10);
   g.lineTo(-3,10);g.lineTo(-5,4.5);g.lineTo(-11,7);g.lineTo(-4,-3);g.closePath();
@@ -621,7 +633,13 @@ function drawHero(){
   g.fillText('· PURGA GEOMÉTRICA INFINITA ·',0,44);
   g.restore();
   g.save();g.translate(cx,cy+92);
-  drawShipIcon(g,1.4,'#7FD1B9');
+  /* v4.12: la nave del héroe del menú luce tu aspecto equipado */
+  {
+    const sk=getSkin();
+    const cc=sk.color==='prisma'?'hsl('+Math.floor((time*40)%360)+',85%,66%)':sk.color;
+    const hc=sk.color==='prisma'?'#FFD166':(sk.color==='menta'?null:sk.color);
+    drawShipIcon(g,1.4,cc,hc);
+  }
   g.restore();
 }
 try{

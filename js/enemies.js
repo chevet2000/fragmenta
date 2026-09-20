@@ -22,6 +22,10 @@ function spawnEnemy(tk,elvl,o){
      pero ahora se reparte: 4 tramos del 12,5% durante la pelea + resto al morir */
   const gPieces=(1+(elvl>=106?1:0)+(elvl>=114?1:0))+(T.magnet?1:0);
   e.goldTotal=Math.max(1,Math.round((.25+run.level*.15)*(players[0]?players[0].goldMul:1)))*gPieces;
+  /* v4.12: BESTIARIO — la figura queda registrada al aparecer (bandera, sin persistir aquí) */
+  if(!save.seen)save.seen={};
+  save.seen[tk]=1;
+  if(e.elite)save.seen.elite=1;
   enemies.push(e);return e;
 }
 function pickRoamTarget(e){e.tx=rand(40,W-40);e.ty=rand(70,H*.52);e.rt=rand(1.6,3);}
@@ -72,6 +76,8 @@ function spawnCamper(L){
   e.CD=D;
   e.campT=2.2;
   e.beam=null;
+  if(!save.seen)save.seen={};
+  save.seen.camp=1; /* v4.12: bestiario */
   return e;
 }
 function camperAI(e,dt){

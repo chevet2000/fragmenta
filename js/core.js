@@ -119,8 +119,47 @@ function rollMissions(){
   }
   sendMiss();
 }
+/* ============ v4.12: MISIONES DIARIAS ============ */
+/* 3 misiones por día (sorteo determinista por fecha, iguales para todos).
+   El progreso se comparte entre partidas del mismo día y caduca a medianoche. */
+function ensureDailyM(){
+  const ds=daySeed();
+  if(!save.dailyM||save.dailyM.d!==ds){
+    const rng=mulberry32(hashStr('FRGDM-'+ds));
+    const pool=[...DAILY_POOL];
+    const l=[];
+    for(let i=0;i<3&&pool.length;i++){
+      const j=Math.floor(rng()*pool.length);
+      const m=pool.splice(j,1)[0];
+      l.push({k:m.k,txt:m.txt,n:m.n,p:0,rw:m.rw,gem:m.gem,done:false});
+    }
+    save.dailyM={d:ds,l};
+    persist();
+  }
+  return save.dailyM.l;
+}
+function dailyMDone(){
+  if(!save.dailyM||save.dailyM.d!==daySeed())return 0;
+  return save.dailyM.l.filter(m=>m.done).length;
+}
+function dailyMissionTick(kind,amt){
+  if(!save.dailyM||save.dailyM.d!==daySeed())return;
+  for(const m of save.dailyM.l){
+    if(m.done||m.k!==kind)continue;
+    m.p=Math.min(m.n,m.p+amt);
+    if(m.p>=m.n){
+      m.done=true;
+      save.gold+=m.rw;save.totGold=(save.totGold||0)+m.rw;
+      if(m.gem){save.gems+=m.gem;save.totGems=(save.totGems||0)+m.gem;}
+      banner('MISIÓN DIARIA CUMPLIDA','+'+m.rw+' de oro'+(m.gem?' · +'+m.gem+' gema':''));
+      SFX.relic();vib(50);
+      checkAch();persist();
+    }
+  }
+}
 function sendMiss(){ if(net.mode==='host')sendMsg({t:'ev',k:'miss',l:run.missions.map(m=>({txt:m.txt,p:m.p,n:m.n,done:!!m.done}))}); }
 function missionTick(kind,amt){
+  dailyMissionTick(kind,amt); /* v4.12: las diarias comparten los mismos contadores */
   for(const m of run.missions){
     if(m.done)continue;
     const hit=(kind==='kills'&&m.txt.startsWith('Destruye'))||(kind==='gold'&&m.txt.startsWith('Recoge'))||(kind==='elite'&&m.txt.startsWith('Caza'));

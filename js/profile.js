@@ -1,9 +1,12 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.11';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.12';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
-  pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
+  pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
+  /* v4.12: reto diario, misiones diarias, hangar, combos, estadísticas y bestiario */
+  daily:{seed:null,best:0},dailyBest:0,dailyM:null,skins:{owned:['menta'],eq:null},
+  bestCombo:0,totGold:0,totGems:0,seen:{}};}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));
@@ -30,6 +33,12 @@ function persist(){
   try{localStorage.setItem(saveProfile==='local'?KEY_LOCAL:KEY_NET,JSON.stringify(save));}catch(e){}
 }
 const has=id=>!!save.tree[id];
+
+/* ============ v4.12: HANGAR — aspecto equipado ============ */
+function getSkin(){
+  const eq=(save.skins&&save.skins.eq)||'menta';
+  return SKINS.find(s=>s.id===eq)||SKINS[0];
+}
 
 /* ============ PILOTO Y RANKING ============ */
 function getPilot(){

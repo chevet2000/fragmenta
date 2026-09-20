@@ -50,6 +50,7 @@ function hitPlayer(pl,d){
   }
   if(pl.stone)d=Math.max(1,d-1);
   pl.hp-=d;pl.invul=1.1;run.combo=0;
+  run.comboN=0; /* v4.12: recibir daño corta el combo de bajas */
   run.stTaken+=d;
   if(pl.venge)pl.vengeT=4;
   SFX.hurt();vib(70);shake=Math.min(16,shake+8);redFlash();
@@ -168,7 +169,7 @@ function updAbilities(pl,dt){
     while(pl.intAcc>=1){
       pl.intAcc-=1;
       if(pl.slot===1&&net.mode==='host')net.walletG+=1;
-      else{save.gold+=1;run.goldRun+=1;}
+      else{save.gold+=1;run.goldRun+=1;save.totGold=(save.totGold||0)+1;} /* v4.12: estadística */
       missionTick('gold',1);
     }
   }

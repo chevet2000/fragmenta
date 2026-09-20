@@ -27,6 +27,16 @@ function refreshHUD(){
     }).join('');
     bb.title=tbs.map(t=>{const p=TEMP_POOL.find(x=>x.id===t.id);return p?p.name:'';}).join(' · ');
   }else{bb.classList.add('hidden');bb.innerHTML='';}
+  /* v4.12: contador de COMBO de bajas (se desvanece en su último segundo) */
+  const ct=$('#comboTag');
+  if(ct){
+    if(runActive&&state==='play'&&run.comboN>=3){
+      ct.classList.remove('hidden');
+      ct.textContent='COMBO ×'+run.comboN;
+      ct.style.opacity=run.comboT<1?String(.3+.7*Math.max(0,run.comboT)):'1';
+      ct.style.color=run.comboN>=50?'#FF6B6B':(run.comboN>=25?'#FF7EB6':'#FFD166');
+    }else ct.classList.add('hidden');
+  }
   const alive=amClient()?cEnemies.size+(boss?1:0):enemies.length+(boss?1:0);
   const pend=amClient()?0:wave.pending+wave.pool.length;
   const killed=Math.max(0,wave.total-pend-alive);
