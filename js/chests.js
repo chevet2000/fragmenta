@@ -17,8 +17,9 @@ function walletGems(slot,v){
   save.gems+=v;save.totGems=(save.totGems||0)+v;
 }
 function grantGold(slot,v){
-  walletGold(slot,v);
-  run.goldRun+=v;
+  const gv=Math.max(1,Math.round(v*curseGoldMul())); /* v4.17: MISERIA reduce el oro */
+  walletGold(slot,gv);
+  run.goldRun+=gv;
 }
 function grantGems(slot,v){
   walletGems(slot,v);

@@ -16,7 +16,9 @@ function spawnEnemy(tk,elvl,o){
     camp:o.camp||null,CD:null,campT:2.2,beam:null,
     frozen:0,burn:null,shockT:0,
     /* v4.10: ORO POR PARTES — presupuesto total fijado al aparecer */
-    goldTotal:0,goldDropped:0,goldMark:.8};
+    goldTotal:0,goldDropped:0,goldMark:.8,
+    /* v4.17: resucitación — revT (temporizador del mago) y revived (marca) */
+    revT:0,revived:false};
   /* v4.16: el MAGO tarda un poco en dar su primera invocación (respiro inicial) */
   if(tk==='mago')e.sumT=rand(4,7);
   if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
@@ -184,6 +186,27 @@ function mageSummon(e){
   hostRing(e.x,e.y,64,'#B388FF');
   floater(e.x,e.y-e.r-12,'¡INVOCA!','#B388FF',12);
   SFX.warp();
+}
+/* v4.17: RESUCITAR — el mago de nivel alto (nv 128+) trae de vuelta al último
+   esbirro caído cerca de él, con el 55% de su vida. Nunca resucita magos,
+   élites ni campistas (anti-cascada, igual que la invocación). */
+function mageRevive(e){
+  if(!e.memo)e.memo=[];
+  const now=time;
+  e.memo=e.memo.filter(m=>now-m.t<18);
+  if(!e.memo.length||enemies.length>=24)return;
+  const m=e.memo.pop();
+  const elvl=clamp(m.elvl,minLvlOf(run.level),maxLvlOf(run.level));
+  const c=spawnEnemy(m.tk,elvl,{after:'roam',delay:.2});
+  c.sx=e.x+rand(-18,18);c.sy=e.y+rand(6,16);c.x=c.sx;c.y=c.sy;
+  c.cx=e.x+rand(-80,80);c.cy=e.y+rand(20,70);
+  c.fx=clamp(e.x+rand(-120,120),30,W-30);c.fy=rand(80,H*.5);
+  c.hp=Math.max(1,Math.round(c.maxhp*.55)); /* 55% de su vida MÁXIMA */
+  c.revived=true;
+  rings.push({x:c.sx,y:c.sy,r:6,R:60,t:0,life:.5,color:'#B388FF'});
+  hostRing(c.sx,c.sy,60,'#B388FF');
+  floater(c.sx,c.sy-c.r-10,'¡RESUCITA!','#B388FF',12);
+  tone(240,540,.3,'sine',.05);
 }
 
 /* ============ ELEMENTOS ============ */

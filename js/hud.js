@@ -22,11 +22,21 @@ function refreshHUD(){
   if(tbs.length){
     bb.classList.remove('hidden');
     bb.innerHTML=tbs.map(tb=>{
-      const tp=TEMP_POOL.find(t=>t.id===tb.id);
-      return '<span class="bicon">'+(TB_ICON[tb.id]||'✦')+'<i>'+tb.waves+'</i></span>';
+      const sea=tempBuffSealed(tb.id); /* v4.17: BLOQUEO sella el poder */
+      return '<span class="bicon'+(sea?' sealed':'')+'">'+(TB_ICON[tb.id]||'✦')+'<i>'+(sea?'✖':tb.waves)+'</i></span>';
     }).join('');
     bb.title=tbs.map(t=>{const p=TEMP_POOL.find(x=>x.id===t.id);return p?p.name:'';}).join(' · ');
   }else{bb.classList.add('hidden');bb.innerHTML='';}
+  /* v4.17: maldiciones activas del HECHICERO (◈ = mientras él viva · Nol = oleadas) */
+  const cb=$('#curseBar');
+  if(cb){
+    const csl=(run.curses&&runActive)?run.curses:[];
+    if(csl.length){
+      cb.classList.remove('hidden');
+      cb.innerHTML=csl.map(c=>'<span class="bicon curse">'+(CURSE_ICON[c.id]||'✖')+'<i>'+(c.alive?'◈':c.waves+'ol')+'</i></span>').join('');
+      cb.title='MALDICIONES: '+csl.map(c=>CURSES[c.id].name).join(' · ');
+    }else{cb.classList.add('hidden');cb.innerHTML='';}
+  }
   /* v4.12: contador de COMBO de bajas (se desvanece en su último segundo) */
   const ct=$('#comboTag');
   if(ct){

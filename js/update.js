@@ -48,7 +48,7 @@ async function checkUpdate(manual){
    saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
 function integrityCheck(){
   try{
-    const need=['btnWipe','buffBar','btnCheckUpd'];
+    const need=['btnWipe','buffBar','curseBar','btnCheckUpd'];
     const dv=document.documentElement.getAttribute('data-v');
     const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
     if(ok)return true;

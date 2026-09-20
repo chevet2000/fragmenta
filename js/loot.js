@@ -82,6 +82,22 @@ function killEnemy(e,bySlot){
     save.totMage=(save.totMage||0)+1;
     floater(e.x,e.y-36,'¡MAGO CAÍDO!','#B388FF',13);
   }
+  /* v4.17: esbirros resucitados cuentan para EXORCISTA; el cadáver reciente
+     alimenta la memoria de resucitación del HECHICERO y de los magos altos */
+  if(e.revived){
+    save.totRevKills=(save.totRevKills||0)+1;
+    floater(e.x,e.y-30,'RESUCITADO DESTRUIDO','#D6BCFF',11);
+  }
+  if(!e.elite&&!e.camp&&!e.T.mage){
+    if(boss&&boss.kind==='HECHICERO'){
+      (boss.memo=boss.memo||[]).push({tk:e.tk,elvl:e.elvl,t:time});
+      if(boss.memo.length>10)boss.memo.shift();
+    }
+    for(const mg of enemies)if(!mg.dead&&mg!==e&&mg.T.mage&&mg.elvl>=128&&Math.hypot(mg.x-e.x,mg.y-e.y)<300){
+      (mg.memo=mg.memo||[]).push({tk:e.tk,elvl:e.elvl,t:time});
+      if(mg.memo.length>6)mg.memo.shift();
+    }
+  }
   checkAch();
 }
 function doSplit(e){
@@ -168,6 +184,7 @@ function damageBoss(d,crit,bySlot){
 }
 function killBoss(){
   const b=boss;boss=null;
+  if(b.kind==='HECHICERO')expireCurses(); /* v4.17: sus maldiciones "mientras él viva" se disipan */
   run.kills++;save.totKills++;
   if(!run.bossDmgTaken)run.stPerfect++;
   burst(b.x,b.y,b.D.color,34,240);burst(b.x,b.y,'#F2EFE6',20,160);

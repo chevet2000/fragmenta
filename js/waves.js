@@ -111,6 +111,7 @@ function makeElite(L,delay){
   e.fx=rand(60,W-60);e.fy=rand(90,H*.4);
   e.x=e.sx;e.y=e.sy;
   floater(e.sx,90,'¡ÉLITE!','#B388FF',14);
+  return e; /* v4.17: el HECHICERO lo reposiciona al invocarlo */
 }
 function buildWave(L){
   wave={type:'',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:1,side:1,pool:[]};

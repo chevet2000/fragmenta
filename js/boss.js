@@ -20,8 +20,8 @@ const BOSS_DEFS={
  /* v4.16: EL HECHICERO — el guardián mago. Cura a su legión en área y la
     invoca sin parar: mata a los esbirros rápido o la pelea se hace eterna. */
  HECHICERO:{name:'HECHICERO',shape:'mage',color:'#B388FF',
-   mech:'Pulsos arcanos que curan a su legión + esbirros invocados',
-   tip:'Quema a los esbirros y golpéalo entre pulso y pulso; cada fase cura a más aliados a la vez.',
+   mech:'Pulsos arcanos que curan a su legión, legión invocada, resucita esbirros y lanza MALDICIONES',
+   tip:'Mátalo pronto: al caer se disipan sus maldiciones (salvo las de varias oleadas). Caza a los resucitados.',
    hpM:1.0,speed:.5,r:46},
  CUATERNIO:{name:'CUATERNIO',shape:'square',color:'#7DFF9E',
    mech:'4-6 escudos hexagonales giran bloqueando tus balas',
@@ -63,8 +63,9 @@ function spawnBoss(L){
     sprT:3,sprT2:0,sum2T:6,ring5T:2.6,
     fanT:2.8,aimT:3.4,sumT:5,ringT:3,
     laT:3.2,clT:4,swT:2.5,swA:0,swDir:0,swT2:0,gnT:3,gxA:0,gyA:0,gnLife:0,shT:4,
-    /* v4.16: HECHICERO — timers de pulso arcano (hzT) y de invocación (hsumT) */
-    hzT:3,hsumT:4,
+    /* v4.16: HECHICERO — timers de pulso arcano (hzT) y de invocación (hsumT)
+       v4.17: curseT (maldiciones) · revT (resucitar) · eliteT/eliteDone (élite) */
+    hzT:3,hsumT:4,curseT:6,revT:8,eliteT:14,eliteDone:0,memo:[],
     lemTp:0,gatherT:0,gather:null,gatherPhase:0,gatherPhaseT:0,
     clones:[],lasers:[],shields:[]};
   boss.maxPh=D.easy?1:(key==='SEÑOR'?Math.min(5,4+boss.tier):3+boss.tier); /* v4.14: base 3 · 4ª OL30+ · 5ª OL60+ (SEÑOR +1) */
@@ -335,6 +336,28 @@ function updBoss(dt){
         SFX.warp();
       }
     }
+    /* v4.17: MALDICIONES — lanza una al azar; cada una afecta SOLO una cosa */
+    b.curseT-=dt;
+    if(b.curseT<=0){b.curseT=(b.ph>=3?9:12)*pM;castCurse(b);}
+    /* v4.17: RESUCITA hasta 2 esbirros caídos hace menos de 18 s (60% de vida) */
+    b.revT-=dt;
+    if(b.revT<=0){b.revT=9*pM;bossRevive(b);}
+    /* v4.17: INVOCAR UN ÉLITE — desde la fase 2, máx 2 por combate y solo
+       cuando no quede otro élite vivo en pantalla */
+    b.eliteT-=dt;
+    if(b.eliteT<=0){
+      if(b.ph>=2&&b.eliteDone<2&&!enemies.some(q=>q.elite&&!q.dead)&&enemies.length<28){
+        b.eliteDone++;b.eliteT=22*pM;
+        const el=makeElite(run.level,.4);
+        if(el){
+          el.sx=b.x+rand(-30,30);el.sy=b.y+10;el.x=el.sx;el.y=el.sy;
+          el.cx=b.x+rand(-90,90);el.cy=b.y+60;
+          el.fx=clamp(b.x+rand(-150,150),30,W-30);el.fy=rand(90,H*.45);
+        }
+        floater(b.x,b.y-b.r-16,'¡INVOCA UN ÉLITE!','#B388FF',13);
+        SFX.warp();vib(40);
+      }else b.eliteT=5;
+    }
   }
   if(isSenor){
     b.sumT-=dt;
@@ -573,6 +596,9 @@ function passive(e,dt){
   if(e.T.mage){
     e.healT-=dt;if(e.healT<=0){e.healT=4.2;mageHeal(e);}
     e.sumT-=dt;if(e.sumT<=0){e.sumT=8;mageSummon(e);}
+    /* v4.17: desde nv 128 el mago RESUCITA a un esbirro caído cerca de él */
+    if(e.elvl>=128){e.revT+=dt;
+      if(e.revT>=13){e.revT=-rand(0,4);mageRevive(e);}}
   }
 }
 function updEnemies(dt){
@@ -778,6 +804,28 @@ function mageBossHeal(b){
     floater(b.x,b.y-b.r-12,'+','#7DFF9E',13);
   }
 }
+/* v4.17: el HECHICERO resucita hasta 2 esbirros de los caídos hace menos de
+   18 s (al 60% de vida, con bruma lila). Nunca trae de vuelta magos,
+   élites ni campistas: su legión sigue siendo de esbirros. */
+function bossRevive(b){
+  const now=time;
+  b.memo=(b.memo||[]).filter(m=>now-m.t<18);
+  if(!b.memo.length)return;
+  const k=Math.min(2,b.memo.length,Math.max(0,26-enemies.length));
+  let n=0;
+  for(let i=0;i<k;i++){
+    const m=b.memo.pop();
+    const elvl=clamp(m.elvl,minLvlOf(run.level),maxLvlOf(run.level));
+    const c=spawnEnemy(m.tk,elvl,{after:'roam',delay:i*.2});
+    c.sx=b.x+rand(-30,30);c.sy=b.y+30;c.x=c.sx;c.y=c.sy;
+    c.cx=b.x+rand(-90,90);c.cy=b.y+80;
+    c.fx=clamp(b.x+rand(-160,160),30,W-30);c.fy=rand(90,H*.45);
+    c.hp=Math.max(1,Math.round(c.maxhp*.6)); /* 60% de su vida MÁXIMA (la max se conserva) */
+    c.revived=true;n++;
+    rings.push({x:c.sx,y:c.sy,r:6,R:66,t:0,life:.5,color:'#B388FF'});
+  }
+  if(n){floater(b.x,b.y-b.r-16,'¡RESUCITA!','#B388FF',13);tone(240,540,.3,'sine',.05);}
+}
 function updCollisions(){
   for(const e of enemies){
     if(e.dead)continue;
@@ -808,9 +856,10 @@ function updPickups(dt){
       /* v4.15: el botín va a la billetera del piloto que lo recoge (slot>0 = cliente) */
       const remote=pl.slot>0&&net.mode==='host';
       if(p.t==='gold'){
-        if(remote)walletGold(pl.slot,p.val);else save.gold+=p.val;
-        run.goldRun+=p.val;save.totGold=(save.totGold||0)+p.val;
-        missionTick('gold',p.val);SFX.coin();
+        const gv=Math.max(1,Math.round(p.val*curseGoldMul())); /* v4.17: MISERIA */
+        if(remote)walletGold(pl.slot,gv);else save.gold+=gv;
+        run.goldRun+=gv;save.totGold=(save.totGold||0)+gv;
+        missionTick('gold',gv);SFX.coin();
       }else if(p.t==='gem'){
         if(remote)walletGems(pl.slot,1);else save.gems++;
         run.gemsRun++;save.totGems=(save.totGems||0)+1;
@@ -820,7 +869,7 @@ function updPickups(dt){
       }else if(p.t==='minichest'){
         SFX.chest();
         if(R()<.6){
-          const v=Math.round((80+run.level*10)*players[0].goldMul);
+          const v=Math.max(1,Math.round((80+run.level*10)*players[0].goldMul*curseGoldMul())); /* v4.17: MISERIA */
           if(remote)walletGold(pl.slot,v);else save.gold+=v;
           run.goldRun+=v;save.totGold=(save.totGold||0)+v;
           banner('COFRE PEQUEÑO','+'+v+' DE ORO');

@@ -222,6 +222,14 @@ function drawEnemy(e){
     }
     g.restore();g.globalAlpha=1;
   }
+  /* v4.17: marca de esbirro RESUCITADO — bruma lila que lo distingue */
+  if(e.revived){
+    g.save();g.translate(e.x,e.y);
+    g.globalAlpha=.28+Math.sin(time*3+e.wob)*.1;
+    g.strokeStyle='#D6BCFF';g.lineWidth=1.5;g.setLineDash([4,6]);
+    g.beginPath();g.arc(0,0,e.r+5,0,TAU);g.stroke();
+    g.setLineDash([]);g.restore();g.globalAlpha=1;
+  }
   if(e.frozen>0){
     g.save();g.translate(e.x,e.y);
     g.globalAlpha=.25;g.strokeStyle='#B0E8FF';g.lineWidth=2;

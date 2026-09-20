@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.16';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.17';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},achClaimed:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
@@ -8,7 +8,9 @@ function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:
   daily:{seed:null,best:0},dailyBest:0,dailyM:null,skins:{owned:['menta'],eq:null},
   bestCombo:0,totGold:0,totGems:0,seen:{},
   /* v4.14: fantasma del ranking, devorados por el agujero negro y biomas visitados */
-  ghost:null,totDevour:0,biomesSeen:{},ghostBeat:false};}
+  ghost:null,totDevour:0,biomesSeen:{},ghostBeat:false,
+  /* v4.17: maldiciones sufridas y resucitados destruidos */
+  totCurses:0,totRevKills:0};}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));

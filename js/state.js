@@ -7,7 +7,9 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   comboN:0,comboT:0,
   stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false,
   /* v4.14: FANTASMA del ranking — trazas de la mejor partida frenética */
-  ghostTrail:[],ghostAcc:0,ghostPassed:false,ghostRef:null};
+  ghostTrail:[],ghostAcc:0,ghostPassed:false,ghostRef:null,
+  /* v4.17: LAS MALDICIONES del HECHICERO — cada una afecta solo una cosa */
+  curses:[]};
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let dailyMode=false; /* v4.12: reto diario */
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[],ultBeams=[]; /* v4.13: ultBeams = rayos del Aniquilador */

@@ -404,3 +404,7 @@ button{font-family:inherit}
   background:rgba(255,209,102,.08);border:1px solid var(--amber);color:var(--amber);cursor:pointer;flex:none}
 .arow.pend{border-color:rgba(255,209,102,.55)}
 .arow.pend .amk{background:var(--amber);border-color:var(--amber);color:#0A0C10}
+
+/* ===== v4.17: maldiciones del HECHICERO ===== */
+.buffbar .bicon.curse{border-color:#B388FF;color:#D6BCFF;background:rgba(179,136,255,.16);text-shadow:0 0 6px rgba(179,136,255,.55)}
+.buffbar .bicon.sealed{opacity:.38;filter:saturate(.25)}

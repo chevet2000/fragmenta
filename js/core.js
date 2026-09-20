@@ -14,7 +14,9 @@ function recompute(){
       if(rb.nova)b.nova=rb.nova;
     }
     for(const id of (run.buffs[slot]||[])){const c=CARDS.find(c=>c.id===id);if(c)c.f(b);}
-    for(const tb of (run.tempBuffs||[])){const tc=TEMP_POOL.find(t=>t.id===tb.id);if(tc)tc.f(b);}
+    for(const tb of (run.tempBuffs||[])){
+      if(tempBuffSealed(tb.id))continue; /* v4.17: BLOQUEO sella el poder */
+      const tc=TEMP_POOL.find(t=>t.id===tb.id);if(tc)tc.f(b);}
     const RR=id=>run.relics.includes(id);
     if(RR('nucleo')){b.dmg+=2;b.maxHp-=1;}
     if(RR('hierro')){b.maxHp+=3;}
@@ -91,7 +93,7 @@ const XP_MUL=.6;
 let expFrac=0;
 const waveXp=()=>clamp(1+Math.floor(run.level/9),1,5);
 function gainExp(n){
-  expFrac+=n*XP_MUL;
+  expFrac+=n*XP_MUL*curseExpMul(); /* v4.17: LETARGO reduce la exp a la mitad */
   const whole=Math.floor(expFrac);
   if(whole>0)expFrac-=whole;
   run.exp+=whole;

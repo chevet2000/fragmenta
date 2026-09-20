@@ -305,6 +305,8 @@ function openStats(){
     ['FANTASMA (MEJOR CARRERA)',save.ghost&&save.ghost.t?(fmtT(save.ghost.t)+' · '+save.ghost.k+' bajas'):'—'],
     ['DEVORADOS · AGUJERO NEGRO',save.totDevour||0],
     ['BIOMAS VISITADOS',Object.keys(save.biomesSeen||{}).length+' / '+BIOMES.length],
+    ['MALDICIONES SUFRIDAS',save.totCurses||0],
+    ['RESUCITADOS DESTRUIDOS',save.totRevKills||0],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -367,6 +369,7 @@ function resetRunCommon(){
   run.frenzyEliteT=rand(20,35); /* v4.13: élites al azar */
   /* v4.14: fantasma desactivado por defecto (startFrenzy lo activa si hay traza) */
   run.ghostTrail=[];run.ghostAcc=0;run.ghostPassed=false;run.ghostRef=null;run.ghostLead=0;
+  run.curses=[]; /* v4.17: sin maldiciones al empezar */
   bots=[]; /* v4.9: sin aliados al empezar */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
@@ -524,6 +527,7 @@ function startRunClient(d){
   closeEmoPanel();
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
   run.buffs=players.map(()=>[]);
+  run.curses=[]; /* v4.17 */
   recompute();
   for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
   players[0].x=W*.42;players[0].y=H-130;
@@ -585,6 +589,7 @@ function nextWave(){
   }
   formY=0;formT=0;
   if(net.mode!=='client')updTempBuffs();
+  if(net.mode!=='client')curseTickWave(); /* v4.17: las de varias oleadas cuentan atrás */
   buildWave(L);
   waveState='play';clearTimer=0;
 }

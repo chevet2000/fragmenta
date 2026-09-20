@@ -45,6 +45,9 @@ const ACHS=[
  /* v4.16: el mago y su guardián */
  {id:'mg15',name:'ANTIMAGIA',          desc:'Elimina 15 MAGOS',                     rw:4, ck:()=>(save.totMage||0)>=15},
  {id:'hec', name:'ROMPEHECHIZOS',      desc:'Derrota 5 HECHICERO',                  rw:4, ck:()=>(save.bossKills.HECHICERO||0)>=5},
+/* v4.17: las maldiciones y los resucitados */
+{id:'mld', name:'MALDITO',            desc:'Sufre 15 maldiciones del HECHICERO',   rw:4, ck:()=>(save.totCurses||0)>=15},
+{id:'exo', name:'EXORCISTA',          desc:'Destruye 10 esbirros RESUCITADOS',     rw:4, ck:()=>(save.totRevKills||0)>=10},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

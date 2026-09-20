@@ -60,7 +60,7 @@ const BESTIARY={
  magnet:{name:'IMÁN',      desc:'Atrae el oro del suelo hacia sí mismo (radio 160) y suelta el doble de botín. Cázalo rápido o te vaciará la pantalla.'},
  kami:  {name:'KAMIKAZE',  desc:'Se lanza contra ti y explota dañando todo en radio 70. Media vida, máxima agresividad.'},
  /* v4.16: el MAGO — sanador arcano que escala con su nivel */
- mago:  {name:'MAGO',      desc:'No baja nunca: flota junto a su banda y lanza PULSOS ARCANOS que curan a los aliados heridos. Cuanto MÁS NIVEL tiene, MÁS aliados cura a la vez (1 → hasta 6) y desde nivel alto INVOCA esbirros. Prioridad objetivo: mátalo primero.'},
+ mago:  {name:'MAGO',      desc:'No baja nunca: flota junto a su banda y lanza PULSOS ARCANOS que curan a los aliados heridos. Cuanto MÁS NIVEL tiene, MÁS aliados cura a la vez (1 → hasta 6), desde el nivel 128 INVOCA esbirros y también RESUCITA a los caídos a su alrededor. Prioridad objetivo: mátalo primero.'},
 };
 
 /* ============ niveles de enemigo ============ */

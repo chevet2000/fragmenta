@@ -11,7 +11,7 @@ function sendSnap(){
       Math.round(e.x),Math.round(e.y),Math.round(e.r*10),
       e.elite?1:0, e.snake==null?null:e.snake, e.snIdx,
       e.camp?Object.keys(CAMP_DEFS).indexOf(e.camp)+1:0,
-      (e.frozen>0?1:0)+(e.burn?2:0)];
+      (e.frozen>0?1:0)+(e.burn?2:0)+(e.revived?4:0)];
     return arr;
   });
   const bs=boss?[Math.round(boss.x),Math.round(boss.y),Math.max(0,Math.ceil(boss.hp)),boss.ph,

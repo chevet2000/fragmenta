@@ -42,7 +42,8 @@ window.addEventListener('pointermove',e=>{
     tone(900,300,.1,'sine',.04);
     t.ax=e.clientX;t.ay=e.clientY;t.sx=pl.x;t.sy=pl.y;
   }
-  const target=clampShip(pl,t.sx+(e.clientX-t.ax)*DRAG_GAIN,t.sy+(e.clientY-t.ay)*DRAG_GAIN);
+  const DG=DRAG_GAIN*curseMoveMul(); /* v4.17: TORPEZA — los mandos pesan */
+  const target=clampShip(pl,t.sx+(e.clientX-t.ax)*DG,t.sy+(e.clientY-t.ay)*DG);
   pl.touch={active:true,tx:target.x,ty:target.y};
   t.px=e.clientX;t.py=e.clientY;t.lastMs=now;
   t.x=e.clientX;t.y=e.clientY;
@@ -169,6 +170,9 @@ let wipeArm=false,wipeT=null;
   /* v4.12: también se reinician diario, misiones, hangar, combos, stats y bestiario */
   save.daily={seed:null,best:0};save.dailyBest=0;save.dailyM=null;
   save.skins={owned:['menta'],eq:null};save.bestCombo=0;save.totGold=0;save.totGems=0;save.seen={};
+  /* v4.14–4.17: contadores y trazas nuevas también se reinician */
+  save.totDevour=0;save.biomesSeen={};save.ghost=null;save.ghostBeat=false;save.totPhase5=0;save.totMage=0;
+  save.totCurses=0;save.totRevKills=0;
   save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}

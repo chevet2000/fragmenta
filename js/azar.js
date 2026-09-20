@@ -21,6 +21,11 @@ function syncTempMsg(){
   if(net.mode==='host')sendMsg({t:'ev',k:'temp',l:run.tempBuffs.map(t=>({id:t.id,waves:t.waves}))});
 }
 function grantTempBuff(slot){
+  /* v4.17: BLOQUEO — el poder del cofre se cambia por oro */
+  if(curseActive('bloqueo')){
+    if(slot!=null)grantGold(slot,120);
+    return '+120 DE ORO (poderes bloqueados por la MALDICIÓN)';
+  }
   if(!run.tempBuffs)run.tempBuffs=[];
   const act=run.tempBuffs.map(t=>t.id);
   const pool=TEMP_POOL.filter(t=>!act.includes(t.id));
@@ -40,7 +45,7 @@ function updTempBuffs(){
   const had=run.tempBuffs.length;
   run.tempBuffs=run.tempBuffs.filter(tb=>tb.waves>0);
   if(run.tempBuffs.length<had){recompute();banner('PODER TEMPORAL','Un poder ha expirado');}
-  const ch=azarChance();
+  const ch=curseActive('bloqueo')?0:azarChance(); /* v4.17: BLOQUEO no deja sorteos nuevos */
   if(ch>0&&Math.random()<ch){
     const act=run.tempBuffs.map(t=>t.id);
     const pool=TEMP_POOL.filter(t=>!act.includes(t.id));

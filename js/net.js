@@ -375,6 +375,7 @@ function clientEvent(d){
     return;
   }
   if(k==='temp'){ run.tempBuffs=d.l||[]; return; }
+  if(k==='curs'){ applyCurses(d.l); return; } /* v4.17: maldiciones del HECHICERO */
   if(k==='chestw'){ banner('COFRE','El anfitrión está abriendo…'); return; }
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
   if(k==='over'){
@@ -415,13 +416,14 @@ function applySnap(d){
         snake:ed[8]==null?null:ed[8],snIdx:ed[9]||0,wob:(id*2.39996)%TAU,
         frozen:0,burn:null,shockT:0,camp:null,CD:null};
       if(ed[10])e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;
-      if(ed[11]){e.frozen=(ed[11]&1)?1:0;e.burn=(ed[11]&2)?{dps:0,t:1}:null;}
+      if(ed[11]){e.frozen=(ed[11]&1)?1:0;e.burn=(ed[11]&2)?{dps:0,t:1}:null;e.revived=!!(ed[11]&4);}
+      else e.revived=false; /* v4.17 */
       cEnemies.set(id,e);
     }else{
       e.tx=ed[4];e.ty=ed[5];e.hp=ed[3];e.elvl=ed[2];e.r=ed[6]/10;e.elite=!!ed[7];
       e.snake=ed[8]==null?null:ed[8];e.snIdx=ed[9]||0;
       if(ed[10])e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;
-      if(ed[11]!==undefined){e.frozen=(ed[11]&1)?1:0;if(ed[11]&2&&!e.burn)e.burn={dps:0,t:1};}
+      if(ed[11]!==undefined){e.frozen=(ed[11]&1)?1:0;if(ed[11]&2&&!e.burn)e.burn={dps:0,t:1};e.revived=!!(ed[11]&4);}
     }
   }
   for(const [id,e] of cEnemies){
