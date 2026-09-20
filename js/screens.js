@@ -85,8 +85,8 @@ function renderRankList(){
 }
  /* v4.8: eliminado añadir/copiar registros por código — el ranking se
     sincroniza automáticamente al conectar dos jugadores en el lobby co-op */
- $('#btnRank').addEventListener('click',openRank);
- $('#btnRankBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnRank', 'click',openRank);
+ bindEl('#btnRankBack', 'click',()=>{refreshMenu();showScr('menu');});
 function openGuide(){
   const box=$('#guideList');box.innerHTML='';
   for(const key of BOSS_ORDER){

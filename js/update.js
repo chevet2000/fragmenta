@@ -42,9 +42,33 @@ async function checkUpdate(manual){
     return false;
   }
 }
-$('#btnCheckUpd').addEventListener('click',()=>{audio();checkUpdate(true);});
-$('#btnUpdate').addEventListener('click',()=>{updHardReload();});
+/* v4.8.1: autodiagnóstico de archivos desfasados.
+   Si el HTML servido por la caché no coincide con el JS en ejecución
+   (falta data-v o botones de esta versión), se recarga una sola vez
+   saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
+function integrityCheck(){
+  try{
+    const need=['btnWipe','buffBar','btnCheckUpd'];
+    const dv=document.documentElement.getAttribute('data-v');
+    const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
+    if(ok)return true;
+    let tried=false;
+    try{tried=!!sessionStorage.getItem('frag_ic');}catch(e){}
+    const hadRv=/[?&]rv=/.test(location.search);
+    if(!tried&&!hadRv){
+      try{sessionStorage.setItem('frag_ic','1');}catch(e){}
+      updHardReload();
+      return false;
+    }
+    const eb=document.getElementById('errbox');
+    if(eb){eb.classList.remove('hidden');
+      eb.textContent='ARCHIVOS DESACTUALIZADOS: borra los datos del navegador o vuelve a subir el repo completo';}
+    return false;
+  }catch(e){return true;}
+}
+bindEl('#btnCheckUpd', 'click',()=>{audio();checkUpdate(true);});
+bindEl('#btnUpdate', 'click',()=>{updHardReload();});
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden&&state==='menu')checkUpdate(false);
 });
-checkUpdate(false);
+if(integrityCheck())checkUpdate(false);

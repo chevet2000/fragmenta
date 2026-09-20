@@ -118,9 +118,9 @@ function applyZoom(){
 function setZoom(z){treeZoom=clamp(Math.round(z*20)/20,.3,2.4);applyZoom();}
 function fitZoom(){setZoom(clamp((window.innerWidth-24)/TREE_W,.3,1));
   const svg=$('#treeSvg');if(svg&&svg.parentElement)svg.parentElement.scrollLeft=0;}
-$('#zIn').addEventListener('click',()=>setZoom(treeZoom+.15));
-$('#zOut').addEventListener('click',()=>setZoom(treeZoom-.15));
-$('#zFit').addEventListener('click',fitZoom);
+bindEl('#zIn', 'click',()=>setZoom(treeZoom+.15));
+bindEl('#zOut', 'click',()=>setZoom(treeZoom-.15));
+bindEl('#zFit', 'click',fitZoom);
 (function(){
   const tw=$('.tree-wrap');if(!tw)return;
   const zp=new Map();let pinch=null;

@@ -7,6 +7,10 @@ window.addEventListener('error',function(ev){
 
 /* ============ utilidades ============ */
 const $=s=>document.querySelector(s);
+/* v4.8.1: enlace seguro de eventos. Si el elemento no existe (HTML/JS desfasados
+   mezclados por la caché del navegador), se ignora en vez de lanzar
+   "Cannot read properties of null (reading 'addEventListener')". */
+const bindEl=(sel,ev,fn,opt)=>{try{const el=document.querySelector(sel);if(el)el.addEventListener(ev,fn,opt);}catch(e){}};
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));

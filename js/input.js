@@ -61,42 +61,42 @@ window.addEventListener('pointercancel',endTouch);
 document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},{passive:false});
 
 /* ---- LISTENERS ---- */
- $('#btnNova').addEventListener('pointerdown',e=>{e.preventDefault();audio();fireNovaLocal();});
- $('#btnEmo').addEventListener('click',()=>{audio();$('#emoPanel').classList.toggle('open');});
- $('#btnEmoClose').addEventListener('click',closeEmoPanel);
+ bindEl('#btnNova', 'pointerdown',e=>{e.preventDefault();audio();fireNovaLocal();});
+ bindEl('#btnEmo', 'click',()=>{audio();$('#emoPanel').classList.toggle('open');});
+ bindEl('#btnEmoClose', 'click',closeEmoPanel);
  $('#faceRow').querySelectorAll('button').forEach(b=>{
   b.addEventListener('click',()=>{audio();sendEmo(b.dataset.e);closeEmoPanel();});
 });
  $('#callRow').querySelectorAll('button').forEach(b=>{
   b.addEventListener('click',()=>{audio();sendCall(b.dataset.k);closeEmoPanel();});
 });
- $('#btnPause').addEventListener('click',()=>{if(state==='play')pauseGame();});
- $('#btnPlay').addEventListener('click',()=>{destroyNet();startRun();});
- $('#btnWeekly').addEventListener('click',()=>{destroyNet();startWeekly();});
- $('#btnRetry').addEventListener('click',()=>{
+ bindEl('#btnPause', 'click',()=>{if(state==='play')pauseGame();});
+ bindEl('#btnPlay', 'click',()=>{destroyNet();startRun();});
+ bindEl('#btnWeekly', 'click',()=>{destroyNet();startWeekly();});
+ bindEl('#btnRetry', 'click',()=>{
   if(net.mode){netEndLocal(null);return;}
   if(weeklyMode)startWeekly();else startRun();
 });
- $('#btnResume').addEventListener('click',()=>{state='play';showScr(null);});
- $('#btnQuit').addEventListener('click',()=>{
+ bindEl('#btnResume', 'click',()=>{state='play';showScr(null);});
+ bindEl('#btnQuit', 'click',()=>{
   if(net.mode==='host'&&net.connected)sendMsg({t:'ev',k:'end'});
   if(net.mode==='client')sendMsg({t:'bye'});
   persist();goMenu();
 });
- $('#btnMenu').addEventListener('click',()=>{persist();goMenu();});
- $('#btnArsenal').addEventListener('click',()=>openShop('menu'));
- $('#btnPShop').addEventListener('click',()=>openShop('pause'));
- $('#btnOShop').addEventListener('click',()=>openShop('over'));
- $('#btnPbShop').addEventListener('click',()=>openShop('post'));
- $('#btnCloseShop').addEventListener('click',()=>{ showScr(shopReturn); });
- $('#btnBuy').addEventListener('click',buyNode);
- $('#btnGuide').addEventListener('click',openGuide);
- $('#btnGuideBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
- $('#btnAch').addEventListener('click',openAch);
- $('#btnAchBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnMenu', 'click',()=>{persist();goMenu();});
+ bindEl('#btnArsenal', 'click',()=>openShop('menu'));
+ bindEl('#btnPShop', 'click',()=>openShop('pause'));
+ bindEl('#btnOShop', 'click',()=>openShop('over'));
+ bindEl('#btnPbShop', 'click',()=>openShop('post'));
+ bindEl('#btnCloseShop', 'click',()=>{ showScr(shopReturn); });
+ bindEl('#btnBuy', 'click',buyNode);
+ bindEl('#btnGuide', 'click',openGuide);
+ bindEl('#btnGuideBack', 'click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#btnAch', 'click',openAch);
+ bindEl('#btnAchBack', 'click',()=>{refreshMenu();showScr('menu');});
 /* v4.8: BORRAR PARTIDA — reinicia el perfil local (doble toque de confirmación) */
 let wipeArm=false,wipeT=null;
- $('#btnWipe').addEventListener('click',()=>{
+ bindEl('#btnWipe', 'click',()=>{
   const b=$('#btnWipe');
   if(!wipeArm){
     wipeArm=true;b.textContent='¿BORRAR TODO? TOCA DE NUEVO';b.classList.add('danger');
@@ -117,14 +117,14 @@ let wipeArm=false,wipeT=null;
   SFX.hurt();vib(80);
   banner('PARTIDA BORRADA','Progreso local reiniciado por completo');
 });
- $('#btnInstall').addEventListener('click',async()=>{
+ bindEl('#btnInstall', 'click',async()=>{
   if(!deferredPrompt)return;
   deferredPrompt.prompt();
   try{await deferredPrompt.userChoice;}catch(e){}
   deferredPrompt=null;
   $('#btnInstall').classList.add('hidden');
 });
- $('#btnPbGo').addEventListener('click',()=>{
+ bindEl('#btnPbGo', 'click',()=>{
   if(state!=='postboss')return;
   if(net.mode==='client')return;
   if(net.mode==='host'&&players.length===2){
@@ -144,11 +144,11 @@ let wipeArm=false,wipeT=null;
   state='play';
   run.level++;nextWave();
 });
- $('#btnSound').addEventListener('click',()=>{muted=!muted;updSoundBtns();});
- $('#btnPSound').addEventListener('click',()=>{muted=!muted;updSoundBtns();});
- $('#btnPMus').addEventListener('click',()=>{save.mus=!save.mus;persist();updSoundBtns();});
- $('#btnFS').addEventListener('click',()=>{goFullscreen();});
- $('#btnAscend').addEventListener('click',()=>{
+ bindEl('#btnSound', 'click',()=>{muted=!muted;updSoundBtns();});
+ bindEl('#btnPSound', 'click',()=>{muted=!muted;updSoundBtns();});
+ bindEl('#btnPMus', 'click',()=>{save.mus=!save.mus;persist();updSoundBtns();});
+ bindEl('#btnFS', 'click',()=>{goFullscreen();});
+ bindEl('#btnAscend', 'click',()=>{
   if(!ascConfirm){ascConfirm=true;refreshMenu();setTimeout(()=>{ascConfirm=false;refreshMenu();},2500);return;}
   ascConfirm=false;
   save.prest++;save.tree={};save.gold=0;save.gems=0;save.best.lvl=0;save.bestShip=1;
@@ -158,7 +158,7 @@ let wipeArm=false,wipeT=null;
 document.querySelectorAll('#diffRow button').forEach(b=>{
   b.addEventListener('click',()=>{save.diff=b.dataset.d;persist();refreshMenu();});
 });
- $('#btnHost').addEventListener('click',()=>{
+ bindEl('#btnHost', 'click',()=>{
   audio();goFullscreen();
   net.lobbyDiff='normal';
   $('#lobbyDiffRow').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.d==='normal'));
@@ -170,28 +170,28 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
     $('#lobbyDiffRow').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
   });
 });
- $('#btnCopy').addEventListener('click',()=>{
+ bindEl('#btnCopy', 'click',()=>{
   const c=net.code;
   if(navigator.clipboard)navigator.clipboard.writeText(c).catch(()=>{});
   $('#lobbyStat').innerHTML='Código copiado: <b style="color:var(--amber)">'+c+'</b><br>Envíaselo a tu compañero.';
 });
- $('#btnLobbyArsenal').addEventListener('click',()=>openShop('lobby'));
- $('#btnLobbyCancel').addEventListener('click',()=>{destroyNet();goMenu();});
- $('#btnStartCoop').addEventListener('click',()=>{if(net.connected)startCoop();});
- $('#btnJoin').addEventListener('click',()=>{
+ bindEl('#btnLobbyArsenal', 'click',()=>openShop('lobby'));
+ bindEl('#btnLobbyCancel', 'click',()=>{destroyNet();goMenu();});
+ bindEl('#btnStartCoop', 'click',()=>{if(net.connected)startCoop();});
+ bindEl('#btnJoin', 'click',()=>{
   audio();
   $('#joinInput').value='';
   $('#joinStat').innerHTML='Pide el código de 5 letras a tu compañero.<br><span class="prof">USARÁS TU PERFIL ONLINE (separado del local)</span>';
   showScr('join');state='joinmenu';
 });
- $('#joinInput').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});
- $('#btnJoinGo').addEventListener('click',()=>{
+ bindEl('#joinInput', 'input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');});
+ bindEl('#btnJoinGo', 'click',()=>{
   const c=$('#joinInput').value.trim();
   if(c.length!==5){$('#joinStat').innerHTML='<span class="err">El código tiene 5 caracteres.</span>';return;}
   joinRoom(c);
 });
- $('#btnJoinCancel').addEventListener('click',()=>{destroyNet();goMenu();});
- $('#btnNwSolo').addEventListener('click',()=>{
+ bindEl('#btnJoinCancel', 'click',()=>{destroyNet();goMenu();});
+ bindEl('#btnNwSolo', 'click',()=>{
   if(net.mode==='host'&&runActive){
     sendMsg({t:'ev',k:'end'});
     destroyNet();
@@ -205,11 +205,11 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
     state='play';
   }
 });
- $('#btnNwCancel').addEventListener('click',()=>{
+ bindEl('#btnNwCancel', 'click',()=>{
   if(net.mode==='host'&&net.connected)sendMsg({t:'ev',k:'end'});
   netEndLocal(null);
 });
- $('#btnExp').addEventListener('click',()=>{
+ bindEl('#btnExp', 'click',()=>{
   const code=exportProfile();
   $('#profBox').classList.remove('hidden');
   $('#profIO').value=code;
@@ -218,7 +218,7 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
   $('#profMsg').textContent='Copia este código y pégalo en el otro dispositivo (IMPORTAR).';
   copyText(code,null);
 });
- $('#btnImp').addEventListener('click',()=>{
+ bindEl('#btnImp', 'click',()=>{
   $('#profBox').classList.remove('hidden');
   $('#profIO').value='';
   $('#profIO').readOnly=false;
@@ -226,7 +226,7 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
   $('#profMsg').textContent='Pega aquí el código del otro perfil y pulsa EJECUTAR.';
   $('#profBox').dataset.mode='imp';
 });
- $('#btnProfGo').addEventListener('click',()=>{
+ bindEl('#btnProfGo', 'click',()=>{
   const m=$('#profMsg');
   if($('#profBox').dataset.mode!=='imp'){
     m.className='err';m.textContent='Pulsa primero IMPORTAR PERFIL para pegar un código.';
