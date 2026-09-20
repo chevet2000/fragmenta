@@ -14,6 +14,17 @@ function refreshHUD(){
     :`OLEADA ${run.level}${tn?' · '+tn:''} · nv ${minLvlOf(run.level)}–${maxLvlOf(run.level)}`;
   $('#shipTxt').textContent='NV '+run.shipLv;
   $('#expFill').style.width=clamp(run.exp/shipNeed(run.shipLv)*100,0,100)+'%';
+  /* v4.8: barra de iconos de poderes temporales activos (❖ + oleadas restantes) */
+  const bb=$('#buffBar');
+  const tbs=run.tempBuffs||[];
+  if(tbs.length){
+    bb.classList.remove('hidden');
+    bb.innerHTML=tbs.map(tb=>{
+      const tp=TEMP_POOL.find(t=>t.id===tb.id);
+      return '<span class="bicon">'+(TB_ICON[tb.id]||'✦')+'<i>'+tb.waves+'</i></span>';
+    }).join('');
+    bb.title=tbs.map(t=>{const p=TEMP_POOL.find(x=>x.id===t.id);return p?p.name:'';}).join(' · ');
+  }else{bb.classList.add('hidden');bb.innerHTML='';}
   const alive=amClient()?cEnemies.size+(boss?1:0):enemies.length+(boss?1:0);
   const pend=amClient()?0:wave.pending+wave.pool.length;
   const killed=Math.max(0,wave.total-pend-alive);

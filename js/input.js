@@ -19,6 +19,8 @@ cv.addEventListener('pointerdown',e=>{
   activeTouches[e.pointerId]={slot,ax:e.clientX,ay:e.clientY,sx:pl.x,sy:pl.y,px:e.clientX,py:e.clientY,lastMs:performance.now()};
   const p=clampShip(pl,e.clientX,e.clientY-TOUCH_LEAD);
   pl.touch={active:true,tx:p.x,ty:p.y};
+  /* v4.8: el cliente anuncia su posición al instante (la nave remota no espera al primer movimiento) */
+  if(amClient())sendMsg({t:'inp',x:Math.round(pl.x),y:Math.round(pl.y)});
 });
 window.addEventListener('pointermove',e=>{
   if(state!=='play')return;
@@ -92,6 +94,29 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  $('#btnGuideBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
  $('#btnAch').addEventListener('click',openAch);
  $('#btnAchBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
+/* v4.8: BORRAR PARTIDA — reinicia el perfil local (doble toque de confirmación) */
+let wipeArm=false,wipeT=null;
+ $('#btnWipe').addEventListener('click',()=>{
+  const b=$('#btnWipe');
+  if(!wipeArm){
+    wipeArm=true;b.textContent='¿BORRAR TODO? TOCA DE NUEVO';b.classList.add('danger');
+    clearTimeout(wipeT);wipeT=setTimeout(()=>{wipeArm=false;b.textContent='BORRAR PARTIDA';b.classList.remove('danger');},2600);
+    return;
+  }
+  wipeArm=false;clearTimeout(wipeT);
+  b.textContent='BORRAR PARTIDA';b.classList.remove('danger');
+  const pilot=save.pilot,mus=save.mus,diff=save.diff;
+  save.tree={};save.gold=0;save.gems=0;save.best={lvl:0,kills:0};save.bestShip=1;save.bestAll=0;
+  save.prest=0;save.totKills=0;save.runs=0;save.ach={};save.totElite=0;save.totRescue=0;
+  save.totChest=0;save.totCamp=0;save.bestHard=0;save.bossKills={};save.weekly=null;save.weekBestAll=0;
+  save.ranking=[];save.mShots=0;save.mHits=0;save.mDmg=0;save.mTaken=0;save.mPerfect=0;
+  save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
+  persist();
+  try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}
+  recompute();refreshMenu();
+  SFX.hurt();vib(80);
+  banner('PARTIDA BORRADA','Progreso local reiniciado por completo');
+});
  $('#btnInstall').addEventListener('click',async()=>{
   if(!deferredPrompt)return;
   deferredPrompt.prompt();

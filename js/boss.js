@@ -301,6 +301,8 @@ function updBoss(dt){
   }
 }
 function updEBullets(dt){
+  /* v4.8: tope de balas enemigas simultáneas (anti-lag en oleadas extremas) */
+  if(ebullets.length>320)ebullets.splice(0,ebullets.length-320);
   for(const b of ebullets){
     b.x+=b.vx*dt;b.y+=b.vy*dt;
     if(b.x<-20||b.x>W+20||b.y<-30||b.y>H+30){b.dead=true;continue;}
@@ -418,7 +420,8 @@ function updBullets(dt){
       if((b.x-boss.x)**2+(b.y-boss.y)**2<rr*rr){
         b.hits.push('B');damageBoss(b.dmg,b.crit,b.slot);
         const shooter=players[b.slot]||players[0];
-        if(shooter&&shooter.fire&&Math.random()<shooter.fire.ch){
+        /* v4.8: si este disparo mató al Guardián, boss ya es null — comprobar antes de quemar */
+        if(boss&&shooter&&shooter.fire&&Math.random()<shooter.fire.ch){
           boss.burn={dps:shooter.fire.dps,t:shooter.fire.dur};
           floater(boss.x,boss.y-boss.r-10,'🔥','#FF9F43',12);
         }

@@ -261,7 +261,8 @@ function drawBossCommon(){
 function drawShip(pl,isLocal){
   const g=ctx;
   if(pl.hp<=0)return;
-  const core=pl.slot===0?'#7FD1B9':'#64C7FF';
+  /* v4.8: nave del JUGADOR 2 en rosa para distinguirla de la del JUGADOR 1 (menta) */
+  const core=pl.slot===0?'#7FD1B9':'#FF7EB6';
   const blink=pl.invul>0&&Math.floor(time*18)%2===0;
   if(pl.orbs>0){
     const ot=(pl.orbT||time*2.4);
@@ -316,6 +317,11 @@ function drawShip(pl,isLocal){
     g.globalAlpha=.5;g.strokeStyle='#FFD166';g.lineWidth=1;
     g.beginPath();g.arc(0,0,28+Math.sin(time*12)*3,0,TAU);g.stroke();g.globalAlpha=blink?.35:1;
   }
+  /* v4.8: etiqueta P1 / P2 sobre cada nave en co-op */
+  if(players.length===2){
+    g.font='700 10px "Chakra Petch",monospace';g.textAlign='center';g.textBaseline='alphabetic';
+    g.fillStyle=core;g.fillText('P'+(pl.slot+1),0,-30);
+  }
   g.restore();
   if(!isLocal)return;
   const key=''+pl.slot;
@@ -364,7 +370,8 @@ function drawRadar(){
     if(pl.hp<=0)continue;
     const px=cx+clamp((pl.x/W-.5)*2,-1,1)*r*.82;
     const py=cy+clamp((pl.y/H-.5)*2,-1,1)*r*.82;
-    ctx.fillStyle='#F2EFE6';
+    /* v4.8: puntos del radar con el color de cada jugador */
+    ctx.fillStyle=pl.slot===0?'#7FD1B9':'#FF7EB6';
     ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill();
   }
   ctx.restore();

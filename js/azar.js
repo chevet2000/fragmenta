@@ -1,10 +1,12 @@
 'use strict';
 /* ============ poderes temporales (PROTOCOLO AZAR) ============ */
+/* v4.8: iconos de la barra superior del HUD */
+const TB_ICON={tshield:'⛨',tmissile:'➤',tlaser:'▲',theal:'✚',torb:'◎',taura:'✂',trate:'⚡',tgold:'◆'};
 const TEMP_POOL=[
  {id:'tshield',name:'ESCUDO FANTASMA',desc:'Escudo que bloquea 1 golpe y recarga rápido',f:b=>{b.shield=true;b.shieldFast=true;}},
  {id:'tmissile',name:'LLUVIA DE MISILES',desc:'Misiles teledirigidos dobles y rápidos',f:b=>{b.homing=true;b.msl=Math.max(b.msl,2);b.homeFast=true;}},
  {id:'tlaser',name:'TORRETAS LÁSER',desc:'Rayo prismático cada 3 s al enemigo más cercano',f:b=>{b.prism=true;b.priFast=true;}},
- {id:'theal',name:'PROTOCOLO MÉDICO',desc:'Cura 3 PV al instante y regenera durante el efecto',f:b=>{b.heal+=3;b.regenRate+=.3;}},
+ {id:'theal',name:'PROTOCOLO MÉDICO',desc:'Cura 3 PV al activarse y regenera mientras dura',f:b=>{b.regenRate+=.3;}},
  {id:'torb',name:'ORBITALES FANTASMA',desc:'2 orbes de contacto giran alrededor de la nave',f:b=>{b.orbs+=2;}},
  {id:'taura',name:'CAMPO CORTANTE',desc:'Desmenuza a los enemigos pegados a tu nave',f:b=>{b.aura=true;}},
  {id:'trate',name:'SOBRECARGA',desc:'+40% de cadencia de disparo',f:b=>{b.rate*=1.4;}},
@@ -28,6 +30,7 @@ function grantTempBuff(slot){
   }
   const c=pool[irand(0,pool.length-1)];
   run.tempBuffs.push({id:c.id,waves:2});
+  if(c.id==='theal'&&slot!=null)healPlayerOnce(slot,3); /* v4.8: curación única */
   recompute();syncTempMsg();
   return 'PODER: '+c.name+' (2 OLEADAS)';
 }
@@ -44,6 +47,7 @@ function updTempBuffs(){
     if(pool.length){
       const c=pool[irand(0,pool.length-1)];
       run.tempBuffs.push({id:c.id,waves:2});
+      if(c.id==='theal')healPlayerOnce(0,3); /* v4.8: curación única al anfitrión */
       recompute();
       banner('AZAR · '+c.name,c.desc+' · dura 2 oleadas ('+Math.round(ch*100)+'%)');
     }

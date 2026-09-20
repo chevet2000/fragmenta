@@ -68,6 +68,7 @@ function hitPlayer(pl,d){
 function shoot(pl){
   pl.shots++;
   run.stShots++;
+  if(bullets.length>380)return; /* v4.8: tope de balas propias (anti-lag) */
   const heavy=pl.overdrive&&pl.shots%(pl.overEvery||6)===0;
   for(let f=0;f<pl.files;f++){
     const ox=(f-(pl.files-1)/2)*13;

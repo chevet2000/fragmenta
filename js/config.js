@@ -6,7 +6,9 @@ let runDiff='solo';
 const multHP=()=>DIFFS[runDiff]||1;
 
 /* ============ niveles de enemigo ============ */
-function hpForLevel(l){return Math.max(1,Math.round((1.25*l+2.2)*Math.pow(1.042,l)*multHP()));}
+/* v4.8: vida de enemigo mucho mayor (1.042 -> 1.055 por nivel): con el árbol al
+   máximo y en HARDCORE cuesta bastante más purgar cada oleada */
+function hpForLevel(l){return Math.max(1,Math.round((1.25*l+2.2)*Math.pow(1.055,l)*multHP()));}
 function maxLvlOf(L){return 4+L;}
 function minLvlOf(L){return 1+Math.max(0,Math.floor((L-1)/5))*2;}
 const TYPES={

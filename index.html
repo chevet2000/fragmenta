@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.7 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.8 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.7">
+<link rel="stylesheet" href="css/styles.css?v=4.8">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -28,6 +28,7 @@
   <div class="hud-mid">
     <div id="hudLevel">OLEADA 1</div>
     <div id="shipRow"><b id="shipTxt">NV 1</b><div class="expbar"><i id="expFill"></i></div></div>
+    <div class="buffbar hidden" id="buffBar"></div>
     <div class="wavebar"><i id="waveFill"></i></div>
     <div id="netTag" class="hidden"></div>
   </div>
@@ -90,7 +91,7 @@
     <canvas id="heroCv" width="640" height="340"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">Nuevas ramas <b>IMÁN · PROSPERIDAD · AZAR · ENLACE</b> y nodos de <b>FUSIÓN</b> con final compartido. Cofre blindado cada 2 oleadas, poderes temporales por sorteo, curación al compañero, zoom en el arsenal y <b>DESAFÍO SEMANAL</b>.</p>
+  <p class="tagline">La <b>GRAN PURGA</b>: enemigos mucho más duros, experiencia reequilibrada (1-5 por baja · niveles 100/150/200…), tope de 10 cartas por tipo, iconos de poderes en pantalla, música de menú, ranking 100% automático en co-op y botón para borrar tu partida. ¿Hasta qué oleada llegas ahora?</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -107,6 +108,7 @@
     <button class="btn" id="btnArsenal">ARSENAL · ÁRBOL</button>
     <button class="btn" id="btnGuide">GUÍA · GUARDIÁNES</button>
     <button class="btn" id="btnAch">LOGROS</button>
+    <button class="btn" id="btnWipe">BORRAR PARTIDA</button>
     <button class="btn hidden" id="btnInstall">INSTALAR APP</button>
     <button class="btn hidden" id="btnAscend">ASCENDER</button>
     <button class="btn" id="btnFS">PANTALLA COMPLETA</button>
@@ -118,7 +120,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.7 · ACTUALIZADOR DE VERSIÓN · ESCUDO DE COFRE SEGÚN LA OLEADA · REGEN 1 VIDA/MIN · RANKING AUTO CO-OP · MOVIMIENTO TOTAL · FUSIONES · COFRE BLINDADO · AZAR · IMÁN · ENLACE · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.8 · DIFICULTAD MÁXIMA · XP 1-5 SEGÚN LA OLEADA · NIVELES 100/150/200… · TOPE 10 CARTAS · ICONOS DE PODERES · MÚSICA DE MENÚ · RANKING AUTO CO-OP · RÉCORD SEMANAL SALVA SOLO · COFRE BLINDADO = 1 PREMIO AZAR · BORRAR PARTIDA · REGEN 1 VIDA/MIN · FUSIONES · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -129,14 +131,11 @@
       <small>TU CÓDIGO DE PILOTO</small>
       <b id="pilotCode">----</b>
       <div class="prec" id="pilotRec"></div>
-      <button class="btn" id="btnCopyMyRec" style="margin-top:8px;padding:9px">COPIAR MI REGISTRO</button>
     </div>
+    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin:10px 0">
+      LOS RANKING SE SINCRONIZAN SOLOS<br>CUANDO DOS JUGADORES SE CONECTAN EN CO-OP</div>
     <canvas id="rankCard" width="360" height="200"></canvas>
     <div id="rankMsg"></div>
-    <div style="font-size:9px;letter-spacing:.26em;color:var(--dim);text-align:center;margin-bottom:8px">
-      PEGA AQUÍ EL REGISTRO DE UN AMIGO</div>
-    <input id="recInput" placeholder="FRG9.2025W23.K7X2.15.12.A3F1" autocomplete="off">
-    <button class="btn" id="btnAddRec" style="margin-bottom:12px;padding:11px">AÑADIR AL RANKING</button>
     <div id="rankList"></div>
     <button class="btn" id="btnRankBack" style="margin-top:6px">VOLVER</button>
   </div>
@@ -270,37 +269,36 @@
     <div class="stats" id="ovStats"></div>
     <div id="ovMast"></div>
     <div id="ovKeep"></div>
-    <button class="btn hidden" id="btnCopyRec">COPIAR REGISTRO SEMANAL</button>
     <button class="btn primary" id="btnRetry">REINTENTAR</button>
     <button class="btn" id="btnOShop">ARSENAL</button>
     <button class="btn" id="btnMenu">MENÚ</button>
   </div>
 </div>
 
-<script src="js/utils.js?v=4.7"></script>
-<script src="js/profile.js?v=4.7"></script>
-<script src="js/achievements.js?v=4.7"></script>
-<script src="js/audio.js?v=4.7"></script>
-<script src="js/config.js?v=4.7"></script>
-<script src="js/tree.js?v=4.7"></script>
-<script src="js/relics.js?v=4.7"></script>
-<script src="js/state.js?v=4.7"></script>
-<script src="js/net.js?v=4.7"></script>
-<script src="js/core.js?v=4.7"></script>
-<script src="js/enemies.js?v=4.7"></script>
-<script src="js/waves.js?v=4.7"></script>
-<script src="js/boss.js?v=4.7"></script>
-<script src="js/loot.js?v=4.7"></script>
-<script src="js/player.js?v=4.7"></script>
-<script src="js/azar.js?v=4.7"></script>
-<script src="js/chests.js?v=4.7"></script>
-<script src="js/netsync.js?v=4.7"></script>
-<script src="js/render.js?v=4.7"></script>
-<script src="js/screens.js?v=4.7"></script>
-<script src="js/treeui.js?v=4.7"></script>
-<script src="js/hud.js?v=4.7"></script>
-<script src="js/input.js?v=4.7"></script>
-<script src="js/game.js?v=4.7"></script>
-<script src="js/update.js?v=4.7"></script>
+<script src="js/utils.js?v=4.8"></script>
+<script src="js/profile.js?v=4.8"></script>
+<script src="js/achievements.js?v=4.8"></script>
+<script src="js/audio.js?v=4.8"></script>
+<script src="js/config.js?v=4.8"></script>
+<script src="js/tree.js?v=4.8"></script>
+<script src="js/relics.js?v=4.8"></script>
+<script src="js/state.js?v=4.8"></script>
+<script src="js/net.js?v=4.8"></script>
+<script src="js/core.js?v=4.8"></script>
+<script src="js/enemies.js?v=4.8"></script>
+<script src="js/waves.js?v=4.8"></script>
+<script src="js/boss.js?v=4.8"></script>
+<script src="js/loot.js?v=4.8"></script>
+<script src="js/player.js?v=4.8"></script>
+<script src="js/azar.js?v=4.8"></script>
+<script src="js/chests.js?v=4.8"></script>
+<script src="js/netsync.js?v=4.8"></script>
+<script src="js/render.js?v=4.8"></script>
+<script src="js/screens.js?v=4.8"></script>
+<script src="js/treeui.js?v=4.8"></script>
+<script src="js/hud.js?v=4.8"></script>
+<script src="js/input.js?v=4.8"></script>
+<script src="js/game.js?v=4.8"></script>
+<script src="js/update.js?v=4.8"></script>
 </body>
 </html>

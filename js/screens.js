@@ -47,11 +47,9 @@ function openRank(){
   $('#rankWeek').textContent=ws;
   $('#pilotCode').textContent=pilot;
   const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
-  const myStr=mine?makeRecordString(mine.seed,mine.code,mine.wave,mine.ship):null;
   $('#pilotRec').innerHTML=mine
-    ?('OLEADA '+mine.wave+' · NAVE NV '+mine.ship+'<br>'+myStr)
+    ?('RÉCORD DE ESTA SEMANA<br>OLEADA '+mine.wave+' · NAVE NV '+mine.ship)
     :'Aún sin registro esta semana.<br>Juega el DESAFÍO SEMANAL para generarlo.';
-  $('#btnCopyMyRec').style.display=mine?'block':'none';
   renderRankList();
   showScr('rank');
 }
@@ -60,7 +58,7 @@ function renderRankList(){
   const list=sortedRanking();
   if(list.length===0){
     box.innerHTML='<div style="font-size:10px;letter-spacing:.2em;color:var(--dim);text-align:center;padding:10px 0">'+
-      'SIN REGISTROS · comparte tu código con<br>tus amigos y añade los suyos aquí</div>';
+      'SIN REGISTROS · los ranking se sincronizan solos<br>al conectaros en el lobby co-op</div>';
     return;
   }
   list.forEach((r,i)=>{
@@ -85,28 +83,8 @@ function renderRankList(){
   if(!card)card=sortedRanking().find(r=>r.seed===ws);
   drawRankCard($('#rankCard'),card||{seed:ws});
 }
- $('#btnAddRec').addEventListener('click',()=>{
-  const s=$('#recInput').value;
-  const p=parseRecordString(s);
-  const m=$('#rankMsg');
-  if(!p){
-    m.className='err';m.textContent='Formato no válido. Debe ser: FRG9.SEMANA.CODIGO.OLEADA.NAVE.HASH';
-    return;
-  }
-  addRankingEntry(p);
-  $('#recInput').value='';
-  m.className='ok';
-  m.textContent=(p.ok?'✓ Registro verificado':'≈ Registro añadido (sin verificar)')+' · '+p.code+' · oleada '+p.wave;
-  renderRankList();
-  SFX.buy();
-});
- $('#btnCopyMyRec').addEventListener('click',()=>{
-  const pilot=getPilot(),ws=weekSeed();
-  const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
-  if(!mine)return;
-  copyText(makeRecordString(mine.seed,mine.code,mine.wave,mine.ship),
-    'Envíalo a tus amigos para el ranking');
-});
+ /* v4.8: eliminado añadir/copiar registros por código — el ranking se
+    sincroniza automáticamente al conectar dos jugadores en el lobby co-op */
  $('#btnRank').addEventListener('click',openRank);
  $('#btnRankBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
 function openGuide(){
@@ -152,6 +130,7 @@ function goMenu(){
   wrecks=[];emosFx=[];closeEmoPanel();
   weeklyMode=false;R=Math.random;
   musStop();
+  if(actx)musStart(); /* v4.8: música del menú */
   useProfile('local');
   refreshMenu();showScr('menu');
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
@@ -270,6 +249,19 @@ function nextWave(){
   if(net.mode!=='client'){
     if(L>save.best.lvl)save.best.lvl=L;
     if(L>save.bestAll)save.bestAll=L;
+    /* v4.8: el récord del desafío semanal se guarda EN CADA OLEADA —
+       aunque el jugador se retire por lag, su ranking ya está a salvo */
+    if(weeklyMode){
+      const ws=weekSeed();
+      if(!save.weekly||save.weekly.seed!==ws)save.weekly={seed:ws,best:0};
+      if(run.level>(save.weekly.best||0)){
+        save.weekly.best=run.level;
+        save.weekBestAll=Math.max(save.weekBestAll||0,run.level);
+        const pilot=getPilot();
+        addRankingEntry({seed:ws,code:pilot,wave:run.level,ship:run.shipLv,
+          h:weekHash(ws,pilot,run.level,run.shipLv),ok:true});
+      }
+    }
     checkAch();
     persist();
   }
@@ -313,19 +305,22 @@ function showShipCards(picks,onPick,waitNote){
 }
 function showShipLevelLocal(){
   state='levelup';SFX.lvl();
+  const cnt=id=>cardStacks(0,id);
   const picks=[],used=new Set();
   for(let i=0;i<3;i++){
     const r=Math.random();
     let tier=r<.12&&run.level>=4?2:r<.40?1:0;
     for(let t=tier;t>=0;t--){
-      const cands=CARDS.filter(c=>c.tier===t&&!used.has(c.id));
+      const cands=CARDS.filter(c=>c.tier===t&&!used.has(c.id)&&cnt(c.id)<MAX_STACKS);
       if(cands.length){const c=cands[irand(0,cands.length-1)];used.add(c.id);picks.push(c);break;}
     }
   }
-  while(picks.length<3)picks.push(CARDS[0]);
+  while(picks.length<3){
+    const c=CARDS.find(c=>cnt(c.id)<MAX_STACKS&&!picks.includes(c))||CARDS[0];
+    picks.push(c);
+  }
   showShipCards(picks,id=>{
-    run.buffs[0].push(id);SFX.buy();
-    recompute();
+    applyShipCard(0,id);SFX.buy(); /* v4.8: tope 10 por carta + curación instantánea */
     pendingShipLevels--;
     if(pendingShipLevels>0)showShipLevelLocal();
     else{state='play';showScr(null);persist();}
@@ -389,6 +384,7 @@ function showPostBoss(){
   curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
   showRelicCards(curRelics,r=>{
     run.relics.push(r.id);recompute();persist();
+    if(r.id==='hierro')healPlayerOnce(0,3); /* v4.8: curación única al obtenerla */
     banner('RELIQUIA',r.name);
   });
   showScr('post');
@@ -440,14 +436,7 @@ function gameOver(){
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
     `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
     `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
-  const cr=$('#btnCopyRec');
-  if(lastWeeklyRec){
-    cr.classList.remove('hidden');
-    cr.onclick=()=>{
-      copyText(makeRecordString(lastWeeklyRec.seed,lastWeeklyRec.code,lastWeeklyRec.wave,lastWeeklyRec.ship),
-        'Pégalo en el ranking de tus amigos');
-    };
-  }else cr.classList.add('hidden');
+  /* v4.8: eliminado el botón de copiar registro semanal por código */
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');
   $('#bossBar').classList.add('hidden');
   closeEmoPanel();

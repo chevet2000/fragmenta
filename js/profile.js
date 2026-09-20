@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.7';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.8';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}

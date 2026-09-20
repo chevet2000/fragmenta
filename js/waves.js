@@ -110,11 +110,13 @@ function buildWave(L){
     if(t==='form')spawnFormation(L,f);
     else if(t==='snake')spawnSnake(L,f);
     else if(t==='drip'){
-      const n=Math.max(5,Math.round((11+L)*f));
+      /* v4.8: tope de goteo por oleada (antes 11+L sin límite → 460 enemigos en la 450) */
+      const n=Math.max(5,Math.round(Math.min(70,11+L)*f));
       const a=[];for(let i=0;i<n;i++)a.push('drip');
       wave.pending+=n;wave.total+=n;pools.push(a);
     }else{
-      const n=Math.max(6,Math.round((16+L*.9)*f));
+      /* v4.8: tope de enjambre por oleada */
+      const n=Math.max(6,Math.round(Math.min(95,16+L*.9)*f));
       const a=[];for(let i=0;i<n;i++)a.push('swarm');
       wave.pending+=n;wave.total+=n;pools.push(a);
     }
@@ -155,6 +157,9 @@ function buildWave(L){
 }
 function updWaveSpawns(dt){
   if(wave.pool.length===0)return;
+  /* v4.8: nunca más de 110 enemigos vivos a la vez — el resto espera en cola
+     (mata el lag del desafío semanal en oleadas altas) */
+  if(enemies.length>=110){wave.spawnT=Math.max(wave.spawnT,.4);return;}
   wave.spawnT-=dt;
   if(wave.spawnT<=0){
     const t=wave.pool.shift();wave.pending--;

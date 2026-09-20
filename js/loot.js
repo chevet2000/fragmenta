@@ -3,7 +3,8 @@
 function dropLoot(e){
   const gMul=players[0].goldMul;
   const g=(1+(e.elvl>=6?1:0)+(e.elvl>=14?1:0))+(e.T.magnet?1:0);
-  for(let i=0;i<g;i++)
+  const pkCap=pickups.length<250; /* v4.8: tope de botín para evitar lag extremo */
+  if(pkCap)for(let i=0;i<g;i++)
     pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-40),
       val:Math.max(1,Math.round((.3+e.elvl*.22)*gMul))});
   let gr=.028+e.elvl*.0018;
@@ -25,7 +26,8 @@ function killEnemy(e,bySlot){
   dropLoot(e);
   if(e.tk==='hive')hiveBurst(e);
   doSplit(e);
-  gainExp(Math.round((1+e.elvl*.55)*pl.expMul));
+  /* v4.8: XP según el nivel máximo de la oleada (1-5 por baja) */
+  gainExp(Math.round(waveXp()*pl.expMul));
   missionTick('kills',1);
   if(pl.frenzy){run.combo++;
     if(run.combo>=6&&frenzyT<=0){frenzyT=5;floater(pl.x,pl.y-34,'¡FRENESÍ!','#FFD166',14);}}
@@ -45,7 +47,7 @@ function killEnemy(e,bySlot){
         val:Math.max(2,Math.round((1.2+run.level*.35)*gMul))});
     for(let i=0;i<1+(run.level>=12?1:0);i++)
       pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60)});
-    gainExp(Math.round((3+e.elvl*.55)*6*pl.expMul));
+    gainExp(Math.round(waveXp()*6*pl.expMul));
     floater(e.x,e.y-34,'¡ÉLITE CAÍDO!','#B388FF',14);
     shake=Math.min(16,shake+6);
   }
@@ -55,7 +57,7 @@ function killEnemy(e,bySlot){
     for(let i=0;i<5;i++)
       pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60),
         val:Math.max(2,Math.round((1+run.level*.3)*pl.goldMul))});
-    gainExp(Math.round((3+e.elvl*.5)*4*pl.expMul));
+    gainExp(Math.round(waveXp()*4*pl.expMul));
     floater(e.x,e.y-40,'¡CAMPISTA CAÍDO!','#FFD166',13);
     shake=Math.min(16,shake+6);
     checkAch();
@@ -138,7 +140,7 @@ function killBoss(){
     pickups.push({t:'chest',x:b.x,y:b.y,vx:rand(-20,20),vy:-80});
     floater(b.x,b.y-60,'¡COFRE! ATRÁPALO','#FFD166',15);
   }
-  gainExp(Math.round((30+run.level*6)*players[0].expMul));
+  gainExp(Math.round(waveXp()*12*players[0].expMul));
   banner('GUARDIÁN DESTRUIDO',run.level%10===0?'Recoge el cofre y el botín':'Recoge las recompensas');
 }
 

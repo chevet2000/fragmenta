@@ -17,7 +17,7 @@ function recompute(){
     for(const tb of (run.tempBuffs||[])){const tc=TEMP_POOL.find(t=>t.id===tb.id);if(tc)tc.f(b);}
     const RR=id=>run.relics.includes(id);
     if(RR('nucleo')){b.dmg+=2;b.maxHp-=1;}
-    if(RR('hierro')){b.maxHp+=3;b.heal+=3;}
+    if(RR('hierro')){b.maxHp+=3;}
     if(RR('magnet'))b.magnet*=2;
     if(RR('tiempo'))b.slow*=.85;
     if(RR('alquimia'))b.goldMul*=1.3;
@@ -70,15 +70,27 @@ function burst(x,y,color,n,sp){
 function redFlash(){const f=$('#flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),70);}
 
 /* ============ EXPERIENCIA ============ */
-const shipNeed=lv=>Math.round(6*Math.pow(lv,1.3))+8;
+/* v4.8: curva nueva — nivel 1 pide 100 XP, nivel 2 pide 150, y +50 por nivel
+   (100, 150, 200, 250…). Cada nivel comienza siempre en 0. */
+const shipNeed=lv=>100+(lv-1)*50;
+/* XP por baja: 1-5 puntos según el nivel de enemigo MÁXIMO de la oleada
+   (oleadas 1-8 → 1 · 9-17 → 2 · 18-26 → 3 · 27-35 → 4 · 36+ → 5) */
+const waveXp=()=>clamp(1+Math.floor(maxLvlOf(run.level)/9),1,5);
 function gainExp(n){
   run.exp+=n;
   let need=shipNeed(run.shipLv);
   while(run.exp>=need){
     run.exp-=need;run.shipLv++;
     save.bestShip=Math.max(save.bestShip,run.shipLv);
-    pendingShipLevels++;
-    floater(P.x,P.y-40,'NIVEL DE NAVE '+run.shipLv,'#7FD1B9',15);
+    /* v4.8: máximo 5 niveles en espera — el excedente se convierte en oro
+       (evita cadenas infinitas de elección de cartas en oleadas altas) */
+    if(pendingShipLevels<5){
+      pendingShipLevels++;
+      floater(P.x,P.y-40,'NIVEL DE NAVE '+run.shipLv,'#7FD1B9',15);
+    }else{
+      grantGold(0,150);
+      floater(P.x,P.y-30,'+150 ORO · NIVEL '+run.shipLv,'#FFD166',12);
+    }
     need=shipNeed(run.shipLv);
   }
 }

@@ -15,6 +15,13 @@ function openChest(slot,kind){
   save.totChest=(save.totChest||0)+1;
   checkAch();persist();
   SFX.chest();
+  /* v4.8: cofre blindado = UNA recompensa al azar, sin elección de 3 */
+  if(kind==='arm'){
+    chestSlot=slot;
+    const rid=['gold','gems','temp'][irand(0,2)];
+    chestReward(rid,'arm');
+    return;
+  }
   if(net.mode==='host'&&slot===1&&net.connected){
     chestSlot=1;chestwaitT=0;
     state='chestwait';
@@ -49,12 +56,14 @@ function buildChestUI(lv,onPick,kind){
   });
 }
 function chestReward(id,kind){
+  const arm=kind==='arm';
   let msg='';
   if(id==='gold'){
-    const v=120+run.level*18;
+    /* v4.8: valores según el tipo de cofre (blindado paga mejor) */
+    const v=arm?(140+run.level*20):(120+run.level*18);
     grantGold(chestSlot,v);msg='+'+v+' DE ORO';
   }else if(id==='gems'){
-    const v=4+Math.floor(run.level/10);
+    const v=arm?(5+Math.floor(run.level/9)):(4+Math.floor(run.level/10));
     grantGems(chestSlot,v);msg='+'+v+' GEMAS';
   }else if(id==='temp'){
     msg=grantTempBuff(chestSlot);
@@ -63,13 +72,14 @@ function chestReward(id,kind){
     if(pool.length){
       const r=pool[irand(0,pool.length-1)];
       run.relics.push(r.id);recompute();
+      if(r.id==='hierro')healPlayerOnce(chestSlot||0,3); /* v4.8: curación única */
       msg='RELIQUIA: '+r.name;
     }else{
       const v=200;
       grantGold(chestSlot,v);msg='+'+v+' DE ORO (sin reliquias disponibles)';
     }
   }
-  banner('COFRE ABIERTO',msg);
+  banner(arm?'COFRE BLINDADO':'COFRE ABIERTO',msg);
   persist();
   if(net.mode==='host'){
     sendMsg({t:'ev',k:'chestgot',m:msg});

@@ -7,6 +7,8 @@ function audio(){
     actx=new AC(); masterGain=actx.createGain(); masterGain.gain.value=.5; masterGain.connect(actx.destination);
   }
   if(actx.state==='suspended')actx.resume();
+  /* v4.8: la música del menú arranca sola al primer toque (sin partida activa) */
+  if(!MUS.playing&&!runActive)musStart();
 }
 function tone(f0,f1,dur,type,vol,delay){
   if(!actx||muted)return;
@@ -88,11 +90,18 @@ function musSched(){
       if(st%2===1&&Math.random()<inten)musNote(arp[irand(0,3)],spb*1.4,'square',.026,MUS.nextT);
       if(st%2===0)musHat(MUS.nextT,bossOn?.05:.028);
       if(bossOn&&st%8===4)musNote(ch[3]*2,spb*2,'triangle',.04,MUS.nextT);
+    }else if(!runActive){
+      /* v4.8: MÚSICA DEL MENÚ — Ambiente tranquilo y espacial a 84 bpm */
+      if(st%16===0)musNote(ch[0]/2,spb*12,'sine',.03,MUS.nextT);
+      if(st%16===8)musNote(ch[1],spb*9,'triangle',.017,MUS.nextT);
+      if(st%4===2&&Math.random()<.4)musNote(ch[2]*(Math.random()<.5?1:2),spb*2.4,'sine',.014,MUS.nextT);
+      if(st%8===6&&Math.random()<.25)musNote(ch[3]*2,spb*3,'triangle',.011,MUS.nextT);
     }
     MUS.step++;
     MUS.nextT+=spb;
   }
-  MUS.bpm=112+Math.min(36,run.level*1.2)+(boss?18:0);
+  /* v4.8: tempo según contexto — partida acelera, menú respira lento */
+  MUS.bpm=(runActive&&state==='play')?112+Math.min(36,run.level*1.2)+(boss?18:0):84;
 }
 function musStart(){
   if(!actx||MUS.playing)return;

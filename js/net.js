@@ -62,9 +62,10 @@ function hostLobby(){
     }
     net.conn=conn;
     conn.on('open',()=>{
-      net.connected=true;net.retries=0;
+      net.connected=true;net.retries=0;net.rankSent=true;
       conn.send({t:'welcome',diff:net.lobbyDiff||'normal'});
-      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span>';
+      conn.send({t:'rank',list:(save.ranking||[]).slice(-60)}); /* v4.8: el anfitrión también envía el suyo al conectar */
+      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Ranking sincronizado entre los dos</span>';
       $('#btnStartCoop').classList.remove('hidden');
       SFX.gem();vib(40);
     });
@@ -132,7 +133,8 @@ function hostOnData(d){
 function checkShipChoice(){
   if(state!=='shipwait')return;
   if(!(net.hostChosen&&net.clientChosen))return;
-  run.buffs[0].push(net.hostCard); run.buffs[1].push(net.clientCard);
+  applyShipCard(0,net.hostCard);   /* v4.8: tope 10 + curación instantánea por slot */
+  applyShipCard(1,net.clientCard);
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   pendingShipLevels--; recompute(); persist();
   if(pendingShipLevels>0)beginShipChoiceHost();
@@ -142,16 +144,20 @@ function beginShipChoiceHost(){
   if(!net.connected){ showShipLevelLocal(); return; }
   state='shipwait';shipwaitT=0;
   net.hostChosen=false;net.clientChosen=false;
+  const cnt0=id=>cardStacks(0,id),cnt1=id=>cardStacks(1,id);
   const picks=[],used=new Set();
   for(let i=0;i<3;i++){
     const r=Math.random();
     let tier=r<.12&&run.level>=4?2:r<.40?1:0;
     for(let t2=tier;t2>=0;t2--){
-      const cands=CARDS.filter(c=>c.tier===t2&&!used.has(c.id));
+      const cands=CARDS.filter(c=>c.tier===t2&&!used.has(c.id)&&cnt0(c.id)<MAX_STACKS&&cnt1(c.id)<MAX_STACKS);
       if(cands.length){const c=cands[irand(0,cands.length-1)];used.add(c.id);picks.push(c);break;}
     }
   }
-  while(picks.length<3)picks.push(CARDS[0]);
+  while(picks.length<3){
+    const c=CARDS.find(c=>cnt0(c.id)<MAX_STACKS&&cnt1(c.id)<MAX_STACKS&&!picks.includes(c))||CARDS[0];
+    picks.push(c);
+  }
   sendMsg({t:'ev',k:'ship',lv:run.shipLv,ids:picks.map(c=>c.id)});
   showShipCards(picks,c=>{
     net.hostChosen=true; net.hostCard=c.id; SFX.buy();
