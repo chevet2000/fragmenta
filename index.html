@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.2 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.3 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -88,13 +88,14 @@ button{font-family:inherit}
   padding:24px;background:rgba(7,9,13,.87);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s,visibility .25s;overflow-y:auto}
 .scr.show{opacity:1;visibility:visible;pointer-events:auto}
+#scrMenu{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 20px)}
 .btn{display:block;width:100%;padding:13px;border:1px solid var(--line);background:rgba(12,16,22,.6);color:var(--ink);
   font-weight:700;letter-spacing:.16em;font-size:13px;cursor:pointer;text-transform:uppercase}
 .btn.primary{background:var(--amber);color:#0A0C10;border-color:var(--amber)}
 .btn:active{transform:translateY(1px)}
 .btn:disabled{opacity:.4}
 
-#hero{width:min(380px,90vw);margin-bottom:8px;position:relative}
+#hero{width:min(380px,90vw);margin:6px 0 8px;position:relative}
 #heroCv,#heroImg{width:100%;display:block}
 .tagline{color:var(--dim);font-size:11px;letter-spacing:.06em;text-align:center;line-height:1.7;max-width:340px}
 .tagline b{color:var(--mint)}
@@ -219,7 +220,7 @@ button{font-family:inherit}
 #btnCloseShop{width:auto;padding:9px 16px}
 .tree-wrap{flex:1;overflow:auto;width:100%;display:flex;justify-content:flex-start;padding:10px 0 14px;
   -webkit-overflow-scrolling:touch}
-#treeSvg{width:700px;height:auto;flex:none;display:block;margin:0 auto}
+#treeSvg{width:780px;height:auto;flex:none;display:block;margin:0 auto}
 .shop-foot{width:100%;border-top:1px solid var(--line);padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
   background:var(--panel)}
 #ndInfo{min-height:70px;margin-bottom:8px}
@@ -361,10 +362,10 @@ button{font-family:inherit}
 
 <div class="scr show" id="scrMenu">
   <div id="hero">
-    <canvas id="heroCv" width="640" height="330"></canvas>
+    <canvas id="heroCv" width="640" height="340"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">Arrastra el dedo: la nave te sigue. La NOVA es tu <b>botón de emergencia</b>: la tendrás antes del primer Guardián. 8 Guardiánes · Campistas · cofres · logros · <b>DESAFÍO SEMANAL</b>.</p>
+  <p class="tagline">Nueva rama <b>ELEMENTOS</b>: ⚡ electrocuta, ❄ congela, 🌬 repele y 🔥 quema. Mini-mapa de amenazas, 111 mejoras, 8 Guardiánes, Campistas, cofres y <b>DESAFÍO SEMANAL</b>.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -390,7 +391,7 @@ button{font-family:inherit}
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.2 · DIFICULTAD PROGRESIVA · NOVA TEMPRANA<br>
+  <div class="ver">FRAGMENTA v4.3 · ELEMENTOS · MINI-MAPA · 111 MEJORAS · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -500,12 +501,12 @@ button{font-family:inherit}
     </div>
     <button class="btn" id="btnCloseShop">VOLVER</button>
   </div>
-  <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 680 1230"></svg></div>
+  <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 780 1400"></svg></div>
   <div class="shop-foot">
     <div id="ndInfo">
       <b id="ndName">ÁRBOL DE HABILIDADES</b>
       <div id="ndMeta"></div>
-      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. La NOVA está en la rama SOPORTE, casi desde el principio. Perfil LOCAL y ONLINE independientes.</p>
+      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. La rama ELEMENTOS añade afinidades: ⚡ ❄ 🌬 🔥. Perfil LOCAL y ONLINE independientes.</p>
       <div id="ndCost"></div>
     </div>
     <button class="btn primary" id="btnBuy" disabled>DESBLOQUEAR</button>
@@ -656,7 +657,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.2';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.3';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
@@ -788,6 +789,10 @@ const ACHS=[
  {id:'sen',  name:'MAYESTAD',         desc:'Derrota al SEÑOR DE FORMAS',           rw:15,ck:()=>(save.bossKills.SEÑOR||0)>=1},
  {id:'wk10', name:'CAMPEÓN SEMANAL',  desc:'Oleada 10 en un Desafío Semanal',      rw:5, ck:()=>(save.weekBestAll||0)>=10},
  {id:'cmp5', name:'DESALOJADOR',      desc:'Derrota 5 Campistas',                  rw:3, ck:()=>(save.totCamp||0)>=5},
+ {id:'elec', name:'TORMENTA ELÉCTRICA',desc:'Desbloquea el tope de ELECTRICIDAD',  rw:4, ck:()=>has('e3')},
+ {id:'ice',  name:'ERA GLACIAL',      desc:'Desbloquea el tope de HIELO',          rw:4, ck:()=>has('e6')},
+ {id:'wind', name:'SEÑOR DEL VIENTO', desc:'Desbloquea el tope de VIENTO',         rw:4, ck:()=>has('e9')},
+ {id:'fire', name:'PIROMANÍACO',      desc:'Desbloquea el tope de FUEGO',          rw:4, ck:()=>has('e12')},
 ];
 function checkAch(){
   let got=false;
@@ -838,6 +843,10 @@ const SFX={
   chest(){tone(400,800,.2,'square',.06);tone(800,1600,.25,'square',.05,.15)},
   laser(){tone(1400,200,.4,'sawtooth',.05)},
   warp(){tone(200,1200,.3,'sine',.05)},
+  zap(){tone(1500,300,.1,'sawtooth',.045)},
+  freeze(){tone(1200,500,.15,'sine',.04)},
+  whoosh(){tone(300,700,.2,'sine',.04)},
+  ignite(){tone(200,90,.25,'sawtooth',.05)},
 };
 
 /* ============ MÚSICA ============ */
@@ -940,9 +949,9 @@ function typeForLevel(l){
   return r<.6?'orb':'dart';
 }
 
-/* ============ árbol: 85 nodos ============ */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625};
+/* ============ árbol: 111 nodos, 8 ramas ============ */
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -960,6 +969,8 @@ const TREE=[
  {id:'ob2',b:'off',s:'B',i:1,cost:{gems:14},wave:20,tag:'TER',name:'PUNTA TÉRMICA',desc:'Daño +2.',fx:b=>b.dmg+=2},
  {id:'ob3',b:'off',s:'B',i:2,cost:{gems:24},wave:26,ship:12,tag:'FL3',name:'TRIPLE FILA',desc:'Tres filas paralelas de balas.',fx:b=>b.files=Math.max(b.files,3)},
  {id:'ob4',b:'off',s:'B',i:3,cost:{gems:30},wave:32,ship:16,tag:'OJI',name:'OJIVA',desc:'Los proyectiles pesados explotan en área.',fx:b=>b.ojiva=true},
+ {id:'oc1',b:'off',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'PUN',name:'PUNTERÍA',desc:'+8% de crítico.',fx:b=>b.crit+=.08},
+ {id:'oc2',b:'off',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'DCA',name:'DOBLE CARGA',desc:'Cada 4.º disparo es pesado (en vez de cada 6.º).',fx:b=>b.overEvery=4},
  {id:'d1',b:'def',i:0,cost:{gold:300},wave:1,tag:'FUS',name:'FUSIBLE',desc:'+2 de vida máxima.',fx:b=>b.maxHp+=2},
  {id:'d2',b:'def',i:1,cost:{gold:700},wave:3,tag:'NAN',name:'NANOBOTS',desc:'Regeneración: 1 vida cada 10 s.',fx:b=>b.regenRate+=.1},
  {id:'d3',b:'def',i:2,cost:{gems:6},wave:5,tag:'RES',name:'RESERVA',desc:'Sobrevives a 1 golpe fatal por oleada, con 1 de vida.',fx:b=>b.emergency=true},
@@ -976,6 +987,8 @@ const TREE=[
  {id:'db2',b:'def',s:'B',i:1,cost:{gems:14},wave:18,ship:10,tag:'DAS',name:'DASH TÁCTICO',desc:'Desliza con un tirón rápido para esquivar (0.35 s de invulnerabilidad).',fx:b=>b.dash=true},
  {id:'db3',b:'def',s:'B',i:2,cost:{gems:24},wave:26,ship:12,tag:'PIO',name:'PIEL DE PIEDRA',desc:'Todo daño recibido se reduce en 1 (mín. 1).',fx:b=>b.stone=true},
  {id:'db4',b:'def',s:'B',i:3,cost:{gems:30},wave:32,ship:16,tag:'FLE',name:'FORTALEZA',desc:'Tu escudo recarga en 15 s en vez de 25.',fx:b=>b.shieldFast=true},
+ {id:'dc1',b:'def',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'INS',name:'INSTINTO',desc:'Con 1 de vida o menos: +50% de cadencia.',fx:b=>b.desperate=true},
+ {id:'dc2',b:'def',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'PLU',name:'PESO PLUMA',desc:'Tu Dash recarga en 1.2 s en vez de 2.2.',fx:b=>b.dashFast=true},
  {id:'u1',b:'sup',i:0,cost:{gold:300},wave:1,tag:'IMA',name:'IMÁN',desc:'Radio de recogida +80%.',fx:b=>b.magnet=1.8},
  {id:'u2',b:'sup',i:1,cost:{gems:5},wave:2,tag:'NOV',name:'NOVA',desc:'Tu botón de emergencia: onda de 15 de daño que limpia balas. Recarga 18 s.',fx:b=>b.nova=b.nova||{d:15,cd:18}},
  {id:'u3',b:'sup',i:2,cost:{gems:8},wave:6,tag:'NAM',name:'NOVA AMP',desc:'Nova: 35 de daño y recarga 13 s.',fx:b=>b.nova={d:35,cd:13}},
@@ -993,6 +1006,8 @@ const TREE=[
  {id:'ub2',b:'sup',s:'B',i:1,cost:{gems:14},wave:20,ship:10,tag:'NCG',name:'NOVA CARGA',desc:'La Nova recarga un 30% más rápido.',fx:b=>b.novaCdMul*=.7},
  {id:'ub3',b:'sup',s:'B',i:2,cost:{gems:24},wave:26,ship:12,tag:'NSU',name:'NOVA SUPREMA',desc:'Daño de la Nova x2.',fx:b=>b.novaMul=2},
  {id:'ub4',b:'sup',s:'B',i:3,cost:{gems:30},wave:32,ship:16,tag:'BAN',name:'BANCO',desc:'+6 de oro por segundo.',fx:b=>b.goldRate=Math.max(b.goldRate,6)},
+ {id:'uc1',b:'sup',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'TRI',name:'TRIBUTO',desc:'+20% de oro adicional.',fx:b=>b.goldMul*=1.2},
+ {id:'uc2',b:'sup',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'VOC',name:'VETA OCULTA',desc:'+4% de probabilidad de gema en cada enemigo.',fx:b=>b.gemExtra=true},
  {id:'t1',b:'tac',i:0,cost:{gold:400},wave:2,tag:'DRO',name:'DRON',desc:'Un dron orbital dispara al enemigo más cercano.',fx:b=>b.drones++},
  {id:'t2',b:'tac',i:1,cost:{gems:6},wave:6,tag:'ESQ',name:'ESCUADRÓN',desc:'+1 dron orbital.',fx:b=>b.drones++},
  {id:'t3',b:'tac',i:2,cost:{gold:1500},wave:8,tag:'REB',name:'REBOTICA',desc:'Las balas rebotan 1 vez.',fx:b=>b.bounce++},
@@ -1009,6 +1024,8 @@ const TREE=[
  {id:'tb2',b:'tac',s:'B',i:1,cost:{gems:14},wave:20,ship:10,tag:'PR2',name:'PRISMA PLUS',desc:'El rayo dispara cada 3 s en vez de 5.',fx:b=>b.priFast=true},
  {id:'tb3',b:'tac',s:'B',i:2,cost:{gems:24},wave:26,ship:12,tag:'MI2',name:'MISILES DOBLES',desc:'Dos misiles por ciclo.',fx:b=>b.msl=2},
  {id:'tb4',b:'tac',s:'B',i:3,cost:{gems:30},wave:32,ship:16,tag:'ENJ',name:'ENJAMBRE DE HIERRO',desc:'+3 drones orbitales.',fx:b=>b.drones+=3},
+ {id:'tc1',b:'tac',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'NDR',name:'NÚCLEO DRON',desc:'Tus drones disparan el doble de rápido.',fx:b=>b.droneFast=true},
+ {id:'tc2',b:'tac',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'OHA',name:'OJO DE HALCÓN',desc:'Tus misiles salen cada 1.8 s en vez de 2.5.',fx:b=>b.homeFast=true},
  {id:'r1',b:'rap',i:0,cost:{gold:400,gems:2},wave:1,tag:'GAT',name:'GATILLO SENSIBLE',desc:'Cadencia de disparo +8%.',fx:b=>b.rate*=1.08},
  {id:'r2',b:'rap',i:1,cost:{gold:900,gems:4},wave:5,tag:'MEC',name:'MECANISMO FINO',desc:'Cadencia +10%.',fx:b=>b.rate*=1.10},
  {id:'r3',b:'rap',i:2,cost:{gold:1600,gems:6},wave:9,tag:'PRC',name:'DOBLE PERCUSIÓN',desc:'Cadencia +12%.',fx:b=>b.rate*=1.12},
@@ -1016,6 +1033,8 @@ const TREE=[
  {id:'r5',b:'rap',i:4,cost:{gems:12},wave:19,ship:10,tag:'MOT',name:'MOTOR LINEAL',desc:'Cadencia +18%.',fx:b=>b.rate*=1.18},
  {id:'r6',b:'rap',i:5,cost:{gold:4000,gems:14},wave:25,ship:13,tag:'HIP',name:'HIPERCADENCIA',desc:'Cadencia +22%.',fx:b=>b.rate*=1.22},
  {id:'r7',b:'rap',i:6,cost:{gems:20},wave:32,ship:16,tag:'LUM',name:'VELOCIDAD LUMINAL',desc:'Cadencia +30%.',fx:b=>b.rate*=1.30},
+ {id:'rc1',b:'rap',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'TEM',name:'TEMPESTAD',desc:'Cadencia +15%.',fx:b=>b.rate*=1.15},
+ {id:'rc2',b:'rap',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'ULR',name:'ULTRARRÁPIDO',desc:'Cadencia +15% adicional.',fx:b=>b.rate*=1.15},
  {id:'w1',b:'ric',i:0,cost:{gold:350,gems:2},wave:1,tag:'BOL',name:'BOLSILLOS',desc:'Oro obtenido +10%.',fx:b=>b.goldMul*=1.10},
  {id:'w2',b:'ric',i:1,cost:{gold:800,gems:3},wave:4,tag:'REC',name:'RECOGEDOR',desc:'Oro +12%.',fx:b=>b.goldMul*=1.12},
  {id:'w3',b:'ric',i:2,cost:{gold:1500,gems:5},wave:8,tag:'FIL',name:'FILÓN',desc:'Oro +15%.',fx:b=>b.goldMul*=1.15},
@@ -1023,6 +1042,8 @@ const TREE=[
  {id:'w5',b:'ric',i:4,cost:{gems:11},wave:18,ship:9,tag:'MIN',name:'MINA PROFUNDA',desc:'Oro +20%.',fx:b=>b.goldMul*=1.20},
  {id:'w6',b:'ric',i:5,cost:{gold:4500,gems:12},wave:24,ship:12,tag:'VET',name:'VETA MADRE',desc:'Oro +25%.',fx:b=>b.goldMul*=1.25},
  {id:'w7',b:'ric',i:6,cost:{gems:18},wave:30,ship:15,tag:'ORO',name:'EL DORADO',desc:'Oro +35%.',fx:b=>b.goldMul*=1.35},
+ {id:'wc1',b:'ric',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'FIE',name:'FIEBRE DEL ORO',desc:'Oro +20%.',fx:b=>b.goldMul*=1.20},
+ {id:'wc2',b:'ric',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'AUF',name:'ALQUIMIA FINA',desc:'Oro +20% adicional.',fx:b=>b.goldMul*=1.20},
  {id:'s1',b:'sab',i:0,cost:{gold:350,gems:2},wave:2,tag:'APR',name:'APRENDIZ',desc:'Experiencia +10%.',fx:b=>b.expMul*=1.10},
  {id:'s2',b:'sab',i:1,cost:{gold:800,gems:3},wave:5,tag:'EST',name:'ESTUDIANTE',desc:'Experiencia +12%.',fx:b=>b.expMul*=1.12},
  {id:'s3',b:'sab',i:2,cost:{gold:1500,gems:5},wave:9,tag:'ERU',name:'ERUDITO',desc:'Experiencia +15%.',fx:b=>b.expMul*=1.15},
@@ -1030,22 +1051,42 @@ const TREE=[
  {id:'s5',b:'sab',i:4,cost:{gems:11},wave:19,ship:10,tag:'ORA',name:'ORÁCULO',desc:'Experiencia +20%.',fx:b=>b.expMul*=1.20},
  {id:'s6',b:'sab',i:5,cost:{gold:4500,gems:12},wave:25,ship:13,tag:'MAE',name:'MAESTRÍA',desc:'Experiencia +25%.',fx:b=>b.expMul*=1.25},
  {id:'s7',b:'sab',i:6,cost:{gems:18},wave:32,ship:16,tag:'OMN',name:'OMNISCIENCIA',desc:'Experiencia +35%.',fx:b=>b.expMul*=1.35},
+ {id:'sc1',b:'sab',s:'C',i:0,cost:{gold:2000,gems:8},wave:18,ship:11,tag:'ANC',name:'ANCESTRAL',desc:'Experiencia +20%.',fx:b=>b.expMul*=1.20},
+ {id:'sc2',b:'sab',s:'C',i:1,cost:{gems:26},wave:30,ship:15,tag:'ILU',name:'ILUMINADO',desc:'Experiencia +20% adicional.',fx:b=>b.expMul*=1.20},
+ /* ---- RAMA ELEMENTOS (⚡❄🌬🔥) ---- */
+ {id:'e1',b:'ele',i:0,cost:{gold:800,gems:3},wave:4,tag:'ARC',name:'ARCO ELÉCTRICO',desc:'⚡ 10% al impactar: electrocuta a 2 enemigos cercanos (6 de daño).',fx:b=>b.elec={ch:.10,n:2,dmg:6}},
+ {id:'e2',b:'ele',i:1,req:'e1',cost:{gold:1800,gems:6},wave:8,tag:'TOR',name:'TORMENTA',desc:'⚡ 15%: electrocuta a 3 enemigos (12 de daño).',fx:b=>b.elec={ch:.15,n:3,dmg:12}},
+ {id:'e3',b:'ele',i:2,req:'e2',cost:{gems:20},wave:13,ship:10,tag:'JUP',name:'JÚPITER',desc:'⚡ TOPE · 25%: electrocuta a 4 enemigos (20 de daño) y los aturde 1 s.',fx:b=>b.elec={ch:.25,n:4,dmg:20,stun:true}},
+ {id:'e4',b:'ele',i:3,cost:{gold:800,gems:3},wave:5,tag:'ESC',name:'ESCARCHA',desc:'❄ 12% al impactar: congela a 2 enemigos 1.5 s (no se mueven ni disparan).',fx:b=>b.ice={ch:.12,n:2,dur:1.5}},
+ {id:'e5',b:'ele',i:4,req:'e4',cost:{gold:1800,gems:6},wave:9,tag:'GLA',name:'GLACIAR',desc:'❄ 18%: congela a 3 enemigos 2.5 s.',fx:b=>b.ice={ch:.18,n:3,dur:2.5}},
+ {id:'e6',b:'ele',i:5,req:'e5',cost:{gems:20},wave:14,ship:10,tag:'CER',name:'CERO ABSOLUTO',desc:'❄ TOPE · 28%: congela a 4 enemigos 3.5 s y los congelados reciben +50% de daño.',fx:b=>{b.ice={ch:.28,n:4,dur:3.5};b.iceTop=true}},
+ {id:'e7',b:'ele',i:6,cost:{gold:800,gems:3},wave:4,tag:'RAF',name:'RÁFAGA',desc:'🌬 Aura: repele a los enemigos a menos de 100 px de tu nave.',fx:b=>b.wind={rad:100,force:120,dmg:0,bul:false}},
+ {id:'e8',b:'ele',i:7,req:'e7',cost:{gold:1800,gems:6},wave:9,tag:'CIC',name:'CICLÓN',desc:'🌬 Radio 140, empuje fuerte y desvía las balas enemigas cercanas.',fx:b=>b.wind={rad:140,force:190,dmg:0,bul:true}},
+ {id:'e9',b:'ele',i:8,req:'e8',cost:{gems:20},wave:13,ship:10,tag:'TOR',name:'TORNADO',desc:'🌬 TOPE · Radio 180: los repelidos reciben daño y las balas cercanas estallan.',fx:b=>b.wind={rad:180,force:260,dmg:8,bul:true}},
+ {id:'e10',b:'ele',i:9,cost:{gold:800,gems:3},wave:6,tag:'ASQ',name:'ASCUA',desc:'🔥 12% al impactar: incendia (4 de daño/s durante 3 s).',fx:b=>b.fire={ch:.12,dps:4,dur:3,spread:0,boom:false}},
+ {id:'e11',b:'ele',i:10,req:'e10',cost:{gold:1800,gems:6},wave:10,tag:'LLA',name:'LLAMA',desc:'🔥 18%: 7 de daño/s durante 4 s y se propaga a 1 enemigo cercano.',fx:b=>b.fire={ch:.18,dps:7,dur:4,spread:1,boom:false}},
+ {id:'e12',b:'ele',i:11,req:'e11',cost:{gems:20},wave:15,ship:11,tag:'INF',name:'INFERNO',desc:'🔥 TOPE · 28%: 12 de daño/s durante 5 s, propaga a 2 y los quemados explotan al morir.',fx:b=>b.fire={ch:.28,dps:12,dur:5,spread:2,boom:true}},
 ];
 TREE.forEach(nd=>{
-  nd.x=nd.s?BX[nd.b]+(nd.s==='A'?-30:30):BX[nd.b];
-  nd.y=nd.s?830+nd.i*95:92+nd.i*92;
+  if(nd.b==='ele'){nd.x=BX.ele;nd.y=92+nd.i*88;}
+  else{nd.x=nd.s?BX[nd.b]+(nd.s==='A'?-30:30):BX[nd.b];
+       nd.y=nd.s?830+nd.i*95:92+nd.i*92;}
 });
 const byBranch={};
 for(const nd of TREE)(byBranch[nd.b]=byBranch[nd.b]||[]).push(nd);
 for(const b in byBranch){
   const arr=byBranch[b].filter(n=>!n.s).sort((a,c)=>a.i-c.i);
-  for(let i=0;i<arr.length-1;i++)arr[i].next=arr[i+1].id;
-  const last=arr[arr.length-1];
-  const sA=byBranch[b].filter(n=>n.s==='A').sort((a,c)=>a.i-c.i);
-  const sB=byBranch[b].filter(n=>n.s==='B').sort((a,c)=>a.i-c.i);
-  last.subA=sA[0]?sA[0].id:null; last.subB=sB[0]?sB[0].id:null;
-  for(let i=0;i<sA.length-1;i++)sA[i].next=sA[i+1].id;
-  for(let i=0;i<sB.length-1;i++)sB[i].next=sB[i+1].id;
+  if(b!=='ele'){
+    for(let i=0;i<arr.length-1;i++)arr[i].next=arr[i+1].id;
+    const last=arr[arr.length-1];
+    const sA=byBranch[b].filter(n=>n.s==='A').sort((a,c)=>a.i-c.i);
+    const sB=byBranch[b].filter(n=>n.s==='B').sort((a,c)=>a.i-c.i);
+    const sC=byBranch[b].filter(n=>n.s==='C').sort((a,c)=>a.i-c.i);
+    last.subA=sA[0]?sA[0].id:null; last.subB=sB[0]?sB[0].id:null; last.subC=sC[0]?sC[0].id:null;
+    for(let i=0;i<sA.length-1;i++)sA[i].next=sA[i+1].id;
+    for(let i=0;i<sB.length-1;i++)sB[i].next=sB[i+1].id;
+    for(let i=0;i<sC.length-1;i++)sC[i].next=sC[i+1].id;
+  }
 }
 const icoGold='<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.6" fill="none" stroke="#FFD166" stroke-width="1.6"/><circle cx="6" cy="6" r="1.8" fill="#FFD166"/></svg>';
 const icoGem='<svg viewBox="0 0 12 12"><path d="M6 1 L11 6 L6 11 L1 6 Z" fill="none" stroke="#64C7FF" stroke-width="1.6"/><path d="M6 3.4 L8.6 6 L6 8.6 L3.4 6 Z" fill="#64C7FF"/></svg>';
@@ -1110,7 +1151,6 @@ let wave={type:'form',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:
 let bannerT=0,bannerTxt='',bannerSub='';const BANNER_LIFE=1.9;
 let curPicks=[],selNode=null,curRelics=[],relicChosen=false,ascConfirm=false;
 let lastWeeklyRec=null;
-/* NOVA de arranque: se otorga a mitad de la oleada 3 si no tienes ninguna */
 let freeNovaGiven=false;
 
 function mkPlayer(slot){return{
@@ -1120,6 +1160,8 @@ function mkPlayer(slot){return{
   vamp:false,frenzy:false,execute:false,presa:false,reflect:false,venge:false,secondWind:false,
   dash:false,stone:false,homing:false,prism:false,priFast:false,msl:1,neb:false,pointDef:false,
   slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
+  elec:null,ice:null,iceTop:false,wind:null,fire:null,
+  overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   touch:null
@@ -1162,7 +1204,7 @@ const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
 const amClient=()=>net.mode==='client';
 function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
 function peerReady(){ return typeof Peer!=='undefined'; }
-function mkPeerId(code){ return 'frg42-'+code; }
+function mkPeerId(code){ return 'frg43-'+code; }
 function destroyNet(){
   if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
   try{if(net.conn)net.conn.close();}catch(e){}
@@ -1174,15 +1216,20 @@ function destroyNet(){
   net.remoteStats={};net.lobbyDiff='normal';
 }
 function computeStatblock(){
-  const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
+  const b=blankStats();
+  for(const nd of TREE)if(has(nd.id))nd.fx(b);
+  b.goldMul*=1+.25*save.prest;
+  return b;
+}
+function blankStats(){
+  return{dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
     slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,
     drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
     presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
     priFast:false,msl:1,neb:false,pointDef:false,slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,
-    ojiva:false,gemLuck:false,heartDrop:false,vortex:false};
-  for(const nd of TREE)if(has(nd.id))nd.fx(b);
-  b.goldMul*=1+.25*save.prest;
-  return b;
+    ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
+    elec:null,ice:null,iceTop:false,wind:null,fire:null,
+    overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false};
 }
 function hostLobby(){
   if(!peerReady()){
@@ -1469,16 +1516,19 @@ function applySnap(d){
     const id=ed[0];seen.add(id);
     let e=cEnemies.get(id);
     if(!e){
-      const tk=TKLIST[ed[1]]||0]||'orb';
+      const tk=TKLIST[ed[1]||0]||'orb';
       e={id,tk,T:TYPES[tk]||TYPES.orb,elvl:ed[2],hp:ed[3],
         x:ed[4],y:ed[5],r:ed[6]/10,elite:!!ed[7],flash:0,
-        snake:ed[8]==null?null:ed[8],snIdx:ed[9]||0,wob:(id*2.39996)%TAU};
-      if(ed[10]){e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;}
+        snake:ed[8]==null?null:ed[8],snIdx:ed[9]||0,wob:(id*2.39996)%TAU,
+        frozen:0,burn:null,shockT:0,camp:null,CD:null};
+      if(ed[10])e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;
+      if(ed[11]){e.frozen=(ed[11]&1)?1:0;e.burn=(ed[11]&2)?{dps:0,t:1}:null;}
       cEnemies.set(id,e);
     }else{
       e.tx=ed[4];e.ty=ed[5];e.hp=ed[3];e.elvl=ed[2];e.r=ed[6]/10;e.elite=!!ed[7];
       e.snake=ed[8]==null?null:ed[8];e.snIdx=ed[9]||0;
       if(ed[10])e.camp=e.CD=CAMP_DEFS[Object.keys(CAMP_DEFS)[ed[10]-1]]||null;
+      if(ed[11]!==undefined){e.frozen=(ed[11]&1)?1:0;if(ed[11]&2&&!e.burn)e.burn={dps:0,t:1};}
     }
   }
   for(const [id,e] of cEnemies){
@@ -1502,12 +1552,7 @@ function applySnap(d){
 /* ============ recompute ============ */
 function recompute(){
   const mk=slot=>{
-    const b={dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
-      slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,
-      heal:0,drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
-      presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
-      priFast:false,msl:1,neb:false,pointDef:false,slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,
-      ojiva:false,gemLuck:false,heartDrop:false,vortex:false};
+    const b=blankStats();
     const applyTree=(slot===0)||(net.mode!=='client');
     if(applyTree){
       for(const nd of TREE)if(has(nd.id))nd.fx(b);
@@ -1542,6 +1587,9 @@ function recompute(){
     pl.prism=b.prism;pl.priFast=b.priFast;pl.msl=b.msl;pl.neb=b.neb;pl.pointDef=b.pointDef;
     pl.slowField=b.slowField;pl.novaRadial=b.novaRadial;pl.novaCdMul=b.novaCdMul;pl.novaMul=b.novaMul;
     pl.ojiva=b.ojiva;pl.gemLuck=b.gemLuck;pl.heartDrop=b.heartDrop;pl.vortex=b.vortex;
+    pl.elec=b.elec;pl.ice=b.ice;pl.iceTop=b.iceTop;pl.wind=b.wind;pl.fire=b.fire;
+    pl.overEvery=b.overEvery;pl.desperate=b.desperate;pl.dashFast=b.dashFast;
+    pl.droneFast=b.droneFast;pl.homeFast=b.homeFast;pl.gemExtra=b.gemExtra;
     pl.phoenixCharges=b.phx;
     if(b.heal)pl.hp=Math.min(pl.maxHp,pl.hp+b.heal);
     if(pl.maxHp>oldMax)pl.hp=Math.min(pl.maxHp,pl.hp+(pl.maxHp-oldMax));
@@ -1569,7 +1617,7 @@ function burst(x,y,color,n,sp){
 }
 function redFlash(){const f=$('#flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),70);}
 
-/* ============ experiencia ============ */
+/* ============ EXPERIENCIA ============ */
 const shipNeed=lv=>Math.round(6*Math.pow(lv,1.3))+8;
 function gainExp(n){
   run.exp+=n;
@@ -1636,7 +1684,8 @@ function spawnEnemy(tk,elvl,o){
     elite:!!o.elite,snake:(o.snake!=null)?o.snake:null,snIdx:o.snIdx||0,
     inT:0,inDelay:0,dvy:0,sx:0,sy:0,cx:0,cy:0,fx:0,fy:0,tx:0,ty:0,dead:false,
     refCD:0,kamArm:tk==='kami'?rand(1.2,2.6):0,kamT:0,kamV:0,
-    camp:o.camp||null,CD:null,campT:2.2,beam:null};
+    camp:o.camp||null,CD:null,campT:2.2,beam:null,
+    frozen:0,burn:null,shockT:0};
   if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
   enemies.push(e);return e;
 }
@@ -1745,6 +1794,65 @@ function camperAI(e,dt){
         if(dd<0.07)hitPlayer(q,1);
       }
     }
+  }
+}
+
+/* ============ ELEMENTOS ============ */
+function applyBurn(e,f,slot){
+  const burn={dps:f.dps,t:f.dur,spread:f.spread,boom:f.boom,slot:slot||0};
+  if(e===boss){ boss.burn=burn; return; }
+  if(e.burn)return;
+  e.burn=burn;
+  if(f.spread>0){
+    let n=f.spread;
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<100){
+        o.burn={dps:Math.max(2,Math.round(f.dps*.6)),t:f.dur*.8,spread:0,boom:f.boom,slot:burn.slot};
+        floater(o.x,o.y-o.r-6,'🔥','#FF9F43',10);
+        n--;
+      }
+    }
+  }
+}
+function elementProcs(e,pl){
+  if(e.dead||!pl)return;
+  if(pl.fire&&Math.random()<pl.fire.ch){
+    applyBurn(e,pl.fire,pl.slot);
+    floater(e.x,e.y-e.r-8,'🔥','#FF9F43',11);
+    SFX.ignite();
+  }
+  if(pl.ice&&Math.random()<pl.ice.ch){
+    let n=pl.ice.n;
+    e.frozen=Math.max(e.frozen,pl.ice.dur);
+    floater(e.x,e.y-e.r-8,'❄','#B0E8FF',11);
+    SFX.freeze();
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<110){
+        o.frozen=Math.max(o.frozen,pl.ice.dur);
+        floater(o.x,o.y-o.r-8,'❄','#B0E8FF',10);
+        n--;
+      }
+    }
+  }
+  if(pl.elec&&Math.random()<pl.elec.ch){
+    let n=pl.elec.n;
+    const dmg=pl.elec.dmg;
+    e.shockT=Math.max(e.shockT,pl.elec.stun?1:.4);
+    floater(e.x,e.y-e.r-14,'⚡','#FFE666',12);
+    SFX.zap();
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<110){
+        o.shockT=Math.max(o.shockT,pl.elec.stun?1:.3);
+        damageEnemy(o,dmg,false,pl.slot);
+        floater(o.x,o.y-o.r-8,'⚡','#FFE666',10);
+        n--;
+      }
+    }
+    damageEnemy(e,Math.round(dmg*.6),false,pl.slot);
+    if(boss&&Math.hypot(boss.x-e.x,boss.y-e.y)<140)damageBoss(Math.round(dmg*.6),false,pl.slot);
   }
 }
 
@@ -1903,7 +2011,7 @@ function updWaveSpawns(dt){
   }
 }
 
-/* ============ GUARDIÁNES (DIFICULTAD PROGRESIVA) ============ */
+/* ============ GUARDIÁNES ============ */
 const BOSS_DEFS={
  MONOLITO:{name:'MONOLITO',shape:'square',color:'#C8CFD8',
    mech:'3 láseres lentos + abanicos suaves',
@@ -1950,7 +2058,7 @@ function spawnBoss(L){
   bossName=D.name+'-'+String(L).padStart(2,'0');
   const hp=Math.round(hpForLevel(maxLvlOf(L))*(14+L*2.2)*D.hpM);
   boss={x:W/2,y:-90,ty:Math.max(110,H*.16),hp,maxhp:hp,r:D.r,t:0,ph:1,rot:0,flash:0,
-    kind:key,D,
+    kind:key,D,burn:null,
     fanT:2.8,aimT:3.4,sumT:5,ringT:3,
     laT:3.2,clT:4,swT:2.5,swA:0,swDir:0,swT2:0,gnT:3,gxA:0,gyA:0,gnLife:0,shT:4,
     lemTp:0,gatherT:0,gather:null,gatherPhase:0,gatherPhaseT:0,
@@ -1972,8 +2080,15 @@ function updBoss(dt){
   if(!boss)return;
   const b=boss;
   const coop=players.length===2&&net.mode==='host';
-  const easy=!!b.D.easy;    /* los 3 primeros: sin fase 2 y más suaves */
+  const easy=!!b.D.easy;
   b.t+=dt;b.rot+=dt*((b.ph===2?1.5:0.9));b.flash=Math.max(0,b.flash-dt*5);
+  if(b.burn){
+    b.hp-=b.burn.dps*dt;
+    if(Math.random()<dt*8)parts.push({x:b.x+rand(-b.r,b.r),y:b.y+rand(-b.r,b.r),vx:rand(-20,20),vy:rand(-60,-20),
+      rot:0,vr:0,life:.4,t:0,color:'#FF9F43',kind:'tri',size:3});
+    if(b.hp<=0){killBoss();return;}
+    b.burn.t-=dt;if(b.burn.t<=0)b.burn=null;
+  }
   const K=b.kind;
   const isSenor=(K==='SEÑOR');
   if(K!=='LEMNISCATA'){
@@ -2011,7 +2126,6 @@ function updBoss(dt){
     b.fanT-=dt;
     if(b.fanT<=0){
       b.fanT=easy?4.2:(b.ph===2?2.2:3.2);
-      /* MONOLITO fácil: abanico de 4 balas lentas */
       const n=easy?4:(5+Math.min(6,Math.floor(run.level/3)));
       const sp=Math.min(230,(110+run.level*2))*players[0].slow;
       const span=1.5;
@@ -2208,6 +2322,9 @@ function updEBullets(dt){
       if(pl.pointDef&&Math.hypot(b.x-pl.x,b.y-pl.y)<90){
         b.dead=true;burst(b.x,b.y,'#64C7FF',2,60);consumed=true;break;
       }
+      if(pl.wind&&pl.wind.bul&&Math.hypot(b.x-pl.x,b.y-pl.y)<80){
+        b.dead=true;burst(b.x,b.y,'#B0E8FF',3,70);consumed=true;break;
+      }
     }
     if(consumed)continue;
     for(const pl of players){
@@ -2241,6 +2358,7 @@ function updBullets(dt){
         b.hits.push(e.id);
         if(b.hits.length===1)run.stHits++;
         const willDie=b.hits.length>b.pierce;
+        const shooter=players[b.slot]||players[0];
         if(willDie&&e.T.reflects&&e.refCD<=0){
           e.refCD=.3;
           const pl=nearestPlayer(e.x,e.y);
@@ -2251,8 +2369,8 @@ function updBullets(dt){
           tone(900,400,.08,'square',.03);
         }
         damageEnemy(e,b.dmg,b.crit,b.slot);
+        if(b.hits.length===1&&shooter)elementProcs(e,shooter);
         if(willDie){
-          const shooter=players[b.slot]||players[0];
           if(b.heavy&&shooter.ojiva){
             rings.push({x:b.x,y:b.y,r:6,R:55,t:0,life:.3,color:'#FFD166'});
             hostRing(b.x,b.y,55,'#FFD166');
@@ -2290,6 +2408,11 @@ function updBullets(dt){
       const rr=boss.r+b.r;
       if((b.x-boss.x)**2+(b.y-boss.y)**2<rr*rr){
         b.hits.push('B');damageBoss(b.dmg,b.crit,b.slot);
+        const shooter=players[b.slot]||players[0];
+        if(shooter&&shooter.fire&&Math.random()<shooter.fire.ch){
+          boss.burn={dps:shooter.fire.dps,t:shooter.fire.dur};
+          floater(boss.x,boss.y-boss.r-10,'🔥','#FF9F43',12);
+        }
         if(b.hits.length>b.pierce){
           if(b.bounce>0){
             let t=null,bd=300;
@@ -2334,10 +2457,49 @@ function updEnemies(dt){
   let divers=0;for(const e of enemies)if(e.state==='dive')divers++;
   const maxDivers=(1+Math.floor(run.level/3))*(players.length===2?1.5:1);
   for(const sn of wave.snakes)sn.s+=sn.spd*dt;
+  /* viento: repele alrededor de cada nave con afinidad de viento */
+  for(const pl of players){
+    if(pl.hp<=0||!pl.wind)continue;
+    for(const e of enemies){
+      if(e.dead||e.frozen>0)continue;
+      const dx=e.x-pl.x,dy=e.y-pl.y,d=Math.hypot(dx,dy)||1;
+      if(d<pl.wind.rad&&d>1){
+        const f=pl.wind.force*(1-d/pl.wind.rad);
+        e.x+=dx/d*f*dt;e.y+=dy/d*f*dt;
+        if(pl.wind.dmg)damageEnemy(e,pl.wind.dmg*dt,false,pl.slot);
+      }
+    }
+  }
   for(const e of enemies){
     if(e.dead)continue;
     e.flash=Math.max(0,e.flash-dt*5);
     e.refCD=Math.max(0,e.refCD-dt);
+    /* quemadura */
+    if(e.burn){
+      e.burn.t-=dt;
+      e.hp-=e.burn.dps*dt;
+      if(Math.random()<dt*10)parts.push({x:e.x+rand(-e.r,e.r),y:e.y+rand(-e.r,e.r),vx:rand(-15,15),vy:rand(-60,-20),
+        rot:0,vr:0,life:.4,t:0,color:'#FF9F43',kind:'tri',size:2.5});
+      if(e.hp<=0){
+        if(e.burn.boom){
+          rings.push({x:e.x,y:e.y,r:6,R:60,t:0,life:.3,color:'#FF9F43'});
+          hostRing(e.x,e.y,60,'#FF9F43');
+          for(const o of enemies)if(!o.dead&&o!==e&&Math.hypot(o.x-e.x,o.y-e.y)<60)damageEnemy(o,Math.max(2,Math.round(e.burn.dps*1.5)),false,e.burn.slot);
+        }
+        killEnemy(e,e.burn.slot);
+        continue;
+      }
+      if(e.burn.t<=0)e.burn=null;
+    }
+    /* congelado o aturdido: no se mueve ni dispara */
+    if(e.frozen>0){
+      e.frozen-=dt;
+      continue;
+    }
+    if(e.shockT>0){
+      e.shockT-=dt;
+      continue;
+    }
     let sk=1;
     if(players.some(pl=>pl.slowField&&pl.hp>0&&Math.hypot(e.x-pl.x,e.y-pl.y)<140))sk=.65;
     if(e.state==='kam'){
@@ -2574,6 +2736,7 @@ function dropLoot(e){
       val:Math.max(1,Math.round((.3+e.elvl*.22)*gMul))});
   let gr=.028+e.elvl*.0018;
   if(players.some(pl=>pl.gemLuck))gr*=1.9;
+  if(players.some(pl=>pl.gemExtra))gr+=.04;
   if(run.relics.includes('crudas'))gr+=.08;
   if(Math.random()<gr)pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
   if(Math.random()<.01*(players.some(pl=>pl.heartDrop)?2.2:1))
@@ -2662,6 +2825,7 @@ function damageEnemy(e,dmg,crit,bySlot){
   const pl=players[bySlot]||players[0];
   if(e.armor)dmg=Math.max(1,dmg-e.armor);
   if(e.elite&&pl.presa)dmg*=1.6;
+  if(e.frozen>0&&pl.iceTop)dmg*=1.5;
   let th=0;
   if(run.relics.includes('sangre'))th=.40;
   else if(players.some(q=>q.execute))th=.25;
@@ -2775,7 +2939,7 @@ function hitPlayer(pl,d){
 function shoot(pl){
   pl.shots++;
   run.stShots++;
-  const heavy=pl.overdrive&&pl.shots%6===0;
+  const heavy=pl.overdrive&&pl.shots%(pl.overEvery||6)===0;
   for(let f=0;f<pl.files;f++){
     const ox=(f-(pl.files-1)/2)*13;
     for(let i=0;i<pl.bullets;i++){
@@ -2820,7 +2984,8 @@ function updPlayer(pl,dt){
     pl.x=lerp(pl.x,pl.touch.tx,k);
     pl.y=lerp(pl.y,pl.touch.ty,k);
   }
-  pl.fireAcc+=dt*pl.fireRate*(frenzyT>0?1.5:1)*(pl.vengeT>0?1.3:1);
+  const desperate=pl.desperate&&pl.hp<=1?1.5:1;
+  pl.fireAcc+=dt*pl.fireRate*(frenzyT>0?1.5:1)*(pl.vengeT>0?1.3:1)*desperate;
   while(pl.fireAcc>=1){pl.fireAcc-=1;shoot(pl);}
   if(pl.regenRate>0){
     pl.regAcc+=dt*pl.regenRate;
@@ -2859,7 +3024,7 @@ function updAbilities(pl,dt){
   if(pl.homing){
     pl.homeCd-=dt;
     if(pl.homeCd<=0&&(enemies.length||boss)){
-      pl.homeCd=2.5;
+      pl.homeCd=pl.homeFast?1.8:2.5;
       for(let i=0;i<pl.msl;i++)
         bullets.push({x:pl.x+rand(-10,10),y:pl.y-12,vx:rand(-40,40),vy:-220,
           dmg:Math.max(3,Math.round(pl.dmg*3)),r:5,crit:false,pierce:0,hits:[],bounce:0,
@@ -2892,7 +3057,7 @@ function updAbilities(pl,dt){
       dronePos[key][i].y=pl.y+Math.sin(a)*44-6;
       droneCd[key][i]-=dt;
       if(droneCd[key][i]<=0){
-        droneCd[key][i]=1.15;
+        droneCd[key][i]=pl.droneFast?.6:1.15;
         const t=nearestEnemy(dronePos[key][i].x,dronePos[key][i].y,[],430);
         const ang=t?Math.atan2(t.y-dronePos[key][i].y,t.x-dronePos[key][i].x):-Math.PI/2;
         bullets.push({x:dronePos[key][i].x,y:dronePos[key][i].y,vx:Math.cos(ang)*460,vy:Math.sin(ang)*460,
@@ -3032,8 +3197,9 @@ function sendSnap(){
   const en=enemies.slice(0,60).map(e=>{
     const arr=[e.id,TKLIST.indexOf(e.tk),e.elvl,Math.max(0,Math.ceil(e.hp)),
       Math.round(e.x),Math.round(e.y),Math.round(e.r*10),
-      e.elite?1:0, e.snake==null?null:e.snake, e.snIdx];
-    if(e.camp)arr.push(Object.keys(CAMP_DEFS).indexOf(e.camp)+1);
+      e.elite?1:0, e.snake==null?null:e.snake, e.snIdx,
+      e.camp?Object.keys(CAMP_DEFS).indexOf(e.camp)+1:0,
+      (e.frozen>0?1:0)+(e.burn?2:0)];
     return arr;
   });
   const bs=boss?[Math.round(boss.x),Math.round(boss.y),Math.max(0,Math.ceil(boss.hp)),boss.ph,
@@ -3141,6 +3307,35 @@ function drawEnemy(e){
     g.strokeStyle='#C9A0FF';g.lineWidth=1.5;g.setLineDash([3,7]);
     g.beginPath();g.arc(0,0,e.r+16,0,TAU);g.stroke();
     g.setLineDash([]);g.restore();g.globalAlpha=1;
+  }
+  if(e.frozen>0){
+    g.save();g.translate(e.x,e.y);
+    g.globalAlpha=.25;g.strokeStyle='#B0E8FF';g.lineWidth=2;
+    g.fillStyle='rgba(176,232,255,.12)';
+    shapePath(g,'circle',e.r+4);
+    g.fill();g.stroke();
+    g.globalAlpha=.9;g.lineWidth=1.5;
+    for(let i=0;i<3;i++){
+      const a=i*Math.PI/3+time*.5;
+      g.beginPath();
+      g.moveTo(-Math.cos(a)*(e.r*.5),-Math.sin(a)*(e.r*.5));
+      g.lineTo(Math.cos(a)*(e.r*.5),Math.sin(a)*(e.r*.5));
+      g.stroke();
+    }
+    g.restore();g.globalAlpha=1;
+  }
+  if(e.shockT>0){
+    g.save();g.translate(e.x,e.y);
+    g.globalAlpha=.7;g.strokeStyle='#FFE666';g.lineWidth=1.5;
+    g.beginPath();
+    let ang=rand(0,TAU);
+    g.moveTo(0,0);
+    for(let i=0;i<3;i++){
+      ang+=rand(-.8,.8);
+      g.lineTo(Math.cos(ang)*(e.r*.6),Math.sin(ang)*(e.r*.6));
+    }
+    g.stroke();
+    g.restore();
   }
   g.save();g.translate(e.x,e.y);
   const rot=e.tk==='dash'?time*3+e.wob:(e.T.kami?time*6+e.wob:Math.sin(time*2+e.wob)*.2);
@@ -3323,6 +3518,12 @@ function drawShip(pl,isLocal){
     g.globalAlpha=.12;g.strokeStyle='#FF7EB6';
     g.beginPath();g.arc(0,0,140,0,TAU);g.stroke();g.globalAlpha=blink?.35:1;
   }
+  if(pl.wind){
+    g.globalAlpha=.10+Math.sin(time*3)*.04;g.strokeStyle='#B0E8FF';g.lineWidth=2;
+    g.setLineDash([2,10]);
+    g.beginPath();g.arc(0,0,pl.wind.rad,time*.8,time*.8+TAU);g.stroke();
+    g.setLineDash([]);g.globalAlpha=blink?.35:1;
+  }
   g.strokeStyle='#F2EFE6';g.fillStyle='rgba(242,239,230,.12)';g.lineWidth=2;
   g.beginPath();
   g.moveTo(0,-17);g.lineTo(5,-4);g.lineTo(15,9);g.lineTo(6,6);g.lineTo(4,13);
@@ -3350,6 +3551,47 @@ function drawShip(pl,isLocal){
     g.fillStyle='rgba(255,209,102,.25)';g.fill();
     g.restore();
   }
+}
+/* mini-mapa de amenazas */
+function drawRadar(){
+  const pts=[];
+  if(amClient()){
+    for(const [,e] of cEnemies){
+      if(e.elite)pts.push({x:e.x,y:e.y,c:'#B388FF',s:2.5});
+      if(e.camp)pts.push({x:e.x,y:e.y,c:'#FFD166',s:3.5});
+    }
+  }else{
+    for(const e of enemies){
+      if(e.dead)continue;
+      if(e.elite)pts.push({x:e.x,y:e.y,c:'#B388FF',s:2.5});
+      if(e.camp)pts.push({x:e.x,y:e.y,c:'#FFD166',s:3.5});
+    }
+  }
+  if(boss)pts.push({x:boss.x,y:boss.y,c:'#FF4757',s:4.5});
+  if(pts.length===0)return;
+  const r=30,cx=W-44,cy=112;
+  ctx.save();
+  ctx.globalAlpha=.85;
+  ctx.fillStyle='rgba(12,16,22,.72)';
+  ctx.beginPath();ctx.arc(cx,cy,r+5,0,TAU);ctx.fill();
+  ctx.strokeStyle='#232B36';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(cx,cy,r+5,0,TAU);ctx.stroke();
+  ctx.strokeStyle='rgba(139,147,161,.25)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-r,cy);ctx.lineTo(cx+r,cy);ctx.moveTo(cx,cy-r);ctx.lineTo(cx,cy+r);ctx.stroke();
+  for(const p of pts){
+    const px=cx+clamp((p.x/W-.5)*2,-1,1)*r*.82;
+    const py=cy+clamp((p.y/H-.5)*2,-1,1)*r*.82;
+    ctx.fillStyle=p.c;
+    ctx.beginPath();ctx.arc(px,py,p.s,0,TAU);ctx.fill();
+  }
+  for(const pl of players){
+    if(pl.hp<=0)continue;
+    const px=cx+clamp((pl.x/W-.5)*2,-1,1)*r*.82;
+    const py=cy+clamp((pl.y/H-.5)*2,-1,1)*r*.82;
+    ctx.fillStyle='#F2EFE6';
+    ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill();
+  }
+  ctx.restore();
 }
 function renderGame(dt){
   ctx.fillStyle='#07090D';ctx.fillRect(0,0,W,H);
@@ -3487,6 +3729,7 @@ function renderGame(dt){
     ctx.globalAlpha=1;
   }
   ctx.restore();
+  drawRadar();
 }
 function renderMenuBG(dt){
   ctx.fillStyle='#07090D';ctx.fillRect(0,0,W,H);
@@ -3519,17 +3762,17 @@ function drawHero(){
   const c=$('#heroCv');
   if(!c||c.classList.contains('hidden'))return;
   const g=c.getContext('2d');
-  const w=c.width,h=c.height,cx=w/2,cy=h*.38;
+  const w=c.width,h=c.height,cx=w/2,cy=h*.44;
   g.clearRect(0,0,w,h);
   g.save();
   g.strokeStyle='rgba(255,209,102,.14)';g.lineWidth=1;
-  g.beginPath();g.ellipse(cx,cy,w*.38,h*.22,0,0,TAU);g.stroke();
+  g.beginPath();g.ellipse(cx,cy,w*.38,h*.20,0,0,TAU);g.stroke();
   g.strokeStyle='rgba(127,209,185,.12)';
-  g.beginPath();g.ellipse(cx,cy,w*.42,h*.26,0,0,TAU);g.stroke();
+  g.beginPath();g.ellipse(cx,cy,w*.42,h*.24,0,0,TAU);g.stroke();
   g.restore();
   for(let i=0;i<8;i++){
     const a=time*.22+i*TAU/8;
-    const x=cx+Math.cos(a)*w*.38,y=cy+Math.sin(a)*h*.22;
+    const x=cx+Math.cos(a)*w*.38,y=cy+Math.sin(a)*h*.20;
     const D=BOSS_DEFS[BOSS_ORDER[i]];
     g.save();
     g.translate(x,y);g.rotate(a+time*.4);
@@ -3543,7 +3786,7 @@ function drawHero(){
   }
   for(let i=0;i<5;i++){
     const a=-time*.5+i*TAU/5;
-    const x=cx+Math.cos(a)*w*.34,y=cy+Math.sin(a)*h*.20;
+    const x=cx+Math.cos(a)*w*.34,y=cy+Math.sin(a)*h*.18;
     g.save();g.translate(x,y);
     g.globalAlpha=.5;g.fillStyle='#FFD166';
     g.fillRect(-1,-1,2,2);
@@ -3553,7 +3796,7 @@ function drawHero(){
   const pulse=1+Math.sin(time*2)*.012;
   g.save();g.translate(cx,cy);g.scale(pulse,pulse);
   g.shadowColor='#FFD166';g.shadowBlur=16;
-  g.font='700 60px "Chakra Petch",monospace';
+  g.font='700 58px "Chakra Petch",monospace';
   g.lineWidth=5;g.strokeStyle='rgba(255,209,102,.35)';
   g.strokeText('FRAGMENTA',0,0);
   g.fillStyle='#F2EFE6';
@@ -3896,8 +4139,6 @@ function nextWave(){
   wrecks=[];
   for(const pl of players){pl.shieldLvl=true;pl.emerUsed=false;}
   if(P.secondWind&&L%5===0)for(const pl of players){pl.hp=pl.maxHp;floater(pl.x,pl.y-30,'SEGUNDO AIRE','#7FD1B9',13);}
-  /* NOVA de arranque: regala una Nova básica al llegar a la oleada 3
-     si el jugador aún no tiene ninguna (para el primer Guardián de la oleada 5) */
   if(L>=3&&!freeNovaGiven){
     freeNovaGiven=true;
     for(const pl of players){
@@ -4109,9 +4350,10 @@ function renderTree(){
       const nx=byBranch[b].find(n=>n.id===nd.next);
       s+=`<line x1="${nd.x}" y1="${nd.y+22}" x2="${nx.x}" y2="${nx.y-22}" class="lk ${has(nd.next)?'on':''}"/>`;
     }
+    if(b==='ele')continue;
     const mains=byBranch[b].filter(n=>!n.s).sort((a,c)=>a.i-c.i);
     const last=mains[mains.length-1];
-    for(const sk of['subA','subB']){
+    for(const sk of['subA','subB','subC']){
       if(last[sk]){
         const nx=byBranch[b].find(n=>n.id===last[sk]);
         s+=`<line x1="${last.x}" y1="${last.y+22}" x2="${nx.x}" y2="${nx.y-22}" class="lk ${has(last[sk])?'on':''}"/>`;
@@ -4138,8 +4380,8 @@ function selectNode(id){
   bb.textContent='DESBLOQUEAR';
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
-    mt.textContent=`${TREE.length} MEJORAS · 7 RAMAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. La NOVA está al principio de SOPORTE. Perfil LOCAL y ONLINE independientes.';
+    mt.textContent=`${TREE.length} MEJORAS · 8 RAMAS · ${ownedCount()} ADQUIRIDAS`;
+    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. La rama ELEMENTOS añade afinidades ⚡❄🌬🔥 a tus balas. Perfil LOCAL y ONLINE independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
@@ -4171,7 +4413,7 @@ function buyNode(){
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
   const prof=saveProfile==='local'?'PERFIL LOCAL':'PERFIL ONLINE';
-  $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · 7 RAMAS · v${VERSION}`;
+  $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · 8 RAMAS · v${VERSION}`;
 }
 function openShop(from){
   shopReturn=from;
@@ -4262,7 +4504,7 @@ window.addEventListener('pointermove',e=>{
     const d=Math.hypot(dx,dy);
     pl.x=clamp(pl.x+dx/d*Math.min(120,d*2.6),18,W-18);
     pl.y=clamp(pl.y+dy/d*Math.min(70,d*1.4),H*.5,H-36);
-    pl.invul=Math.max(pl.invul,.35);pl.dashCd=2.2;
+    pl.invul=Math.max(pl.invul,.35);pl.dashCd=pl.dashFast?1.2:2.2;
     floater(pl.x,pl.y-26,'DASH','#64C7FF',11);
     tone(900,300,.1,'sine',.04);
   }
