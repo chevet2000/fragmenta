@@ -146,6 +146,15 @@ function shapePath(g,shape,r){
       const pts=[[-w,-r],[w,-r],[w,-w],[r,-w],[r,w],[w,w],[w,r],[-w,r],[-w,w],[-r,w],[-r,-w],[-w,-w]];
       pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();break;}
     case 'nonagon':poly(9);break;
+    /* v4.16: túnica encapuchada del MAGO — capucha puntiaguda y manto ancho */
+    case 'mage':{
+      g.moveTo(0,-r);
+      g.bezierCurveTo(r*.5,-r*.9,r*.62,-r*.4,r*.4,-r*.15);
+      g.lineTo(r*.95,r*.95);
+      g.lineTo(-r*.95,r*.95);
+      g.lineTo(-r*.4,-r*.15);
+      g.bezierCurveTo(-r*.62,-r*.4,-r*.5,-r*.9,0,-r);
+      g.closePath();break;}
   }
 }
 function drawSnakeLinks(list){
@@ -198,6 +207,20 @@ function drawEnemy(e){
     g.strokeStyle='#C9A0FF';g.lineWidth=1.5;g.setLineDash([3,7]);
     g.beginPath();g.arc(0,0,e.r+16,0,TAU);g.stroke();
     g.setLineDash([]);g.restore();g.globalAlpha=1;
+  }
+  /* v4.16: aura arcano del MAGO — anillo mágico con 2 runas orbitando */
+  if(e.T.mage){
+    g.save();g.translate(e.x,e.y);
+    g.globalAlpha=.3+Math.sin(time*2.6+e.wob)*.14;
+    g.strokeStyle='#B388FF';g.lineWidth=1.5;
+    g.beginPath();g.arc(0,0,e.r+9,0,TAU);g.stroke();
+    for(let i=0;i<2;i++){
+      const a=time*1.7+e.wob+i*Math.PI;
+      g.globalAlpha=.8;
+      g.fillStyle='#B388FF';
+      g.beginPath();g.arc(Math.cos(a)*(e.r+9),Math.sin(a)*(e.r+9)*.6,2.3,0,TAU);g.fill();
+    }
+    g.restore();g.globalAlpha=1;
   }
   if(e.frozen>0){
     g.save();g.translate(e.x,e.y);

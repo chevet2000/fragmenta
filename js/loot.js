@@ -77,6 +77,11 @@ function killEnemy(e,bySlot){
     shake=Math.min(16,shake+6);
     checkAch();
   }
+  if(e.T.mage){
+    /* v4.16: cazador de magos — contador para el logro ANTIMAGIA */
+    save.totMage=(save.totMage||0)+1;
+    floater(e.x,e.y-36,'¡MAGO CAÍDO!','#B388FF',13);
+  }
   checkAch();
 }
 function doSplit(e){

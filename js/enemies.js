@@ -17,6 +17,8 @@ function spawnEnemy(tk,elvl,o){
     frozen:0,burn:null,shockT:0,
     /* v4.10: ORO POR PARTES — presupuesto total fijado al aparecer */
     goldTotal:0,goldDropped:0,goldMark:.8};
+  /* v4.16: el MAGO tarda un poco en dar su primera invocación (respiro inicial) */
+  if(tk==='mago')e.sumT=rand(4,7);
   if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
   /* v4.10: presupuesto de oro = el mismo total que daba antes al morir,
      pero ahora se reparte: 4 tramos del 12,5% durante la pelea + resto al morir */
@@ -70,7 +72,9 @@ function spawnCamper(L){
   const key=keys[Math.floor(R()*keys.length)];
   const D=CAMP_DEFS[key];
   const hp=Math.round(hpForLevel(maxLvlOf(L))*5.5);
-  const e=spawnEnemy(typeForLevel(maxLvlOf(L)),maxLvlOf(L),{after:'roam',delay:1,camp:key});
+  /* v4.16: el campista no puede salir MAGO (un neutral que cura sería raro) */
+  let tk=typeForLevel(maxLvlOf(L));if(tk==='mago')tk='orb';
+  const e=spawnEnemy(tk,maxLvlOf(L),{after:'roam',delay:1,camp:key});
   e.hp=e.maxhp=hp;
   e.r=30;
   e.CD=D;
@@ -136,6 +140,50 @@ function camperAI(e,dt){
       }
     }
   }
+}
+
+/* ============ v4.16: EL MAGO ============ */
+/* PULSO ARCANO: cura hasta mageHealTargets(e.elvl) aliados heridos del radio.
+   Elige SIEMPRE los más graves (menos % de vida) y cura 5% de la vida máxima
+   de CADA curado — a más nivel de enemigo, más vida devuelve. Si sobran
+   plazas se cura a sí mismo. Nunca dispara: su peligro son los demás. */
+function mageHeal(e){
+  const R2=150;
+  const N=mageHealTargets(e.elvl);
+  const heridos=enemies.filter(o=>!o.dead&&o!==e&&o.hp<o.maxhp&&Math.hypot(o.x-e.x,o.y-e.y)<R2)
+    .sort((a,c)=>(a.hp/a.maxhp)-(c.hp/c.maxhp));
+  const targets=heridos.slice(0,N);
+  rings.push({x:e.x,y:e.y,r:8,R:R2,t:0,life:.55,color:'#B388FF'});
+  hostRing(e.x,e.y,R2,'#B388FF');
+  tone(720,1080,.22,'sine',.03);
+  for(const o of targets){
+    const amt=Math.max(2,Math.round(o.maxhp*.05));
+    o.hp=Math.min(o.maxhp,o.hp+amt);
+    floater(o.x,o.y-o.r-8,'+','#7DFF9E',13);
+  }
+  if(targets.length<N&&e.hp<e.maxhp){
+    e.hp=Math.min(e.maxhp,e.hp+Math.max(2,Math.round(e.maxhp*.05)));
+    floater(e.x,e.y-e.r-8,'+','#7DFF9E',12);
+  }
+}
+/* INVOCACIÓN: trae esbirros (nunca otro mago — evita cascadas infinitas).
+   A nivel alto (nv 128+, ~oleada 30) invoca 2 a la vez. Tope de vivos. */
+function mageSummon(e){
+  if(enemies.length>=22)return;
+  const k=e.elvl>=128?2:1;
+  const maxL=maxLvlOf(run.level),minL=minLvlOf(run.level);
+  for(let i=0;i<k;i++){
+    const elvl=clamp(irand(Math.round(maxL*.55),Math.round(maxL*.8)),minL,maxL);
+    let tk=typeForLevel(elvl);if(tk==='mago')tk='orb';
+    const c=spawnEnemy(tk,elvl,{after:'roam',delay:i*.25});
+    c.sx=e.x+rand(-16,16);c.sy=e.y+rand(-8,8);c.x=c.sx;c.y=c.sy;
+    c.cx=e.x+rand(-80,80);c.cy=e.y+rand(20,70);
+    c.fx=clamp(e.x+rand(-110,110),30,W-30);c.fy=rand(80,H*.5);
+  }
+  rings.push({x:e.x,y:e.y,r:6,R:64,t:0,life:.4,color:'#B388FF'});
+  hostRing(e.x,e.y,64,'#B388FF');
+  floater(e.x,e.y-e.r-12,'¡INVOCA!','#B388FF',12);
+  SFX.warp();
 }
 
 /* ============ ELEMENTOS ============ */

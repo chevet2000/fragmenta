@@ -102,7 +102,9 @@ function spawnFrenzyOne(){
 function makeElite(L,delay){
   const maxL=maxLvlOf(L);
   const elvl=maxL+irandR(2,5);
-  const tk=typeForLevel(elvl);
+  let tk=typeForLevel(elvl);
+  /* v4.16: sin MAGOS élite — ya invocan por ser élite y sería doble invocación */
+  if(tk==='mago')tk='sentry';
   const e=spawnEnemy(tk,elvl,{after:'roam',delay,elite:true});
   e.sx=rand(60,W-60);e.sy=-60;
   e.cx=e.sx+rand(-80,80);e.cy=H*.25;

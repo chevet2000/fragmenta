@@ -17,6 +17,12 @@ const BOSS_DEFS={
    mech:'Abre agujeros negros que arrastran tu nave y el oro',
    tip:'Suelta el oro lejos del agujero; muévete en diagonal contra la succión.',
    hpM:0.95,speed:.65,r:44},
+ /* v4.16: EL HECHICERO — el guardián mago. Cura a su legión en área y la
+    invoca sin parar: mata a los esbirros rápido o la pelea se hace eterna. */
+ HECHICERO:{name:'HECHICERO',shape:'mage',color:'#B388FF',
+   mech:'Pulsos arcanos que curan a su legión + esbirros invocados',
+   tip:'Quema a los esbirros y golpéalo entre pulso y pulso; cada fase cura a más aliados a la vez.',
+   hpM:1.0,speed:.5,r:46},
  CUATERNIO:{name:'CUATERNIO',shape:'square',color:'#7DFF9E',
    mech:'4-6 escudos hexagonales giran bloqueando tus balas',
    tip:'Rompe los escudos por un lado y dispara por el hueco.',
@@ -34,11 +40,15 @@ const BOSS_DEFS={
    tip:'Guarda la NOVA y la reserva para la fase 2.',
    hpM:1.6,speed:.6,r:52},
 };
-const BOSS_ORDER=['MONOLITO','AXIOMA','OCTAHEDRO','VERTICE','CUATERNIO','LEMNISCATA','TESIS','SEÑOR'];
+/* v4.16: BOSS_ORDER con 9 entradas — HECHICERO en el hueco 5: debuta en la
+   OL 25 y repite cada 40 oleadas (65, 105, 145…). El índice del jefe viaja en
+   el snapshot (BOSS_ORDER.indexOf), así que la rotación previa solo se corre
+   un hueco a partir de la OL 25. */
+const BOSS_ORDER=['MONOLITO','AXIOMA','OCTAHEDRO','VERTICE','HECHICERO','CUATERNIO','LEMNISCATA','TESIS','SEÑOR'];
 function bossForWave(L){
   if(L%50===0)return 'SEÑOR';
-  const idx=(Math.floor(L/5)-1)%7;
-  return BOSS_ORDER[clamp(idx,0,6)];
+  const idx=(Math.floor(L/5)-1)%8;
+  return BOSS_ORDER[clamp(idx,0,7)];
 }
 function spawnBoss(L){
   const key=bossForWave(L);
@@ -53,6 +63,8 @@ function spawnBoss(L){
     sprT:3,sprT2:0,sum2T:6,ring5T:2.6,
     fanT:2.8,aimT:3.4,sumT:5,ringT:3,
     laT:3.2,clT:4,swT:2.5,swA:0,swDir:0,swT2:0,gnT:3,gxA:0,gyA:0,gnLife:0,shT:4,
+    /* v4.16: HECHICERO — timers de pulso arcano (hzT) y de invocación (hsumT) */
+    hzT:3,hsumT:4,
     lemTp:0,gatherT:0,gather:null,gatherPhase:0,gatherPhaseT:0,
     clones:[],lasers:[],shields:[]};
   boss.maxPh=D.easy?1:(key==='SEÑOR'?Math.min(5,4+boss.tier):3+boss.tier); /* v4.14: base 3 · 4ª OL30+ · 5ª OL60+ (SEÑOR +1) */
@@ -280,8 +292,49 @@ function updBoss(dt){
       for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
         ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false});}}
   }
-  if(!(K==='MONOLITO'||K==='AXIOMA'||K==='OCTAHEDRO'||K==='VERTICE'||K==='CUATERNIO'||K==='LEMNISCATA'||K==='TESIS'||isSenor)){
+  if(!(K==='MONOLITO'||K==='AXIOMA'||K==='OCTAHEDRO'||K==='VERTICE'||K==='CUATERNIO'||K==='LEMNISCATA'||K==='TESIS'||K==='HECHICERO'||isSenor)){
     b.fanT-=dt;if(b.fanT<=0){b.fanT=(b.ph===2?1.7:2.5)*pM;fanAtk(b);}
+  }
+  if(K==='HECHICERO'){
+    /* ráfaga dirigida de runas */
+    b.aimT-=dt;if(b.aimT<=0){
+      b.aimT=(b.ph===2?2.6:3.2)*pM;
+      const pl=nearestPlayer(b.x,b.y);
+      const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(240,(140+run.level*3))*players[0].slow;
+      for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.15)*sp,vy:Math.sin(a+i*.15)*sp,r:5,color:'#B388FF',dead:false});
+      tone(520,260,.1,'sine',.04);
+    }
+    /* anillo de runas lento */
+    b.ringT-=dt;if(b.ringT<=0){
+      b.ringT=(b.ph===2?3.4:4.4)*pM;
+      const n=8+Math.min(6,Math.floor(run.level/5)),sp=95*players[0].slow;
+      for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
+        ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#B388FF',dead:false});}
+      tone(300,180,.2,'sine',.045);
+    }
+    /* PULSO ARCANO DEL JEFE: cura hasta N aliados heridos (radio 210).
+       N crece con la FASE y con el nivel de la partida — a más nivel, más
+       aliados cura a la vez (petición del piloto). */
+    b.hzT-=dt;
+    if(b.hzT<=0){b.hzT=3.8*pM;mageBossHeal(b);}
+    /* ESBIRROS: invoca 2 (fase 1) o 3 (fase 2+) mientras haya hueco */
+    b.hsumT-=dt;
+    if(b.hsumT<=0){
+      b.hsumT=(b.ph>=3?4.5:5.5)*pM;
+      if(enemies.length<26){
+        const k=b.ph>=2?3:2,minL=minLvlOf(run.level),maxL=maxLvlOf(run.level);
+        for(let i=0;i<k;i++){
+          const elvl=clamp(irand(Math.round(maxL*.5),maxL),minL,maxL);
+          let tk=typeForLevel(elvl);if(tk==='mago')tk='orb';
+          const e=spawnEnemy(tk,elvl,{after:'roam',delay:i*.2});
+          e.sx=b.x+rand(-40,40);e.sy=b.y+20;e.x=e.sx;e.y=e.sy;
+          e.cx=b.x+rand(-90,90);e.cy=b.y+80;
+          e.fx=clamp(b.x+rand(-140,140),30,W-30);e.fy=rand(90,H*.45);
+        }
+        floater(b.x,b.y-b.r-16,'¡ESBIRROS!','#B388FF',13);
+        SFX.warp();
+      }
+    }
   }
   if(isSenor){
     b.sumT-=dt;
@@ -516,6 +569,11 @@ function passive(e,dt){
   if(e.T.shoots){e.shootT-=dt;
     if(e.shootT<=0){e.shootT=Math.max(1.6,rand(2.4,4.6)-run.level*.04);eShoot(e,run.level>=12?2:1);}}
   if(e.T.heals){e.healT-=dt;if(e.healT<=0){e.healT=3.6;healPulse(e);}}
+  /* v4.16: el MAGO — pulso arcano + invocación de esbirros */
+  if(e.T.mage){
+    e.healT-=dt;if(e.healT<=0){e.healT=4.2;mageHeal(e);}
+    e.sumT-=dt;if(e.sumT<=0){e.sumT=8;mageSummon(e);}
+  }
 }
 function updEnemies(dt){
   formT+=dt;
@@ -601,7 +659,7 @@ function updEnemies(dt){
       e.x=e.fx+offX+(e.tk==='dash'?Math.sin(formT*2.2+e.wob)*22:0);
       e.y=e.fy+formY+Math.sin(formT*1.3+e.wob)*4;
       e.diveT-=dt;
-      if(e.diveT<=0&&divers<maxDivers&&!e.elite&&!e.T.kami){startDive(e);divers++;}
+      if(e.diveT<=0&&divers<maxDivers&&!e.elite&&!e.T.kami&&!e.T.mage){startDive(e);divers++;}
       passive(e,dt);
     }else if(e.state==='roam'){
       e.rt-=dt;
@@ -628,7 +686,7 @@ function updEnemies(dt){
         }
       }
       e.diveT-=dt;
-      if(e.diveT<=0&&divers<maxDivers&&!e.elite&&!e.T.kami&&!e.camp){startDive(e);divers++;}
+      if(e.diveT<=0&&divers<maxDivers&&!e.elite&&!e.T.kami&&!e.camp&&!e.T.mage){startDive(e);divers++;}
       passive(e,dt);
     }else if(e.state==='dive'){
       e.ds+=dt*e.diveSpd*sk;
@@ -696,6 +754,29 @@ function healPulse(e){
   for(const o of enemies){if(!o.dead&&o!==e&&o.hp<o.maxhp&&Math.hypot(o.x-e.x,o.y-e.y)<95){
     o.hp=Math.min(o.maxhp,o.hp+amt);floater(o.x,o.y-o.r-6,'+','#7DFF9E',11);}}
   if(e.hp<e.maxhp)e.hp=Math.min(e.maxhp,e.hp+amt);
+}
+/* v4.16: PULSO ARCANO DEL HECHICERO — cura hasta N aliados heridos en radio
+   210. N = 2 en fase 1, +1 por fase y +1 más cada 25 niveles de partida
+   (tope 6): cuanto más alto el nivel, más aliados cura a la vez. Cada curado
+   recupera 4% de SU vida máxima. Si no hay heridos cerca, se cura él 1%. */
+function mageBossHeal(b){
+  const R2=210;
+  const N=clamp(2+(b.ph-1)+Math.floor(run.level/25),2,6);
+  const heridos=enemies.filter(e=>!e.dead&&e.hp<e.maxhp&&Math.hypot(e.x-b.x,e.y-b.y)<R2)
+    .sort((a,c)=>(a.hp/a.maxhp)-(c.hp/c.maxhp));
+  const targets=heridos.slice(0,N);
+  rings.push({x:b.x,y:b.y,r:14,R:R2,t:0,life:.65,color:'#B388FF'});
+  hostRing(b.x,b.y,R2,'#B388FF');
+  tone(660,990,.3,'sine',.045);
+  for(const e of targets){
+    const amt=Math.max(2,Math.round(e.maxhp*.04));
+    e.hp=Math.min(e.maxhp,e.hp+amt);
+    floater(e.x,e.y-e.r-8,'+','#7DFF9E',13);
+  }
+  if(!targets.length&&b.hp<b.maxhp){
+    b.hp=Math.min(b.maxhp,b.hp+Math.round(b.maxhp*.01));
+    floater(b.x,b.y-b.r-12,'+','#7DFF9E',13);
+  }
 }
 function updCollisions(){
   for(const e of enemies){

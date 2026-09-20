@@ -42,6 +42,9 @@ const ACHS=[
  {id:'ghb', name:'MÁS RÁPIDO QUE TU PASADO',desc:'Adelanta a tu FANTASMA en el modo frenético',rw:4, ck:()=>!!save.ghostBeat},
  {id:'bio5',name:'VIAJERO DE SECTORES',desc:'Visita los 5 biomas',rw:5, ck:()=>Object.keys(save.biomesSeen||{}).length>=5},
  {id:'bp5', name:'DOMADOR DE GUARDIANES',desc:'Lleva a un Guardián a la FASE 5',rw:8, ck:()=>(save.totPhase5||0)>=1},
+ /* v4.16: el mago y su guardián */
+ {id:'mg15',name:'ANTIMAGIA',          desc:'Elimina 15 MAGOS',                     rw:4, ck:()=>(save.totMage||0)>=15},
+ {id:'hec', name:'ROMPEHECHIZOS',      desc:'Derrota 5 HECHICERO',                  rw:4, ck:()=>(save.bossKills.HECHICERO||0)>=5},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

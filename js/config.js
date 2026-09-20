@@ -59,6 +59,8 @@ const BESTIARY={
  reflect:{name:'REFLEJO',  desc:'Al recibir el golpe que lo destruiría devuelve un disparo hacia ti. Usa misiles, drones o el prisma.'},
  magnet:{name:'IMÁN',      desc:'Atrae el oro del suelo hacia sí mismo (radio 160) y suelta el doble de botín. Cázalo rápido o te vaciará la pantalla.'},
  kami:  {name:'KAMIKAZE',  desc:'Se lanza contra ti y explota dañando todo en radio 70. Media vida, máxima agresividad.'},
+ /* v4.16: el MAGO — sanador arcano que escala con su nivel */
+ mago:  {name:'MAGO',      desc:'No baja nunca: flota junto a su banda y lanza PULSOS ARCANOS que curan a los aliados heridos. Cuanto MÁS NIVEL tiene, MÁS aliados cura a la vez (1 → hasta 6) y desde nivel alto INVOCA esbirros. Prioridad objetivo: mátalo primero.'},
 };
 
 /* ============ niveles de enemigo ============ */
@@ -80,14 +82,26 @@ const TYPES={
   reflect:{shape:'penta',  color:'#B0F2FF',mult:1.1, spd:0.75,reflects:true},
   magnet: {shape:'circle', color:'#C9A0FF',mult:1.0, spd:0.8,magnet:true},
   kami:   {shape:'tri',    color:'#FF4757',mult:0.55,spd:1.0,kami:true},
+  /* v4.16: MAGO — sanador arcano. No pica nunca (mage:true), cura a N aliados
+     (N = mageHealTargets según su nivel) e invoca esbirros. Túnica lila. */
+  mago:   {shape:'mage',   color:'#B388FF',mult:0.95,spd:0.75,mage:true},
 };
-const TKLIST=['orb','dart','block','dash','sentry','medic','hive','reflect','magnet','kami'];
+/* v4.16: 'mago' va AL FINAL del TKLIST — el índice viaja en el snapshot co-op
+   (TKLIST.indexOf) y añadir al final mantiene compatibles los índices viejos */
+const TKLIST=['orb','dart','block','dash','sentry','medic','hive','reflect','magnet','kami','mago'];
 const ECOLORS=['#FF6B6B','#F2EFE6','#7FD1B9','#FFD166','#FF7EB6','#64C7FF','#7DFF9E','#C8CFD8'];
 function colorIdx(c){return Math.max(0,ECOLORS.indexOf(c));}
+/* ============ v4.16: EL MAGO ============ */
+/* Cuántos aliados puede curar un mago de nivel elvl con un pulso.
+   Los niveles de enemigo empiezan en ~96 (v4.9), así que la escala es:
+   nv 96–101 → 1 · nv 102–113 → 2 · nv 114–125 → 3 · nv 126–137 → 4
+   nv 138–149 → 5 · nv 150+ → 6 (tope). Más nivel = más aliados curados. */
+function mageHealTargets(elvl){return clamp(1+Math.floor((elvl-90)/12),1,6);}
 function typeForLevel(l){
   const r=R();
-  if(l>=12)return r<.32?'hive':r<.52?'block':r<.68?'sentry':r<.78?'reflect':r<.87?'kami':r<.94?'magnet':'medic';
-  if(l>=10)return r<.28?'hive':r<.46?'block':r<.62?'sentry':r<.72?'reflect':r<.82?'kami':r<.92?'magnet':'dash';
+  /* v4.16: el MAGO entra en las mezclas altas (~6-7% de las figuras) */
+  if(l>=12)return r<.28?'hive':r<.46?'block':r<.60?'sentry':r<.70?'reflect':r<.78?'kami':r<.86?'magnet':r<.93?'medic':'mago';
+  if(l>=10)return r<.26?'hive':r<.42?'block':r<.56?'sentry':r<.66?'reflect':r<.76?'kami':r<.86?'magnet':r<.94?'dash':'mago';
   if(l>=8) return r<.26?'hive':r<.46?'block':r<.64?'sentry':r<.76?'reflect':r<.88?'medic':'dash';
   if(l>=6) return r<.26?'block':r<.46?'sentry':r<.62?'reflect':r<.80?'dash':r<.92?'medic':'orb';
   if(l>=5) return r<.28?'block':r<.5?'sentry':r<.72?'dash':r<.86?'medic':'orb';
