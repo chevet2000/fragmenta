@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.3 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.4 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -218,9 +218,14 @@ button{font-family:inherit}
 .shop-res span{display:flex;align-items:center;gap:5px}
 .shop-res svg{width:13px;height:13px}
 #btnCloseShop{width:auto;padding:9px 16px}
-.tree-wrap{flex:1;overflow:auto;width:100%;display:flex;justify-content:flex-start;padding:10px 0 14px;
-  -webkit-overflow-scrolling:touch}
-#treeSvg{width:780px;height:auto;flex:none;display:block;margin:0 auto}
+.tree-wrap{flex:1;overflow:auto;width:100%;display:flex;justify-content:flex-start;align-items:flex-start;padding:10px 0 14px;
+  -webkit-overflow-scrolling:touch;position:relative}
+#zoomBar{position:absolute;top:8px;right:10px;display:flex;gap:6px;z-index:5;align-items:center}
+.zbtn{width:34px;height:34px;border:1px solid var(--line);background:rgba(12,16,22,.9);color:var(--ink);
+  font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.zbtn:active{border-color:var(--amber);color:var(--amber)}
+.zbtn.zpct{width:auto;padding:0 8px;font-size:10px;letter-spacing:.1em;color:var(--dim);pointer-events:none}
+#treeSvg{width:1190px;height:1420px;flex:none;display:block;margin:0 auto}
 .shop-foot{width:100%;border-top:1px solid var(--line);padding:12px 16px calc(env(safe-area-inset-bottom,0px) + 14px);
   background:var(--panel)}
 #ndInfo{min-height:70px;margin-bottom:8px}
@@ -245,6 +250,7 @@ button{font-family:inherit}
 .blbl{fill:var(--dim);font-size:8px;letter-spacing:.12em;text-anchor:middle;font-weight:700;font-family:'Chakra Petch'}
 .lk{stroke:var(--line);stroke-width:2}
 .lk.on{stroke:var(--amber)}
+.mrglk{stroke-dasharray:5 4}
 @keyframes pulse{0%,100%{stroke-opacity:1}50%{stroke-opacity:.35}}
 .profrow{display:flex;gap:8px;margin-top:10px}
 .profrow .btn{padding:9px 6px;font-size:10px}
@@ -365,7 +371,7 @@ button{font-family:inherit}
     <canvas id="heroCv" width="640" height="340"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">Nueva rama <b>ELEMENTOS</b>: ⚡ electrocuta, ❄ congela, 🌬 repele y 🔥 quema. Mini-mapa de amenazas, 111 mejoras, 8 Guardiánes, Campistas, cofres y <b>DESAFÍO SEMANAL</b>.</p>
+  <p class="tagline">Nuevas ramas <b>IMÁN · PROSPERIDAD · AZAR · ENLACE</b> y nodos de <b>FUSIÓN</b> con final compartido. Cofre blindado cada 2 oleadas, poderes temporales por sorteo, curación al compañero, zoom en el arsenal y <b>DESAFÍO SEMANAL</b>.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -391,7 +397,7 @@ button{font-family:inherit}
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.3 · ELEMENTOS · MINI-MAPA · 111 MEJORAS · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.4 · FUSIONES · COFRE BLINDADO · AZAR · IMÁN · ENLACE · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -501,12 +507,12 @@ button{font-family:inherit}
     </div>
     <button class="btn" id="btnCloseShop">VOLVER</button>
   </div>
-  <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 780 1400"></svg></div>
+  <div class="tree-wrap"><div id="zoomBar"><button class="zbtn" id="zOut">−</button><span class="zbtn zpct" id="zPct">100%</span><button class="zbtn" id="zIn">+</button><button class="zbtn" id="zFit">⤢</button></div><svg id="treeSvg" viewBox="0 0 1190 1420"></svg></div>
   <div class="shop-foot">
     <div id="ndInfo">
       <b id="ndName">ÁRBOL DE HABILIDADES</b>
       <div id="ndMeta"></div>
-      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. La rama ELEMENTOS añade afinidades: ⚡ ❄ 🌬 🔥. Perfil LOCAL y ONLINE independientes.</p>
+      <p id="ndDesc">Toca un nodo y pulsa DESBLOQUEAR. Ramas IMÁN, PROSPERIDAD, AZAR y ENLACE + nodos de FUSIÓN con final compartido. Perfil LOCAL y ONLINE independientes.</p>
       <div id="ndCost"></div>
     </div>
     <button class="btn primary" id="btnBuy" disabled>DESBLOQUEAR</button>
@@ -657,7 +663,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.3';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.4';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0};}
@@ -949,9 +955,9 @@ function typeForLevel(l){
   return r<.6?'orb':'dart';
 }
 
-/* ============ árbol: 111 nodos, 8 ramas ============ */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720};
+/* ============ árbol: nodos, 12 ramas + fusiones ============ */
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',mrg:'FUSIÓN'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -1066,8 +1072,53 @@ const TREE=[
  {id:'e10',b:'ele',i:9,cost:{gold:800,gems:3},wave:6,tag:'ASQ',name:'ASCUA',desc:'🔥 12% al impactar: incendia (4 de daño/s durante 3 s).',fx:b=>b.fire={ch:.12,dps:4,dur:3,spread:0,boom:false}},
  {id:'e11',b:'ele',i:10,req:'e10',cost:{gold:1800,gems:6},wave:10,tag:'LLA',name:'LLAMA',desc:'🔥 18%: 7 de daño/s durante 4 s y se propaga a 1 enemigo cercano.',fx:b=>b.fire={ch:.18,dps:7,dur:4,spread:1,boom:false}},
  {id:'e12',b:'ele',i:11,req:'e11',cost:{gems:20},wave:15,ship:11,tag:'INF',name:'INFERNO',desc:'🔥 TOPE · 28%: 12 de daño/s durante 5 s, propaga a 2 y los quemados explotan al morir.',fx:b=>b.fire={ch:.28,dps:12,dur:5,spread:2,boom:true}},
+ /* ---- RAMA IMÁN (10 mejoras · radio de recogida) ---- */
+ {id:'im1',b:'ima',i:0,req:null,cost:{gold:250},wave:1,tag:'IMA',name:'IMÁN BÁSICO',desc:'Radio de recogida +60%.',fx:b=>b.magnet+=.6},
+ {id:'im2',b:'ima',i:1,req:'im1',cost:{gold:700},wave:4,tag:'IMA2',name:'IMÁN DOBLE',desc:'Radio de recogida +60% más.',fx:b=>b.magnet+=.6},
+ {id:'im3',b:'ima',i:2,req:'im2',cost:{gems:5},wave:7,tag:'CMP',name:'CAMPO MAGNÉTICO',desc:'Radio +80%.',fx:b=>b.magnet+=.8},
+ {id:'im4',b:'ima',i:3,req:'im3',cost:{gold:1300},wave:10,tag:'CMP2',name:'BOBINAS DE FLUJO',desc:'Radio +80% más.',fx:b=>b.magnet+=.8},
+ {id:'im5',b:'ima',i:4,req:'im4',cost:{gems:8},wave:13,tag:'ATR',name:'ATRAYENTE',desc:'Radio +100%. El oro vuela hacia ti.',fx:b=>b.magnet+=1},
+ {id:'im6',b:'ima',i:5,req:'im5',cost:{gold:2200,gems:4},wave:16,ship:7,tag:'ATR2',name:'ATRAYENTE PLUS',desc:'Radio +100% más.',fx:b=>b.magnet+=1},
+ {id:'im7',b:'ima',i:6,req:'im6',cost:{gems:10},wave:19,ship:9,tag:'MGR',name:'NÚCLEO MAGNETAR',desc:'Radio +120%.',fx:b=>b.magnet+=1.2},
+ {id:'im8',b:'ima',i:7,req:'im7',cost:{gold:3000,gems:6},wave:22,ship:11,tag:'MGR2',name:'MAGNETAR PLUS',desc:'Radio +120% más.',fx:b=>b.magnet+=1.2},
+ {id:'im9',b:'ima',i:8,req:'im8',cost:{gems:14},wave:26,ship:12,tag:'SNG',name:'SINGULARIDAD',desc:'Radio +140%. Nada escapa.',fx:b=>b.magnet+=1.4},
+ {id:'im10',b:'ima',i:9,req:'im9',cost:{gold:3600,gems:8},wave:30,ship:14,tag:'HOR',name:'HORADADOR ESTELAR',desc:'TOPE · Radio +160%: recoges el botín de media pantalla.',fx:b=>b.magnet+=1.6},
+ /* ---- RAMA PROSPERIDAD (experiencia + oro a la vez) ---- */
+ {id:'fp1',b:'for',i:0,req:null,cost:{gold:300,gems:2},wave:2,tag:'PRM',name:'PROMESA',desc:'+10% de oro y +10% de experiencia.',fx:b=>{b.goldMul*=1.10;b.expMul*=1.10}},
+ {id:'fp2',b:'for',i:1,req:'fp1',cost:{gold:700,gems:3},wave:5,tag:'INV',name:'INVERSIÓN',desc:'+12% de oro y +12% de experiencia.',fx:b=>{b.goldMul*=1.12;b.expMul*=1.12}},
+ {id:'fp3',b:'for',i:2,req:'fp2',cost:{gold:1200,gems:5},wave:8,tag:'DIV',name:'DIVIDENDO',desc:'+14% de oro y +14% de experiencia.',fx:b=>{b.goldMul*=1.14;b.expMul*=1.14}},
+ {id:'fp4',b:'for',i:3,req:'fp3',cost:{gold:1800,gems:7},wave:12,ship:7,tag:'ACR',name:'ACUMULACIÓN',desc:'+16% de oro y +16% de experiencia.',fx:b=>{b.goldMul*=1.16;b.expMul*=1.16}},
+ {id:'fp5',b:'for',i:4,req:'fp4',cost:{gems:10},wave:16,ship:9,tag:'CMP',name:'COMPOUNDING',desc:'+18% de oro y +18% de experiencia.',fx:b=>{b.goldMul*=1.18;b.expMul*=1.18}},
+ {id:'fp6',b:'for',i:5,req:'fp5',cost:{gold:3000,gems:10},wave:20,ship:11,tag:'EMP',name:'IMPERIO',desc:'+20% de oro y +20% de experiencia.',fx:b=>{b.goldMul*=1.20;b.expMul*=1.20}},
+ {id:'fp7',b:'for',i:6,req:'fp6',cost:{gems:14},wave:25,ship:13,tag:'DIN',name:'DINASTÍA',desc:'+22% de oro y +22% de experiencia.',fx:b=>{b.goldMul*=1.22;b.expMul*=1.22}},
+ {id:'fp8',b:'for',i:7,req:'fp7',cost:{gold:4200,gems:12},wave:30,ship:15,tag:'EPO',name:'EPOPEYA DEL ORO',desc:'TOPE · +25% de oro y +25% de experiencia.',fx:b=>{b.goldMul*=1.25;b.expMul*=1.25}},
+ /* ---- RAMA AZAR (poderes temporales por sorteo) ---- */
+ {id:'sz0',b:'sor',i:0,req:null,cost:{gold:800,gems:12},wave:6,tag:'ENG',name:'ENIGMA',desc:'Desbloquea el PROTOCOLO AZAR: 35% de activar un poder temporal al azar al iniciar cada oleada (dura 2 oleadas).',fx:b=>b.azar=true},
+ {id:'sz1',b:'sor',i:1,req:'sz0',cost:{gold:500},wave:8,tag:'AZ1',name:'PROTOCOLO I',desc:'Probabilidad del sorteo +5% (35% → 40%).',fx:b=>b.azar=true},
+ {id:'sz2',b:'sor',i:2,req:'sz1',cost:{gems:4},wave:10,tag:'AZ2',name:'PROTOCOLO II',desc:'Probabilidad +5% (→ 45%).',fx:b=>b.azar=true},
+ {id:'sz3',b:'sor',i:3,req:'sz2',cost:{gold:900,gems:2},wave:12,ship:8,tag:'AZ3',name:'PROTOCOLO III',desc:'Probabilidad +5% (→ 50%).',fx:b=>b.azar=true},
+ {id:'sz4',b:'sor',i:4,req:'sz3',cost:{gems:6},wave:15,tag:'AZ4',name:'PROTOCOLO IV',desc:'Probabilidad +5% (→ 55%).',fx:b=>b.azar=true},
+ {id:'sz5',b:'sor',i:5,req:'sz4',cost:{gold:1400,gems:3},wave:18,ship:10,tag:'AZ5',name:'PROTOCOLO V',desc:'Probabilidad +5% (→ 60%).',fx:b=>b.azar=true},
+ {id:'sz6',b:'sor',i:6,req:'sz5',cost:{gems:8},wave:21,tag:'AZ6',name:'PROTOCOLO VI',desc:'Probabilidad +5% (→ 65%).',fx:b=>b.azar=true},
+ {id:'sz7',b:'sor',i:7,req:'sz6',cost:{gold:1600,gems:4},wave:24,ship:12,tag:'AZ7',name:'PROTOCOLO VII',desc:'Probabilidad +5% (→ 70%).',fx:b=>b.azar=true},
+ {id:'sz8',b:'sor',i:8,req:'sz7',cost:{gems:10},wave:27,ship:13,tag:'AZ8',name:'PROTOCOLO VIII',desc:'Probabilidad +5% (→ 75%).',fx:b=>b.azar=true},
+ {id:'sz9',b:'sor',i:9,req:'sz8',cost:{gold:2400,gems:5},wave:30,ship:14,tag:'AZ9',name:'GOBIERNO DEL AZAR',desc:'TOPE · Probabilidad +5% (→ 80%).',fx:b=>b.azar=true},
+ /* ---- RAMA ENLACE (curación al compañero · en solo te cura a ti) ---- */
+ {id:'en1',b:'enl',i:0,req:null,cost:{gold:900,gems:5},wave:6,tag:'ENL',name:'ENLACE VITAL',desc:'Cura 1 PV al compañero cada 5 s (en solo: te cura a ti).',fx:b=>b.linkHeal=1},
+ {id:'en2',b:'enl',i:1,req:'en1',cost:{gold:1400,gems:4},wave:10,tag:'ENL2',name:'ENLACE ESTABLE',desc:'Cura 2 PV cada 5 s.',fx:b=>b.linkHeal=2},
+ {id:'en3',b:'enl',i:2,req:'en2',cost:{gems:8},wave:14,ship:8,tag:'ENL3',name:'ENLACE TENSAO',desc:'Cura 3 PV cada 5 s.',fx:b=>b.linkHeal=3},
+ {id:'en4',b:'enl',i:3,req:'en3',cost:{gold:2200,gems:6},wave:18,ship:10,tag:'ENL4',name:'ENLACE RÁPIDO',desc:'Cura 4 PV cada 4.5 s.',fx:b=>{b.linkHeal=4;b.linkRate=4.5}},
+ {id:'en5',b:'enl',i:4,req:'en4',cost:{gems:12},wave:23,ship:12,tag:'ENL5',name:'VÍNCULO PROFUNDO',desc:'Cura 6 PV cada 4 s.',fx:b=>{b.linkHeal=6;b.linkRate=4}},
+ {id:'en6',b:'enl',i:5,req:'en5',cost:{gems:16},wave:28,ship:14,tag:'ALM',name:'ALMA GEMELA',desc:'TOPE · Cura 8 PV cada 3.5 s.',fx:b=>{b.linkHeal=8;b.linkRate=3.5}},
+ /* ---- NODOS DE FUSIÓN (final compartido: llega por cualquiera de las dos ramas) ---- */
+ {id:'m1',b:'mrg',i:0,x:250,y:1210,cost:{gems:20},wave:24,ship:14,tag:'TIT',name:'OJO DEL TITÁN',desc:'Fusión OFENSIVA·RAPIDEZ (crítico + daño + cadencia): daño +1, crítico +10%, cadencia +12%.',any:['o8','r7'],fx:b=>{b.dmg+=1;b.crit+=.10;b.rate*=1.12}},
+ {id:'m3',b:'mrg',i:1,x:250,y:1330,cost:{gems:20},wave:24,ship:14,tag:'SIN',name:'SINGULARIDAD DE HIERRO',desc:'Fusión DEFENSA·TÁCTICA: +4 de vida máxima y +1 dron orbital.',any:['d8','t8'],fx:b=>{b.maxHp+=4;b.drones++}},
+ {id:'m2',b:'mrg',i:2,x:582,y:1210,cost:{gold:2400,gems:10},wave:28,ship:15,tag:'ECO',name:'ECONOMÍA DE GUERRA',desc:'Fusión RIQUEZA·SABIDURÍA: +20% de oro y +20% de experiencia.',any:['w7','s7'],fx:b=>{b.goldMul*=1.2;b.expMul*=1.2}},
+ {id:'m4',b:'mrg',i:3,x:535,y:1330,cost:{gems:22},wave:30,ship:15,tag:'GRA',name:'CAMPO UNIFICADO',desc:'Fusión SOPORTE·IMÁN: imán +120% y balas enemigas 10% más lentas.',any:['u8','im10'],fx:b=>{b.magnet+=1.2;b.slow*=.9}},
+ {id:'m5',b:'mrg',i:4,x:962,y:1210,cost:{gold:3000,gems:12},wave:32,ship:16,tag:'COM',name:'COMODÍN ETERNO',desc:'Fusión PROSPERIDAD·AZAR: +6% de azar permanente, +15% de oro y experiencia.',any:['fp8','sz9'],fx:b=>{b.azarBonus=(b.azarBonus||0)+.06;b.goldMul*=1.15;b.expMul*=1.15}},
 ];
 TREE.forEach(nd=>{
+  if(nd.b==='mrg')return;
   if(nd.b==='ele'){nd.x=BX.ele;nd.y=92+nd.i*88;}
   else{nd.x=nd.s?BX[nd.b]+(nd.s==='A'?-30:30):BX[nd.b];
        nd.y=nd.s?830+nd.i*95:92+nd.i*92;}
@@ -1075,6 +1126,7 @@ TREE.forEach(nd=>{
 const byBranch={};
 for(const nd of TREE)(byBranch[nd.b]=byBranch[nd.b]||[]).push(nd);
 for(const b in byBranch){
+  if(b==='mrg')continue;
   const arr=byBranch[b].filter(n=>!n.s).sort((a,c)=>a.i-c.i);
   if(b!=='ele'){
     for(let i=0;i<arr.length-1;i++)arr[i].next=arr[i+1].id;
@@ -1137,7 +1189,7 @@ const CARDS=[
 /* ============ estado global ============ */
 let state='menu',runActive=false,shopReturn='menu',lastWaveType='';
 const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]],relics:[],
-  shipLv:1,exp:0,missions:[],combo:0,
+  shipLv:1,exp:0,missions:[],combo:0,tempBuffs:[],
   stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false};
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[];
@@ -1160,14 +1212,14 @@ function mkPlayer(slot){return{
   vamp:false,frenzy:false,execute:false,presa:false,reflect:false,venge:false,secondWind:false,
   dash:false,stone:false,homing:false,prism:false,priFast:false,msl:1,neb:false,pointDef:false,
   slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
-  elec:null,ice:null,iceTop:false,wind:null,fire:null,
+  elec:null,ice:null,iceTop:false,wind:null,fire:null,linkHeal:0,linkRate:5,linkT:0,
   overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   touch:null
 };}
 let players=[mkPlayer(0)];
-const P=players[0];
+let P=players[0]; // se re-vincula en cada inicio de partida (ver bindP)
 let remoteBase=null;
 let localSlot=0;
 
@@ -1223,7 +1275,7 @@ function computeStatblock(){
 }
 function blankStats(){
   return{dmg:2,rate:3,bul:1,files:1,spd:1,pierce:0,crit:.05,magnet:1,maxHp:4,regenRate:0,nova:null,
-    slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,
+    slow:1,goldMul:1,expMul:1,goldRate:0,aura:false,emergency:false,field:false,bounce:0,over:false,linkHeal:0,linkRate:5,azar:false,azarBonus:0,
     drones:0,orbs:0,shield:false,shieldFast:false,phx:0,vamp:false,frenzy:false,execute:false,
     presa:false,reflect:false,venge:false,secondWind:false,dash:false,stone:false,homing:false,prism:false,
     priFast:false,msl:1,neb:false,pointDef:false,slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,
@@ -1295,7 +1347,7 @@ function hostOnData(d){
   if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
   if(d.t==='inp'&&players[1]&&players[1].hp>0){
-    players[1].x=clamp(d.x,18,W-18); players[1].y=clamp(d.y,H*.5,H-36); return;
+    players[1].x=clamp(d.x,18,W-18); players[1].y=clamp(d.y,H*.45,H-20); return;
   }
   if(d.t==='nova'){ fireNovaSlot(1); return; }
   if(d.t==='emo'){ addEmoFx(1,'emo',d.e); return; }
@@ -1316,7 +1368,7 @@ function hostOnData(d){
     applyRelicChoice(); return;
   }
   if(d.t==='chestPick'&&state==='chestwait'){
-    chestSlot=1; chestReward(d.id); return;
+    chestSlot=1; chestReward(d.id,d.kind); return;
   }
   if(d.t==='bye'){ if(runActive)runActive=false; destroyNet(); goMenu(); }
 }
@@ -1477,13 +1529,15 @@ function clientEvent(d){
   }
   if(k==='chest'){
     state='chestpick';SFX.chest();
+    const ckind=d.kind||'boss';
     buildChestUI(d.lv,id=>{
-      sendMsg({t:'chestPick',id});
+      sendMsg({t:'chestPick',id,kind:ckind});
       showScr(null);state='play';
-    });
+    },ckind);
     showScr('chest');
     return;
   }
+  if(k==='temp'){ run.tempBuffs=d.l||[]; return; }
   if(k==='chestw'){ banner('COFRE','El anfitrión está abriendo…'); return; }
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
   if(k==='over'){
@@ -1544,7 +1598,7 @@ function applySnap(d){
   cBossPct=d.bp||0;
   cEB=d.eb.map(b=>({x:b[0],y:b[1],r:b[2],color:ECOLORS[b[3]]||'#F2EFE6'}));
   cBL=d.bl.map(b=>({x:b[0],y:b[1],ang:b[2]/100,kind:b[3]}));
-  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest'][p[0]],x:p[1],y:p[2]}));
+  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest'][p[0]]||'gold',x:p[1],y:p[2],shield:p[3]||0,shieldMax:p[4]||0}));
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));
   cNovaCd=d.nc;
 }
@@ -1564,6 +1618,7 @@ function recompute(){
       if(rb.nova)b.nova=rb.nova;
     }
     for(const id of (run.buffs[slot]||[])){const c=CARDS.find(c=>c.id===id);if(c)c.f(b);}
+    for(const tb of (run.tempBuffs||[])){const tc=TEMP_POOL.find(t=>t.id===tb.id);if(tc)tc.f(b);}
     const RR=id=>run.relics.includes(id);
     if(RR('nucleo')){b.dmg+=2;b.maxHp-=1;}
     if(RR('hierro')){b.maxHp+=3;b.heal+=3;}
@@ -1588,6 +1643,7 @@ function recompute(){
     pl.slowField=b.slowField;pl.novaRadial=b.novaRadial;pl.novaCdMul=b.novaCdMul;pl.novaMul=b.novaMul;
     pl.ojiva=b.ojiva;pl.gemLuck=b.gemLuck;pl.heartDrop=b.heartDrop;pl.vortex=b.vortex;
     pl.elec=b.elec;pl.ice=b.ice;pl.iceTop=b.iceTop;pl.wind=b.wind;pl.fire=b.fire;
+    pl.linkHeal=b.linkHeal||0;pl.linkRate=b.linkRate||5;pl.linkT=pl.linkT||0;
     pl.overEvery=b.overEvery;pl.desperate=b.desperate;pl.dashFast=b.dashFast;
     pl.droneFast=b.droneFast;pl.homeFast=b.homeFast;pl.gemExtra=b.gemExtra;
     pl.phoenixCharges=b.phx;
@@ -2000,6 +2056,14 @@ function buildWave(L){
   }
   const names=comps.map(t=>WAVE_NAME[t]).join(' + ');
   banner('OLEADA '+L+(comps.length>1?' · MIXTA':''),names+' · nv '+minLvlOf(L)+'–'+maxLvlOf(L)+' · '+DIFF_LABEL[runDiff]);
+  /* ---- cofre blindado cada 2 oleadas ---- */
+  if(L>=2&&L%2===0&&L%5!==0&&!pickups.some(p=>p.t==='schest')){
+    const sh=18+L*3;
+    const cx=clamp(W/2+rand(-W*.3,W*.3),50,W-50);
+    pickups.push({t:'schest',x:cx,y:-46,vx:0,vy:0,shield:sh,shieldMax:sh,kind:'arm'});
+    floater(cx,110,'COFRE BLINDADO','#64C7FF',13);
+    if(run.level<=4)banner('COFRE BLINDADO','Destruye su escudo a disparos y atrápalo');
+  }
 }
 function updWaveSpawns(dt){
   if(wave.pool.length===0)return;
@@ -2387,6 +2451,27 @@ function updBullets(dt){
         }
       }
     }
+    if(!b.dead){
+      for(const p of pickups){
+        if(p.t!=='schest')continue;
+        if(Math.hypot(b.x-p.x,b.y-p.y)<24+b.r){
+          b.dead=true;
+          p.shield-=b.dmg;
+          burst(p.x+rand(-8,8),p.y+rand(-8,8),'#64C7FF',3,70);
+          floater(p.x,p.y-30,'-'+b.dmg,'#64C7FF',10);
+          tone(760,520,.05,'sine',.02);
+          if(p.shield<=0){
+            p.t='chest';
+            rings.push({x:p.x,y:p.y,r:10,R:86,t:0,life:.5,color:'#64C7FF'});
+            hostRing(p.x,p.y,86,'#64C7FF');
+            floater(p.x,p.y-42,'¡ESCUDO ROTO!','#64C7FF',13);
+            tone(200,900,.3,'sine',.06);
+            vib(40);
+          }
+          break;
+        }
+      }
+    }
     if(!b.dead&&boss&&!b.hits.includes('B')){
       let blocked=false;
       if(boss.shields&&boss.shields.length){
@@ -2649,14 +2734,13 @@ function updCollisions(){
 }
 function updPickups(dt){
   for(const p of pickups){
-    const isChest=p.t==='chest'||p.t==='minichest';
-    p.vy=Math.min(isChest?(p.t==='minichest'?50:40):70,p.vy+150*dt);p.vx*=.99;
+    p.vy=Math.min(p.t==='minichest'?50:p.t==='schest'?26:p.t==='chest'?40:70,p.vy+150*dt);p.vx*=.99;
     const pl=nearestPlayer(p.x,p.y);
     const dx=pl.x-p.x,dy=pl.y-p.y,d=Math.hypot(dx,dy)||1;
     const R2=70*pl.magnet;
-    if(d<R2){const f=(1-d/R2)*1100;p.vx+=dx/d*f*dt;p.vy+=dy/d*f*dt;}
+    if(d<R2&&p.t!=='schest'){const f=(1-d/R2)*1100;p.vx+=dx/d*f*dt;p.vy+=dy/d*f*dt;}
     p.x+=p.vx*dt;p.y+=p.vy*dt;
-    if(d<24){
+    if(d<24&&p.t!=='schest'){
       p.dead=true;
       const remote=pl.slot===1&&net.mode==='host';
       if(p.t==='gold'){
@@ -2668,7 +2752,7 @@ function updPickups(dt){
         else{save.gems++;run.gemsRun++;}
         SFX.gem();floater(pl.x,pl.y-26,'+1 GEMA','#64C7FF',11);
       }else if(p.t==='chest'){
-        openChest(pl.slot);
+        openChest(pl.slot,p.kind);
       }else if(p.t==='minichest'){
         SFX.chest();
         if(R()<.6){
@@ -2996,6 +3080,23 @@ function updPlayer(pl,dt){
       e.hp-=16*dt;e.flash=Math.max(e.flash,.3);if(e.hp<=0)killEnemy(e,pl.slot);}}
     if(boss&&Math.hypot(boss.x-pl.x,boss.y-pl.y)<boss.r+75)boss.hp-=16*dt;
   }
+  if(pl.linkHeal>0){
+    pl.linkT+=dt;
+    const iv=pl.linkRate||5;
+    if(pl.linkT>=iv){
+      pl.linkT=0;
+      let tgt=null;
+      if(players.length>1)tgt=players.find(q=>q.slot!==pl.slot&&q.hp>0&&q.hp<q.maxHp)||null;
+      else if(pl.hp>0&&pl.hp<pl.maxHp)tgt=pl;
+      if(tgt){
+        tgt.hp=Math.min(tgt.maxHp,tgt.hp+pl.linkHeal);
+        floater(tgt.x,tgt.y-30,'+'+pl.linkHeal+' ENLACE','#7FD1B9',11);
+        rings.push({x:tgt.x,y:tgt.y,r:8,R:52,t:0,life:.45,color:'#7FD1B9'});
+        hostRing(tgt.x,tgt.y,52,'#7FD1B9');
+        tone(700,980,.12,'sine',.035);
+      }
+    }
+  }
   updAbilities(pl,dt);
 }
 function nearestEnemy(x,y,excl,range){
@@ -3115,6 +3216,58 @@ function updWrecks(dt){
   wrecks=wrecks.filter(w=>!w.remove);
 }
 
+/* ============ poderes temporales (PROTOCOLO AZAR) ============ */
+const TEMP_POOL=[
+ {id:'tshield',name:'ESCUDO FANTASMA',desc:'Escudo que bloquea 1 golpe y recarga rápido',f:b=>{b.shield=true;b.shieldFast=true;}},
+ {id:'tmissile',name:'LLUVIA DE MISILES',desc:'Misiles teledirigidos dobles y rápidos',f:b=>{b.homing=true;b.msl=Math.max(b.msl,2);b.homeFast=true;}},
+ {id:'tlaser',name:'TORRETAS LÁSER',desc:'Rayo prismático cada 3 s al enemigo más cercano',f:b=>{b.prism=true;b.priFast=true;}},
+ {id:'theal',name:'PROTOCOLO MÉDICO',desc:'Cura 3 PV al instante y regenera durante el efecto',f:b=>{b.heal+=3;b.regenRate+=.3;}},
+ {id:'torb',name:'ORBITALES FANTASMA',desc:'2 orbes de contacto giran alrededor de la nave',f:b=>{b.orbs+=2;}},
+ {id:'taura',name:'CAMPO CORTANTE',desc:'Desmenuza a los enemigos pegados a tu nave',f:b=>{b.aura=true;}},
+ {id:'trate',name:'SOBRECARGA',desc:'+40% de cadencia de disparo',f:b=>{b.rate*=1.4;}},
+ {id:'tgold',name:'FIESTA DEL ORO',desc:'+4 de oro por segundo y +20% de oro',f:b=>{b.goldRate+=4;b.goldMul*=1.2;}},
+];
+function azarChance(){
+  if(!has('sz0'))return 0;
+  let n=0;for(let i=1;i<=9;i++)if(has('sz'+i))n++;
+  return Math.min(.86,.35+n*.05+(has('m5')?.06:0));
+}
+function syncTempMsg(){
+  if(net.mode==='host')sendMsg({t:'ev',k:'temp',l:run.tempBuffs.map(t=>({id:t.id,waves:t.waves}))});
+}
+function grantTempBuff(slot){
+  if(!run.tempBuffs)run.tempBuffs=[];
+  const act=run.tempBuffs.map(t=>t.id);
+  const pool=TEMP_POOL.filter(t=>!act.includes(t.id));
+  if(!pool.length){
+    if(slot!=null)grantGold(slot,150);
+    return '+150 DE ORO (todos los poderes activos)';
+  }
+  const c=pool[irand(0,pool.length-1)];
+  run.tempBuffs.push({id:c.id,waves:2});
+  recompute();syncTempMsg();
+  return 'PODER: '+c.name+' (2 OLEADAS)';
+}
+function updTempBuffs(){
+  if(!run.tempBuffs)run.tempBuffs=[];
+  for(const tb of run.tempBuffs)tb.waves--;
+  const had=run.tempBuffs.length;
+  run.tempBuffs=run.tempBuffs.filter(tb=>tb.waves>0);
+  if(run.tempBuffs.length<had){recompute();banner('PODER TEMPORAL','Un poder ha expirado');}
+  const ch=azarChance();
+  if(ch>0&&Math.random()<ch){
+    const act=run.tempBuffs.map(t=>t.id);
+    const pool=TEMP_POOL.filter(t=>!act.includes(t.id));
+    if(pool.length){
+      const c=pool[irand(0,pool.length-1)];
+      run.tempBuffs.push({id:c.id,waves:2});
+      recompute();
+      banner('AZAR · '+c.name,c.desc+' · dura 2 oleadas ('+Math.round(ch*100)+'%)');
+    }
+  }
+  syncTempMsg();
+}
+
 /* ============ cofres ============ */
 function grantGold(slot,v){
   if(slot===1&&net.mode==='host')net.walletG+=v;
@@ -3126,26 +3279,32 @@ function grantGems(slot,v){
   else save.gems+=v;
   run.gemsRun+=v;
 }
-function openChest(slot){
+function openChest(slot,kind){
+  kind=kind||'boss';
   save.totChest=(save.totChest||0)+1;
   checkAch();persist();
   SFX.chest();
   if(net.mode==='host'&&slot===1&&net.connected){
     chestSlot=1;chestwaitT=0;
     state='chestwait';
-    sendMsg({t:'ev',k:'chest',lv:run.level});
+    sendMsg({t:'ev',k:'chest',lv:run.level,kind});
     return;
   }
   chestSlot=slot;
   state='chestpick';
-  buildChestUI(run.level,id=>chestReward(id));
+  buildChestUI(run.level,id=>chestReward(id,kind),kind);
   showScr('chest');
   if(net.mode==='host')sendMsg({t:'ev',k:'chestw'});
 }
-function buildChestUI(lv,onPick){
-  const gv=120+lv*18, mv=4+Math.floor(lv/10);
+function buildChestUI(lv,onPick,kind){
+  const arm=kind==='arm';
+  const gv=arm?(140+lv*20):(120+lv*18), mv=arm?(5+Math.floor(lv/9)):(4+Math.floor(lv/10));
   const box=$('#chestOpts');box.innerHTML='';
-  const opts=[
+  const opts=arm?[
+    {id:'gold',b:'◆ ORO GRANDE',p:'+'+gv+' de oro directo a tu perfil.'},
+    {id:'gems',b:'◇ GEMA CRISTALIZADA',p:'+'+mv+' gemas para el arsenal.'},
+    {id:'temp',b:'✦ PODER SORPRESA',p:'Un poder temporal al azar (escudos, misiles, láser, curación…) durante 2 oleadas.'},
+  ]:[
     {id:'gold',b:'◆ ORO GRANDE',p:'+'+gv+' de oro directo a tu perfil.'},
     {id:'gems',b:'◇ GEMA CRISTALIZADA',p:'+'+mv+' gemas para el arsenal.'},
     {id:'relic',b:'◈ RELIQUIA MISTERIOSA',p:'Una reliquia aleatoria que aún no tengas.'},
@@ -3158,7 +3317,7 @@ function buildChestUI(lv,onPick){
     box.appendChild(el);
   });
 }
-function chestReward(id){
+function chestReward(id,kind){
   let msg='';
   if(id==='gold'){
     const v=120+run.level*18;
@@ -3166,6 +3325,8 @@ function chestReward(id){
   }else if(id==='gems'){
     const v=4+Math.floor(run.level/10);
     grantGems(chestSlot,v);msg='+'+v+' GEMAS';
+  }else if(id==='temp'){
+    msg=grantTempBuff(chestSlot);
   }else{
     const pool=RELICS.filter(r=>!run.relics.includes(r.id));
     if(pool.length){
@@ -3210,8 +3371,14 @@ function sendSnap(){
     let kind=b.missile?4:b.dr?3:b.heavy?2:b.crit?1:0;
     return [Math.round(b.x),Math.round(b.y),Math.round(Math.atan2(b.vy,b.vx)*100),kind];
   });
-  const sorted=[...pickups].sort((a,b)=>((b.t==='chest'||b.t==='minichest')?1:0)-((a.t==='chest'||a.t==='minichest')?1:0));
-  const pk=sorted.slice(0,60).map(p=>[p.t==='gold'?0:p.t==='gem'?1:p.t==='chest'?3:p.t==='minichest'?4:2,Math.round(p.x),Math.round(p.y)]);
+  const sorted=[...pickups].sort((a,b)=>((b.t==='chest'||b.t==='minichest'||b.t==='schest')?1:0)-((a.t==='chest'||a.t==='minichest'||a.t==='schest')?1:0));
+  const pk=sorted.slice(0,60).map(p=>
+    p.t==='gold'?[0,Math.round(p.x),Math.round(p.y)]:
+    p.t==='gem'?[1,Math.round(p.x),Math.round(p.y)]:
+    p.t==='chest'?[3,Math.round(p.x),Math.round(p.y)]:
+    p.t==='minichest'?[4,Math.round(p.x),Math.round(p.y)]:
+    p.t==='schest'?[5,Math.round(p.x),Math.round(p.y),Math.max(0,Math.ceil(p.shield)),p.shieldMax]:
+    [2,Math.round(p.x),Math.round(p.y)]);
   const wk=wrecks.map(w=>[w.slot,Math.round(w.x),Math.round(w.y),Math.round(w.prog*100)]);
   const cN=players[1]&&players[1].nova;
   const nc=novaCdGlobal>0?clamp(1-novaCdGlobal/((cN?cN.cd:18)*(cN?players[1].novaCdMul:1)),0,1):1;
@@ -3635,6 +3802,26 @@ function renderGame(dt){
       ctx.beginPath();ctx.arc(0,0,11,0,TAU);ctx.stroke();
       ctx.globalAlpha=1;
     }
+    else if(p.t==='schest'){
+      ctx.rotate(0);
+      ctx.strokeStyle='#FFD166';ctx.lineWidth=2;
+      ctx.strokeRect(-10,-8,20,16);
+      ctx.beginPath();ctx.moveTo(-10,-2.5);ctx.lineTo(10,-2.5);ctx.stroke();
+      ctx.font='700 12px "Chakra Petch",monospace';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#FFD166';ctx.fillText('?',0,5);
+      const frac=clamp((p.shield||0)/(p.shieldMax||1),0,1);
+      ctx.globalAlpha=.4+Math.sin(time*7)*.2;
+      ctx.strokeStyle='#64C7FF';ctx.lineWidth=2.5;
+      ctx.beginPath();
+      for(let i=0;i<6;i++){const a=TAU*i/6+time*.8;
+        const hx=Math.cos(a)*24,hy=Math.sin(a)*24;
+        i?ctx.lineTo(hx,hy):ctx.moveTo(hx,hy);}
+      ctx.closePath();ctx.stroke();
+      ctx.globalAlpha=.85;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.arc(0,0,30,-Math.PI/2,-Math.PI/2+TAU*frac);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
     else{ctx.fillStyle='#FF6B6B';
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();}
     ctx.restore();
@@ -4020,8 +4207,9 @@ function goMenu(){
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
 }
 function resetRunCommon(){
+  P=players[0];
   run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
-  run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;rollMissions();
+  run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;run.tempBuffs=[];rollMissions();
   run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
   pendingShipLevels=0;frenzyT=0;
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
@@ -4150,6 +4338,7 @@ function nextWave(){
     banner('NOVA DE EMERGENCIA','Prepárate: el primer Guardián llega en la oleada 5');
   }
   formY=0;formT=0;
+  if(net.mode!=='client')updTempBuffs();
   buildWave(L);
   waveState='play';clearTimer=0;
 }
@@ -4334,16 +4523,35 @@ function pauseGame(){
 }
 
 /* ============ árbol UI ============ */
+function reqListOk(nd){
+  if(nd.req){const ok=Array.isArray(nd.req)?nd.req.every(has):has(nd.req);if(!ok)return false;}
+  if(nd.any&&!nd.any.some(has))return false;
+  return true;
+}
+function reqText(nd){
+  const parts=[];
+  if(nd.req){const ids=Array.isArray(nd.req)?nd.req:[nd.req];
+    parts.push(ids.map(id=>{const n=TREE.find(q=>q.id===id);return n?n.name:id;}).join(' + '));}
+  if(nd.any)parts.push(nd.any.map(id=>{const n=TREE.find(q=>q.id===id);return n?n.name:id;}).join(' o '));
+  return parts.join(' · ');
+}
 function nodeState(nd){
   const own=has(nd.id);
-  const prevOk=!nd.req||has(nd.req);
+  const prevOk=reqListOk(nd);
   const waveOk=nd.wave<=1||save.best.lvl>=nd.wave;
   const shipOk=save.bestShip>=(nd.ship||1);
   return{own,prevOk,waveOk,shipOk,dispo:!own&&prevOk&&waveOk&&shipOk};
 }
 function renderTree(){
   const svg=$('#treeSvg');let s='';
-  for(const b in BR)s+=`<text class="blbl" x="${BX[b]}" y="54">${BR[b]}</text>`;
+  for(const b in BR)if(BX[b]!=null)s+=`<text class="blbl" x="${BX[b]}" y="54">${BR[b]}</text>`;
+  for(const nd of TREE){
+    if(!nd.any)continue;
+    for(const pid of nd.any){
+      const pa=TREE.find(n=>n.id===pid);if(!pa)continue;
+      s+=`<line x1="${pa.x}" y1="${pa.y+22}" x2="${nd.x}" y2="${nd.y-22}" class="lk mrglk ${has(nd.id)?'on':''}"/>`;
+    }
+  }
   for(const b in byBranch){
     for(const nd of byBranch[b]){
       if(!nd.next)continue;
@@ -4380,8 +4588,8 @@ function selectNode(id){
   bb.textContent='DESBLOQUEAR';
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
-    mt.textContent=`${TREE.length} MEJORAS · 8 RAMAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. La rama ELEMENTOS añade afinidades ⚡❄🌬🔥 a tus balas. Perfil LOCAL y ONLINE independientes.';
+    mt.textContent=`${TREE.length} MEJORAS · ${Object.keys(BX).length} RAMAS · ${ownedCount()} ADQUIRIDAS`;
+    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Nuevas ramas IMÁN, PROSPERIDAD, AZAR y ENLACE. Los nodos de FUSIÓN (línea punteada) se alcanzan por cualquiera de sus dos ramas. Pellizca o usa +/− para hacer zoom. Perfil LOCAL y ONLINE independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
@@ -4390,8 +4598,7 @@ function selectNode(id){
   const st=nodeState(selNode);
   if(st.own){cs.innerHTML='<span class="cs">ADQUIRIDO</span>';bb.disabled=true;}
   else if(!st.prevOk){
-    const req=TREE.find(n=>n.id===selNode.req);
-    cs.innerHTML=`<span class="cs">Requiere: ${req.name}</span>`;bb.disabled=true;
+    cs.innerHTML=`<span class="cs">Requiere: ${reqText(selNode)}</span>`;bb.disabled=true;
   }else if(!st.waveOk||!st.shipOk){
     cs.innerHTML=`<span class="cs nok">Falta: oleada ${selNode.wave} (récord ${save.best.lvl})${selNode.ship?` · nave nv ${selNode.ship} (récord ${save.bestShip})`:''}</span>`;
     bb.disabled=true;
@@ -4413,7 +4620,7 @@ function buyNode(){
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
   const prof=saveProfile==='local'?'PERFIL LOCAL':'PERFIL ONLINE';
-  $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · 8 RAMAS · v${VERSION}`;
+  $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · ${Object.keys(BX).length} RAMAS · v${VERSION}`;
 }
 function openShop(from){
   shopReturn=from;
@@ -4422,13 +4629,50 @@ function openShop(from){
   showScr('shop');
 }
 
+/* ============ zoom del arsenal ============ */
+const TREE_W=1190, TREE_H=1420;
+let treeZoom=1;
+function applyZoom(){
+  const svg=$('#treeSvg');if(!svg)return;
+  svg.style.width=Math.round(TREE_W*treeZoom)+'px';
+  svg.style.height=Math.round(TREE_H*treeZoom)+'px';
+  const pct=$('#zPct');if(pct)pct.textContent=Math.round(treeZoom*100)+'%';
+}
+function setZoom(z){treeZoom=clamp(Math.round(z*20)/20,.3,2.4);applyZoom();}
+function fitZoom(){setZoom(clamp((window.innerWidth-24)/TREE_W,.3,1));
+  const svg=$('#treeSvg');if(svg&&svg.parentElement)svg.parentElement.scrollLeft=0;}
+$('#zIn').addEventListener('click',()=>setZoom(treeZoom+.15));
+$('#zOut').addEventListener('click',()=>setZoom(treeZoom-.15));
+$('#zFit').addEventListener('click',fitZoom);
+(function(){
+  const tw=$('.tree-wrap');if(!tw)return;
+  const zp=new Map();let pinch=null;
+  tw.addEventListener('pointerdown',e=>{zp.set(e.pointerId,{x:e.clientX,y:e.clientY});});
+  tw.addEventListener('pointermove',e=>{
+    if(!zp.has(e.pointerId))return;
+    zp.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(zp.size===2){
+      const pts=[...zp.values()];
+      const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y);
+      if(pinch&&pinch.d>0&&d>0)setZoom(pinch.z*d/pinch.d);
+      pinch={d,z:treeZoom};
+      e.preventDefault();
+    }
+  },{passive:false});
+  const endP=e=>{zp.delete(e.pointerId);if(zp.size<2)pinch=null;};
+  tw.addEventListener('pointerup',endP);tw.addEventListener('pointercancel',endP);
+})();
+window.addEventListener('resize',()=>{if($('#scrShop').classList.contains('show'))fitZoom();});
+fitZoom();
+
 /* ============ HUD ============ */
 function refreshHUD(){
   $('#hudGold').textContent=save.gold;
   $('#hudGems').textContent=save.gems;
   $('#hpTxt').textContent=players.map(p=>(players.length>1?'P'+(p.slot+1)+' ':'')+p.hp+'/'+p.maxHp).join(' · ');
   const myP=players[localSlot]||players[0];
-  $('#dmgTxt').textContent='DAÑO '+myP.dmg+(weeklyMode?' · SEM':'');
+  const tbn=(run.tempBuffs&&run.tempBuffs.length)?' · ✦'+run.tempBuffs.length:'';
+  $('#dmgTxt').textContent='DAÑO '+myP.dmg+(weeklyMode?' · SEM':'')+tbn;
   const tn=wave.types&&wave.types.length>1?'MIXTA':'';
   $('#hudLevel').textContent=boss
     ?`OLEADA ${run.level} · GUARDIÁN`
@@ -4469,10 +4713,10 @@ function refreshHUD(){
 }
 
 /* ============ CONTROL TÁCTIL ============ */
-const DRAG_GAIN=1.6;
-const TOUCH_LEAD=90;
+const DRAG_GAIN=2.3;
+const TOUCH_LEAD=70;
 function clampShip(pl,x,y){
-  return{x:clamp(x,18,W-18),y:clamp(y,H*.5,H-36)};
+  return{x:clamp(x,18,W-18),y:clamp(y,H*.45,H-20)};
 }
 const activeTouches={};
 function slotFromPointer(clientX){
@@ -4503,7 +4747,7 @@ window.addEventListener('pointermove',e=>{
   if(pl.dash&&pl.dashCd<=0&&dtm<70&&Math.hypot(dx,dy)>30){
     const d=Math.hypot(dx,dy);
     pl.x=clamp(pl.x+dx/d*Math.min(120,d*2.6),18,W-18);
-    pl.y=clamp(pl.y+dy/d*Math.min(70,d*1.4),H*.5,H-36);
+    pl.y=clamp(pl.y+dy/d*Math.min(70,d*1.4),H*.45,H-20);
     pl.invul=Math.max(pl.invul,.35);pl.dashCd=pl.dashFast?1.2:2.2;
     floater(pl.x,pl.y-26,'DASH','#64C7FF',11);
     tone(900,300,.1,'sine',.04);
@@ -4637,6 +4881,7 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
     sendMsg({t:'ev',k:'end'});
     destroyNet();
     players=[players[0]];
+    P=players[0];
     wrecks=wrecks.filter(w=>w.slot===0);
     recompute();
     $('#netWait').classList.add('hidden');
