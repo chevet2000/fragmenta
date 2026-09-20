@@ -325,6 +325,16 @@ function drawShip(pl,isLocal){
   g.restore();
   if(!isLocal)return;
   const key=''+pl.slot;
+  /* v4.9: bots aliados (naves doradas autónomas) */
+  for(let i=0;i<bots.length;i++){
+    const bt=bots[i];
+    g.save();g.translate(bt.x,bt.y);
+    g.strokeStyle='#FFD166';g.lineWidth=1.6;
+    g.beginPath();g.moveTo(0,-9);g.lineTo(7,7);g.lineTo(-7,7);g.closePath();g.stroke();
+    g.fillStyle='rgba(255,209,102,.3)';g.fill();
+    g.fillStyle='#B388FF';g.fillRect(-1.5,-1.5,3,3);
+    g.restore();
+  }
   for(let i=0;i<(pl.drones||0)&&i<dronePos[key].length;i++){
     const d=dronePos[key][i];if(!d)continue;
     g.save();g.translate(d.x,d.y);g.rotate(time*3+i);
@@ -474,6 +484,7 @@ function renderGame(dt){
         ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-5,4);ctx.lineTo(-5,-4);ctx.closePath();ctx.fill();
         ctx.restore();
       }else if(b.dr){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-1.2,b.y-5,2.4,10);}
+      else if(b.bot){ /* v4.9: balas del aliado bot */ ctx.fillStyle='#B388FF';ctx.fillRect(b.x-1.5,b.y-6,3,12);}
       else if(b.heavy){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-2.5,b.y-9,5,18);}
       else{ctx.fillStyle=b.crit?'#FFD166':'#F2EFE6';ctx.fillRect(b.x-1.5,b.y-7,3,14);}
     }

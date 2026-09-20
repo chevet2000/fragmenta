@@ -9,6 +9,7 @@ function loop(now){
   if(state==='play'&&!amClient()){
     run.time+=dt;
     for(const pl of players)updPlayer(pl,dt);
+    updBots(dt); /* v4.9: aliado bot de combate */
     updBullets(dt);
     updWaveSpawns(dt);
     updEnemies(dt);
@@ -63,7 +64,17 @@ function loop(now){
   hudAcc+=dt;
   if(hudAcc>.1){hudAcc=0;if(runActive)refreshHUD();}
   persAcc+=dt;
-  if(persAcc>8){persAcc=0;if(runActive)persist();}
+  if(persAcc>8){persAcc=0;
+    if(runActive){
+      /* v4.9: el récord frenético se guarda progresivamente (salir no lo pierde) */
+      if(frenzyMode){
+        if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
+        save.frenzy.bestT=Math.max(save.frenzy.bestT||0,Math.floor(run.time));
+        save.frenzy.bestK=Math.max(save.frenzy.bestK||0,run.kills);
+      }
+      persist();
+    }
+  }
   if(runActive)renderGame(dt);else renderMenuBG(dt);
 }
 requestAnimationFrame(loop);

@@ -59,11 +59,11 @@ function chestReward(id,kind){
   const arm=kind==='arm';
   let msg='';
   if(id==='gold'){
-    /* v4.8: valores según el tipo de cofre (blindado paga mejor) */
-    const v=arm?(140+run.level*20):(120+run.level*18);
+    /* v4.9: recompensas de cofre reducidas (blindado paga algo mejor) */
+    const v=arm?(90+run.level*12):(70+run.level*10);
     grantGold(chestSlot,v);msg='+'+v+' DE ORO';
   }else if(id==='gems'){
-    const v=arm?(5+Math.floor(run.level/9)):(4+Math.floor(run.level/10));
+    const v=arm?(4+Math.floor(run.level/12)):(3+Math.floor(run.level/14));
     grantGems(chestSlot,v);msg='+'+v+' GEMAS';
   }else if(id==='temp'){
     msg=grantTempBuff(chestSlot);

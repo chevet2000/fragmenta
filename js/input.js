@@ -73,6 +73,13 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  bindEl('#btnPause', 'click',()=>{if(state==='play')pauseGame();});
  bindEl('#btnPlay', 'click',()=>{destroyNet();startRun();});
  bindEl('#btnWeekly', 'click',()=>{destroyNet();startWeekly();});
+ bindEl('#btnFrenzy', 'click',()=>{destroyNet();startFrenzy();}); /* v4.9: modo frenético */
+ bindEl('#btnGemX', 'click',()=>{ /* v4.9: mercado de gemas */
+  if(save.gold<GEMX_COST){banner('ORO INSUFICIENTE','Necesitas '+GEMX_COST+' de oro');return;}
+  save.gold-=GEMX_COST;save.gems+=GEMX_GEMS;persist();SFX.buy();vib(25);
+  banner('CAMBIO HECHO','+'+GEMX_GEMS+' gemas para el arsenal');
+  updateShopRes();
+ });
  bindEl('#btnRetry', 'click',()=>{
   if(net.mode){netEndLocal(null);return;}
   if(weeklyMode)startWeekly();else startRun();

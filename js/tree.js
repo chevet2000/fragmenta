@@ -1,7 +1,7 @@
 'use strict';
 /* ============ árbol: nodos, 12 ramas + fusiones ============ */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',mrg:'FUSIÓN'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100};
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',mrg:'FUSIÓN'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -160,6 +160,13 @@ const TREE=[
  {id:'m2',b:'mrg',i:2,x:582,y:1210,cost:{gold:2400,gems:10},wave:28,ship:15,tag:'ECO',name:'ECONOMÍA DE GUERRA',desc:'Fusión RIQUEZA·SABIDURÍA: +20% de oro y +20% de experiencia.',any:['w7','s7'],fx:b=>{b.goldMul*=1.2;b.expMul*=1.2}},
  {id:'m4',b:'mrg',i:3,x:535,y:1330,cost:{gems:22},wave:30,ship:15,tag:'GRA',name:'CAMPO UNIFICADO',desc:'Fusión SOPORTE·IMÁN: imán +120% y balas enemigas 10% más lentas.',any:['u8','im10'],fx:b=>{b.magnet+=1.2;b.slow*=.9}},
  {id:'m5',b:'mrg',i:4,x:962,y:1210,cost:{gold:3000,gems:12},wave:32,ship:16,tag:'COM',name:'COMODÍN ETERNO',desc:'Fusión PROSPERIDAD·AZAR: +6% de azar permanente, +15% de oro y experiencia.',any:['fp8','sz9'],fx:b=>{b.azarBonus=(b.azarBonus||0)+.06;b.goldMul*=1.15;b.expMul*=1.15}},
+ /* ===== v4.9: rama ALIADO — bot de combate; mejoras CARAS con gemas ===== */
+ {id:'b0',b:'bot',i:0,cost:{gold:1200},wave:6,tag:'ALI',name:'ALIADO · CB',desc:'Desbloquea tu bot de combate: una nave autónoma que vuela contigo y dispara al enemigo más cercano (110% de tu daño).',fx:b=>b.bot=1},
+ {id:'b1',b:'bot',i:1,cost:{gems:25},wave:10,req:'b0',tag:'BCA',name:'CAÑÓN DEL ALIADO',desc:'El bot dispara con el DOBLE de daño.',fx:b=>b.botDmg*=2},
+ {id:'b2',b:'bot',i:2,cost:{gems:40},wave:14,req:'b1',tag:'BSO',name:'SOBRECARGA',desc:'El bot dispara un 60% más rápido.',fx:b=>b.botRate*=1.6},
+ {id:'b3',b:'bot',i:3,cost:{gems:55},wave:18,req:'b2',tag:'BMI',name:'MISILES DEL ALIADO',desc:'Cada 4.5 s el bot lanza un misil rastreador (daño x3).',fx:b=>b.botMsl=true},
+ {id:'b4',b:'bot',i:4,cost:{gems:75},wave:22,req:'b3',tag:'BGE',name:'NÚCLEO GEMELO',desc:'+1 bot de combate adicional.',fx:b=>b.botTwin++},
+ {id:'b5',b:'bot',i:5,cost:{gems:100},wave:26,req:'b4',tag:'BDE',name:'DEVASTADOR',desc:'El bot hace x2.5 de daño y sus balas perforan +2 enemigos.',fx:b=>{b.botDmg*=2.5;b.botPrc+=2}},
 ];
 TREE.forEach(nd=>{
   if(nd.b==='mrg')return;

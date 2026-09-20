@@ -32,7 +32,9 @@ function blankStats(){
     priFast:false,msl:1,neb:false,pointDef:false,slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,
     ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
     elec:null,ice:null,iceTop:false,wind:null,fire:null,
-    overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false};
+    overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
+    /* v4.9: ALIADO · bot de combate */
+    bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0};
 }
 function hostLobby(){
   if(!peerReady()){

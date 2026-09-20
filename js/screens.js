@@ -140,7 +140,8 @@ function resetRunCommon(){
   run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
   run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;run.tempBuffs=[];rollMissions();
   run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
-  pendingShipLevels=0;frenzyT=0;
+  pendingShipLevels=0;frenzyT=0;expFrac=0;run.frenzyBossT=30;frenzyMode=false;
+  bots=[]; /* v4.9: sin aliados al empezar */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
   closeEmoPanel();
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
@@ -199,6 +200,31 @@ function startWeekly(){
   refreshHUD();
   musStart();
   banner('DESAFÍO SEMANAL','Semilla '+ws+' · NORMAL ×2.2 · igual para todos');
+  nextWave();
+}
+/* v4.9: MODO FRENÉTICO — oleada única infinita, nivel creciente y jefes
+   periódicos; dificultad HARDCORE fija y récord local progresivo */
+function startFrenzy(){
+  audio();goFullscreen();
+  useProfile('local');
+  weeklyMode=false;R=Math.random;
+  runDiff='hardcore';
+  save.runs++;persist();
+  players=[mkPlayer(0)];localSlot=0;
+  remoteBase=null;
+  resetRunCommon();
+  frenzyMode=true;
+  if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
+  recompute();
+  primePlayers();
+  players[0].x=W/2;players[0].y=H-130;
+  runActive=true;state='play';
+  showScr(null);
+  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+  $('#netTag').classList.add('hidden');
+  refreshHUD();
+  musStart();
+  banner('MODO FRENÉTICO','HARDCORE ×5 · oleada infinita · sobrevive');
   nextWave();
 }
 function startCoop(){
@@ -405,6 +431,13 @@ function gameOver(){
   if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,run.level);
   let weeklyRec=false;
   lastWeeklyRec=null;
+  let frenRec=false;
+  if(frenzyMode){
+    if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
+    if(Math.floor(run.time)>(save.frenzy.bestT||0)||run.kills>(save.frenzy.bestK||0))frenRec=true;
+    save.frenzy.bestT=Math.max(save.frenzy.bestT||0,Math.floor(run.time));
+    save.frenzy.bestK=Math.max(save.frenzy.bestK||0,run.kills);
+  }
   if(weeklyMode){
     const ws=weekSeed();
     if(save.weekly&&save.weekly.seed===ws){
@@ -433,6 +466,7 @@ function gameOver(){
     `<div><small>JEFES SIN DAÑO</small><b>${run.stPerfect}</b></div>`;
   const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
+    (frenRec?`<span class="k1">★ ¡NUEVO RÉCORD FRENÉTICO · ${fmtT(save.frenzy.bestT)} · ${save.frenzy.bestK} BAJAS!</span><br>`:'')+
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
     `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
     `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;

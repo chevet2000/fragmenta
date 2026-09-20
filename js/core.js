@@ -38,6 +38,9 @@ function recompute(){
     pl.prism=b.prism;pl.priFast=b.priFast;pl.msl=b.msl;pl.neb=b.neb;pl.pointDef=b.pointDef;
     pl.slowField=b.slowField;pl.novaRadial=b.novaRadial;pl.novaCdMul=b.novaCdMul;pl.novaMul=b.novaMul;
     pl.ojiva=b.ojiva;pl.gemLuck=b.gemLuck;pl.heartDrop=b.heartDrop;pl.vortex=b.vortex;
+    /* v4.9: ALIADO · bot de combate desbloqueable en el árbol */
+    pl.bot=b.bot||0;pl.botDmg=b.botDmg||1;pl.botRate=b.botRate||1;
+    pl.botMsl=!!b.botMsl;pl.botTwin=b.botTwin||0;pl.botPrc=b.botPrc||0;
     pl.elec=b.elec;pl.ice=b.ice;pl.iceTop=b.iceTop;pl.wind=b.wind;pl.fire=b.fire;
     pl.linkHeal=b.linkHeal||0;pl.linkRate=b.linkRate||5;pl.linkT=pl.linkT||0;
     pl.overEvery=b.overEvery;pl.desperate=b.desperate;pl.dashFast=b.dashFast;
@@ -70,14 +73,18 @@ function burst(x,y,color,n,sp){
 function redFlash(){const f=$('#flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),70);}
 
 /* ============ EXPERIENCIA ============ */
-/* v4.8: curva nueva — nivel 1 pide 100 XP, nivel 2 pide 150, y +50 por nivel
-   (100, 150, 200, 250…). Cada nivel comienza siempre en 0. */
+/* v4.9: XP por OLEADA actual (no por nivel de enemigo, que ahora empieza en
+   ~100) y ganancia global reducida x0.6 — subir de nivel cuesta mucho más.
+   Curva de nave intacta: 100, 150, 200, 250… cada nivel empieza en 0. */
 const shipNeed=lv=>100+(lv-1)*50;
-/* XP por baja: 1-5 puntos según el nivel de enemigo MÁXIMO de la oleada
-   (oleadas 1-8 → 1 · 9-17 → 2 · 18-26 → 3 · 27-35 → 4 · 36+ → 5) */
-const waveXp=()=>clamp(1+Math.floor(maxLvlOf(run.level)/9),1,5);
+const XP_MUL=.6;
+let expFrac=0;
+const waveXp=()=>clamp(1+Math.floor(run.level/9),1,5);
 function gainExp(n){
-  run.exp+=n;
+  expFrac+=n*XP_MUL;
+  const whole=Math.floor(expFrac);
+  if(whole>0)expFrac-=whole;
+  run.exp+=whole;
   let need=shipNeed(run.shipLv);
   while(run.exp>=need){
     run.exp-=need;run.shipLv++;

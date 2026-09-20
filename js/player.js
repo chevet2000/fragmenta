@@ -263,3 +263,45 @@ function updWrecks(dt){
   wrecks=wrecks.filter(w=>!w.remove);
 }
 
+
+/* ============ v4.9: ALIADO · BOT DE COMBATE ============
+   Se desbloquea en el árbol (rama ALIADO) y vuela junto a la nave
+   disparando al enemigo más cercano. Mejoras con GEMAS (caras). */
+function updBots(dt){
+  const P0=players[0];
+  const want=(P0&&P0.bot>0&&!amClient())?(P0.bot+(P0.botTwin||0)):0;
+  if(bots.length>want)bots.length=want;
+  if(!want)return;
+  while(bots.length<want)bots.push({x:P0.x,y:P0.y,cd:rand(.3,.9),msl:rand(2,4)});
+  bots.forEach((bt,i)=>{
+    const a=time*1.5+i*TAU/bots.length;
+    const tx=P0.x+Math.cos(a)*86,ty=P0.y+Math.sin(a)*86-10;
+    bt.x=lerp(bt.x,tx,1-Math.exp(-6*dt));
+    bt.y=lerp(bt.y,ty,1-Math.exp(-6*dt));
+    bt.cd-=dt*P0.botRate;
+    if(bt.cd<=0){
+      const t=nearestEnemy(bt.x,bt.y,[],520);
+      if(t){
+        bt.cd=.85;
+        const ang=Math.atan2(t.y-bt.y,t.x-bt.x);
+        bullets.push({x:bt.x,y:bt.y,vx:Math.cos(ang)*500,vy:Math.sin(ang)*500,
+          dmg:Math.max(1,Math.round(P0.dmg*1.1*P0.botDmg)),r:3.5,crit:false,
+          pierce:P0.pierce+P0.botPrc,hits:[],bounce:0,bot:true,slot:0,life:3,dead:false});
+        tone(900,620,.05,'square',.015);
+      }
+    }
+    if(P0.botMsl){
+      bt.msl-=dt;
+      if(bt.msl<=0){
+        const t=nearestEnemy(bt.x,bt.y,[],650);
+        if(t){
+          bt.msl=4.5;
+          const ang=Math.atan2(t.y-bt.y,t.x-bt.x);
+          bullets.push({x:bt.x,y:bt.y,vx:Math.cos(ang)*220,vy:Math.sin(ang)*220,
+            dmg:Math.max(2,Math.round(P0.dmg*3.3*P0.botDmg)),r:5,crit:false,pierce:0,hits:[],
+            bounce:0,missile:true,bot:true,slot:0,life:5,dead:false});
+        }
+      }
+    }
+  });
+}

@@ -44,7 +44,7 @@ function spawnBoss(L){
   const key=bossForWave(L);
   const D=BOSS_DEFS[key];
   bossName=D.name+'-'+String(L).padStart(2,'0');
-  const hp=Math.round(hpForLevel(maxLvlOf(L))*(14+L*2.2)*D.hpM);
+  const hp=Math.round(hpForLevel(maxLvlOf(L))*(4+L*1.2)*D.hpM); /* v4.9: factor compensado al nuevo nivel base ~100 */
   boss={x:W/2,y:-90,ty:Math.max(110,H*.16),hp,maxhp:hp,r:D.r,t:0,ph:1,rot:0,flash:0,
     kind:key,D,burn:null,
     fanT:2.8,aimT:3.4,sumT:5,ringT:3,

@@ -11,7 +11,9 @@ function refreshHUD(){
   const tn=wave.types&&wave.types.length>1?'MIXTA':'';
   $('#hudLevel').textContent=boss
     ?`OLEADA ${run.level} · GUARDIÁN`
-    :`OLEADA ${run.level}${tn?' · '+tn:''} · nv ${minLvlOf(run.level)}–${maxLvlOf(run.level)}`;
+    :(frenzyMode
+      ?`FRENÉTICO · ${fmtT(run.time)} · OLEADA ${run.level} · nv ${minLvlOf(run.level)}–${maxLvlOf(run.level)}`
+      :`OLEADA ${run.level}${tn?' · '+tn:''} · nv ${minLvlOf(run.level)}–${maxLvlOf(run.level)}`);
   $('#shipTxt').textContent='NV '+run.shipLv;
   $('#expFill').style.width=clamp(run.exp/shipNeed(run.shipLv)*100,0,100)+'%';
   /* v4.8: barra de iconos de poderes temporales activos (❖ + oleadas restantes) */

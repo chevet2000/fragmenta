@@ -90,6 +90,14 @@ function makeElite(L,delay){
 function buildWave(L){
   wave={type:'',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:1,side:1,pool:[]};
   const coop=players.length===2&&net.mode==='host';
+  /* v4.9: MODO FRENÉTICO — una sola oleada infinita con nivel creciente
+     (run.level sube con el tiempo en updWaveSpawns) y jefes periódicos */
+  if(frenzyMode){
+    wave.type='frenzy';
+    wave.pending=40;wave.pool=Array(40).fill('swarm');
+    banner('FRENÉTICO','Oleada infinita · jefes cada 45 s · sobrevive');
+    return;
+  }
   if(L%5===0){
     wave.type='boss';wave.wasBoss=true;wave.total=1;
     run.bossDmgTaken=false;
@@ -156,6 +164,34 @@ function buildWave(L){
   }
 }
 function updWaveSpawns(dt){
+  /* v4.9: rama del MODO FRENÉTICO — aparición continua, nivel creciente cada
+     25 s, élites periódicos y un jefe cada 45 s; respeta el tope de 110 vivos */
+  if(frenzyMode){
+    const nl=1+Math.floor(run.time/25);
+    if(nl>run.level){
+      run.level=nl;
+      save.best.lvl=Math.max(save.best.lvl,nl);save.bestAll=Math.max(save.bestAll,nl);
+      if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,nl);
+      floater(P.x,P.y-40,'NIVEL '+nl+' · MÁS FUERTES','#FF9F43',14);
+      if(nl%2===0){makeElite(nl,1.5);wave.total++;}
+    }
+    if(run.frenzyBossT==null)run.frenzyBossT=30;
+    run.frenzyBossT-=dt;
+    if(run.frenzyBossT<=0&&!boss){
+      run.frenzyBossT=45;
+      spawnBoss(run.level);SFX.boss();
+      banner('¡JEFE!','Guardián frenético nv '+maxLvlOf(run.level));
+    }
+    if(enemies.length>=110){wave.spawnT=Math.max(wave.spawnT,.4);return;}
+    wave.spawnT-=dt;
+    if(wave.spawnT<=0){
+      if(wave.pool.length<8)wave.pool=wave.pool.concat(Array(20).fill('swarm'));
+      wave.pool.shift();wave.pending--;
+      spawnSwarmOne();
+      wave.spawnT=Math.max(.24,.8-run.time*.004)*rand(.8,1.2);
+    }
+    return;
+  }
   if(wave.pool.length===0)return;
   /* v4.8: nunca más de 110 enemigos vivos a la vez — el resto espera en cola
      (mata el lag del desafío semanal en oleadas altas) */

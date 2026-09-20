@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.8.1">
+<html lang="es" data-v="4.9">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.8.1 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.9 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.8.1">
+<link rel="stylesheet" href="css/styles.css?v=4.9">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -102,6 +102,7 @@
   <div class="menu-btns">
     <button class="btn primary" id="btnPlay">JUGAR · 1 JUGADOR</button>
     <button class="btn week" id="btnWeekly">DESAFÍO SEMANAL</button>
+    <button class="btn" id="btnFrenzy" style="border-color:#FF6B6B;color:#FF6B6B">FRENÉTICO · OLEADA INFINITA</button>
     <button class="btn rankb" id="btnRank">RANKING SEMANAL</button>
     <button class="btn" id="btnHost">ONLINE · CREAR SALA</button>
     <button class="btn" id="btnJoin">ONLINE · UNIRSE</button>
@@ -120,7 +121,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.8.1 · DIFICULTAD MÁXIMA · XP 1-5 SEGÚN LA OLEADA · NIVELES 100/150/200… · TOPE 10 CARTAS · ICONOS DE PODERES · MÚSICA DE MENÚ · RANKING AUTO CO-OP · RÉCORD SEMANAL SALVA SOLO · COFRE BLINDADO = 1 PREMIO AZAR · BORRAR PARTIDA · REGEN 1 VIDA/MIN · FUSIONES · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.9 · ENEMIGOS NV 100 DESDE LA OLEADA 1 · VIDA MÁXIMA · XP REDUCIDA · MENOS ORO/GEMAS/CORAZONES · ALIADO BOT (MEJORAS CON GEMAS) · MODO FRENÉTICO ∞ · MERCADO DE GEMAS · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -225,9 +226,10 @@
       <span><svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.6" fill="none" stroke="#FFD166" stroke-width="1.6"/><circle cx="6" cy="6" r="1.8" fill="#FFD166"/></svg><b id="shopGold">0</b></span>
       <span><svg viewBox="0 0 12 12"><path d="M6 1 L11 6 L6 11 L1 6 Z" fill="none" stroke="#64C7FF" stroke-width="1.6"/><path d="M6 3.4 L8.6 6 L6 8.6 L3.4 6 Z" fill="#64C7FF"/></svg><b id="shopGems">0</b></span>
     </div>
+    <button class="btn" id="btnGemX" style="margin-right:8px">CAMBIO · 1500 ORO → 10 GEMAS</button>
     <button class="btn" id="btnCloseShop">VOLVER</button>
   </div>
-  <div class="tree-wrap"><div id="zoomBar"><button class="zbtn" id="zOut">−</button><span class="zbtn zpct" id="zPct">100%</span><button class="zbtn" id="zIn">+</button><button class="zbtn" id="zFit">⤢</button></div><svg id="treeSvg" viewBox="0 0 1190 1420"></svg></div>
+  <div class="tree-wrap"><div id="zoomBar"><button class="zbtn" id="zOut">−</button><span class="zbtn zpct" id="zPct">100%</span><button class="zbtn" id="zIn">+</button><button class="zbtn" id="zFit">⤢</button></div><svg id="treeSvg" viewBox="0 0 1330 1420"></svg></div>
   <div class="shop-foot">
     <div id="ndInfo">
       <b id="ndName">ÁRBOL DE HABILIDADES</b>
@@ -275,30 +277,30 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.8.1"></script>
-<script src="js/profile.js?v=4.8.1"></script>
-<script src="js/achievements.js?v=4.8.1"></script>
-<script src="js/audio.js?v=4.8.1"></script>
-<script src="js/config.js?v=4.8.1"></script>
-<script src="js/tree.js?v=4.8.1"></script>
-<script src="js/relics.js?v=4.8.1"></script>
-<script src="js/state.js?v=4.8.1"></script>
-<script src="js/net.js?v=4.8.1"></script>
-<script src="js/core.js?v=4.8.1"></script>
-<script src="js/enemies.js?v=4.8.1"></script>
-<script src="js/waves.js?v=4.8.1"></script>
-<script src="js/boss.js?v=4.8.1"></script>
-<script src="js/loot.js?v=4.8.1"></script>
-<script src="js/player.js?v=4.8.1"></script>
-<script src="js/azar.js?v=4.8.1"></script>
-<script src="js/chests.js?v=4.8.1"></script>
-<script src="js/netsync.js?v=4.8.1"></script>
-<script src="js/render.js?v=4.8.1"></script>
-<script src="js/screens.js?v=4.8.1"></script>
-<script src="js/treeui.js?v=4.8.1"></script>
-<script src="js/hud.js?v=4.8.1"></script>
-<script src="js/input.js?v=4.8.1"></script>
-<script src="js/game.js?v=4.8.1"></script>
-<script src="js/update.js?v=4.8.1"></script>
+<script src="js/utils.js?v=4.9"></script>
+<script src="js/profile.js?v=4.9"></script>
+<script src="js/achievements.js?v=4.9"></script>
+<script src="js/audio.js?v=4.9"></script>
+<script src="js/config.js?v=4.9"></script>
+<script src="js/tree.js?v=4.9"></script>
+<script src="js/relics.js?v=4.9"></script>
+<script src="js/state.js?v=4.9"></script>
+<script src="js/net.js?v=4.9"></script>
+<script src="js/core.js?v=4.9"></script>
+<script src="js/enemies.js?v=4.9"></script>
+<script src="js/waves.js?v=4.9"></script>
+<script src="js/boss.js?v=4.9"></script>
+<script src="js/loot.js?v=4.9"></script>
+<script src="js/player.js?v=4.9"></script>
+<script src="js/azar.js?v=4.9"></script>
+<script src="js/chests.js?v=4.9"></script>
+<script src="js/netsync.js?v=4.9"></script>
+<script src="js/render.js?v=4.9"></script>
+<script src="js/screens.js?v=4.9"></script>
+<script src="js/treeui.js?v=4.9"></script>
+<script src="js/hud.js?v=4.9"></script>
+<script src="js/input.js?v=4.9"></script>
+<script src="js/game.js?v=4.9"></script>
+<script src="js/update.js?v=4.9"></script>
 </body>
 </html>

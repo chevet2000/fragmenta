@@ -5,12 +5,19 @@ const DIFF_LABEL={solo:'SOLO ×1',normal:'NORMAL ×2.2',dificil:'DIFÍCIL ×3',h
 let runDiff='solo';
 const multHP=()=>DIFFS[runDiff]||1;
 
+/* v4.9: mercado de gemas — cambia oro por gemas en el ARSENAL.
+   Así el oro conserva uso incluso con todas las mejoras al máximo:
+   financia las mejoras del ALIADO (que se pagan con gemas). */
+const GEMX_COST=1500, GEMX_GEMS=10;
+
 /* ============ niveles de enemigo ============ */
-/* v4.8: vida de enemigo mucho mayor (1.042 -> 1.055 por nivel): con el árbol al
-   máximo y en HARDCORE cuesta bastante más purgar cada oleada */
-function hpForLevel(l){return Math.max(1,Math.round((1.25*l+2.2)*Math.pow(1.055,l)*multHP()));}
-function maxLvlOf(L){return 4+L;}
-function minLvlOf(L){return 1+Math.max(0,Math.floor((L-1)/5))*2;}
+/* v4.9: DIFICULTAD BRUTAL — desde la PRIMERA oleada los enemigos son de
+   nivel ~100 (nv 96–100) y la vida sigue creciendo x1.055 por nivel.
+   hp(nv100)≈275 PS · hp(nv150)≈5.300 · hp(nv200)≈100.000: incluso con el
+   árbol al máximo en HARDCORE cuesta mucho purgar cada oleada. */
+function hpForLevel(l){return Math.max(1,Math.round((0.011*l+0.17)*Math.pow(1.055,l)*multHP()));}
+function maxLvlOf(L){return 99+L;}
+function minLvlOf(L){return 96+Math.max(0,Math.floor((L-1)/5))*2;}
 const TYPES={
   orb:    {shape:'circle', color:'#7FD1B9',mult:1.0, spd:1.0},
   dart:   {shape:'tri',    color:'#FFD166',mult:0.7, spd:1.5},

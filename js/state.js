@@ -8,6 +8,8 @@ let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[];
 let wrecks=[];
 let emosFx=[];
+let bots=[]; /* v4.9: aliados bot de combate */
+let frenzyMode=false; /* v4.9: modo frenético */
 let dronePos={'0':[],'1':[]},droneCd={'0':[],'1':[]};
 let boss=null,bossName='';
 let formY=0,formT=0,time=0,shake=0,eid=1,fxId=1;
@@ -27,6 +29,7 @@ function mkPlayer(slot){return{
   slowField:false,novaRadial:false,novaCdMul:1,novaMul:1,ojiva:false,gemLuck:false,heartDrop:false,vortex:false,
   elec:null,ice:null,iceTop:false,wind:null,fire:null,linkHeal:0,linkRate:5,linkT:0,
   overEvery:6,desperate:false,dashFast:false,droneFast:false,homeFast:false,gemExtra:false,
+  bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   touch:null

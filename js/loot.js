@@ -2,17 +2,19 @@
 /* ============ botín ============ */
 function dropLoot(e){
   const gMul=players[0].goldMul;
-  const g=(1+(e.elvl>=6?1:0)+(e.elvl>=14?1:0))+(e.T.magnet?1:0);
+  const g=(1+(e.elvl>=106?1:0)+(e.elvl>=114?1:0))+(e.T.magnet?1:0);
   const pkCap=pickups.length<250; /* v4.8: tope de botín para evitar lag extremo */
   if(pkCap)for(let i=0;i<g;i++)
     pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-40),
-      val:Math.max(1,Math.round((.3+e.elvl*.22)*gMul))});
-  let gr=.028+e.elvl*.0018;
+      /* v4.9: oro según la OLEADA (el nivel del enemigo ya empieza en ~100) y reducido */
+      val:Math.max(1,Math.round((.25+run.level*.15)*gMul))});
+  /* v4.9: gemas y corazones más raros */
+  let gr=.02+run.level*.0012;
   if(players.some(pl=>pl.gemLuck))gr*=1.9;
-  if(players.some(pl=>pl.gemExtra))gr+=.04;
+  if(players.some(pl=>pl.gemExtra))gr+=.03;
   if(run.relics.includes('crudas'))gr+=.08;
   if(Math.random()<gr)pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
-  if(Math.random()<.01*(players.some(pl=>pl.heartDrop)?2.2:1))
+  if(Math.random()<.006*(players.some(pl=>pl.heartDrop)?1.8:1))
     pickups.push({t:'heart',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-120,-40)});
 }
 function killEnemy(e,bySlot){
@@ -41,22 +43,22 @@ function killEnemy(e,bySlot){
     run.eliteKills++;missionTick('elite',1);
     save.totElite=(save.totElite||0)+1;
     const gMul=pl.goldMul*(pl.presa?1.5:1);
-    const n=irand(9,13);
+    const n=irand(6,9); /* v4.9: menos oro de élites */
     for(let i=0;i<n;i++)
       pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-160,160),vy:rand(-240,-60),
-        val:Math.max(2,Math.round((1.2+run.level*.35)*gMul))});
-    for(let i=0;i<1+(run.level>=12?1:0);i++)
+        val:Math.max(2,Math.round((1+run.level*.25)*gMul))});
+    for(let i=0;i<1;i++)
       pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60)});
-    gainExp(Math.round(waveXp()*6*pl.expMul));
+    gainExp(Math.round(waveXp()*4*pl.expMul)); /* v4.9: élite x4 (antes x6) */
     floater(e.x,e.y-34,'¡ÉLITE CAÍDO!','#B388FF',14);
     shake=Math.min(16,shake+6);
   }
   if(e.camp){
     save.totCamp=(save.totCamp||0)+1;
     pickups.push({t:'minichest',x:e.x,y:e.y,vx:0,vy:-90});
-    for(let i=0;i<5;i++)
+    for(let i=0;i<4;i++) /* v4.9: menos oro de campistas */
       pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60),
-        val:Math.max(2,Math.round((1+run.level*.3)*pl.goldMul))});
+        val:Math.max(2,Math.round((.8+run.level*.22)*pl.goldMul))});
     gainExp(Math.round(waveXp()*4*pl.expMul));
     floater(e.x,e.y-40,'¡CAMPISTA CAÍDO!','#FFD166',13);
     shake=Math.min(16,shake+6);
@@ -71,10 +73,11 @@ function doSplit(e){
   if(enemies.length>cap)return;
   const minL=minLvlOf(run.level);
   if(e.elvl<=minL&&e.tk!=='hive')return;
-  const k=clamp(2+Math.floor(e.elvl/6),2,5)+(e.tk==='hive'?1:0);
-  const base=Math.round(e.elvl*.42);
+  const k=clamp(2+Math.floor(e.elvl/12),2,4)+(e.tk==='hive'?1:0);
+  /* v4.9: los hijos heredan ~85% del nivel del padre (los niveles ya empiezan en ~100) */
+  const base=Math.round(e.elvl*.85);
   for(let i=0;i<k;i++){
-    const cl=clamp(base+irand(-1,0),minL,Math.max(minL,e.elvl-1));
+    const cl=clamp(base-irand(0,8),1,Math.max(1,e.elvl-1));
     const c=spawnEnemy(typeForLevel(cl),cl,{after:'roam',delay:i*.06});
     c.sx=e.x+rand(-8,8);c.sy=e.y+rand(-8,8);
     c.fx=clamp(e.x+rand(-120,120),30,W-30);
@@ -128,11 +131,11 @@ function killBoss(){
   shake=20;vib(120);
   tone(500,60,.5,'sawtooth',.1);tone(300,40,.6,'square',.08,.1);
   const gMul=players[0].goldMul;
-  const gn=8+run.level;
+  const gn=5+run.level; /* v4.9: menos oro de jefes */
   for(let i=0;i<gn;i++)
     pickups.push({t:'gold',x:b.x,y:b.y,vx:rand(-160,160),vy:rand(-260,-60),
-      val:Math.max(2,Math.round((.9+run.level*.4)*gMul))});
-  const gm=1+Math.floor(run.level/7);
+      val:Math.max(2,Math.round((.8+run.level*.28)*gMul))});
+  const gm=1+Math.floor(run.level/10); /* v4.9: menos gemas de jefes */
   for(let i=0;i<gm;i++)
     pickups.push({t:'gem',x:b.x,y:b.y,vx:rand(-140,140),vy:rand(-240,-60)});
   pickups.push({t:'heart',x:b.x,y:b.y,vx:0,vy:-120});
@@ -140,7 +143,7 @@ function killBoss(){
     pickups.push({t:'chest',x:b.x,y:b.y,vx:rand(-20,20),vy:-80});
     floater(b.x,b.y-60,'¡COFRE! ATRÁPALO','#FFD166',15);
   }
-  gainExp(Math.round(waveXp()*12*players[0].expMul));
+  gainExp(Math.round(waveXp()*8*players[0].expMul)); /* v4.9: jefe x8 (antes x12) */
   banner('GUARDIÁN DESTRUIDO',run.level%10===0?'Recoge el cofre y el botín':'Recoge las recompensas');
 }
 

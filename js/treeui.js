@@ -96,6 +96,10 @@ function buyNode(){
 }
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
+  /* v4.9: mercado de gemas — el oro sigue sirviendo al final del juego */
+  const gx=$('#btnGemX');
+  if(gx){gx.disabled=save.gold<GEMX_COST;gx.textContent=save.gold>=GEMX_COST?
+    `CAMBIO · ${GEMX_COST} ORO → ${GEMX_GEMS} GEMAS`:`CAMBIO · ${GEMX_COST} ORO → ${GEMX_GEMS} GEMAS (ORO INSUFICIENTE)`;}
   const prof=saveProfile==='local'?'PERFIL LOCAL':'PERFIL ONLINE';
   $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · ${Object.keys(BX).length} RAMAS · v${VERSION}`;
 }
@@ -107,7 +111,7 @@ function openShop(from){
 }
 
 /* ============ zoom del arsenal ============ */
-const TREE_W=1190, TREE_H=1420;
+const TREE_W=1330, TREE_H=1420;
 let treeZoom=1;
 function applyZoom(){
   const svg=$('#treeSvg');if(!svg)return;
