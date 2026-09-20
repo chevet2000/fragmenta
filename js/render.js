@@ -416,7 +416,8 @@ function drawShip(pl,isLocal){
   const skOn=sk&&sk.color!=='menta';
   const skc=skOn?(sk.color==='prisma'?'hsl('+Math.floor((time*40)%360)+',85%,66%)':sk.color):null;
   const skHex=skOn&&sk.color!=='prisma'?sk.color:null;
-  const core=skc||(pl.slot===0?'#7FD1B9':'#FF7EB6');
+  /* v4.15: color por slot — P1 menta, P2 rosa, P3 cielo */
+  const core=skc||SLOT_COL[pl.slot]||'#7FD1B9';
   const blink=pl.invul>0&&Math.floor(time*18)%2===0;
   if(pl.orbs>0){
     const ot=(pl.orbT||time*2.4);
@@ -548,8 +549,8 @@ function drawShip(pl,isLocal){
     g.globalAlpha=.5;g.strokeStyle='#FFD166';g.lineWidth=1;
     g.beginPath();g.arc(0,0,28+Math.sin(time*12)*3,0,TAU);g.stroke();g.globalAlpha=blink?.35:1;
   }
-  /* v4.8: etiqueta P1 / P2 sobre cada nave en co-op */
-  if(players.length===2){
+  /* v4.8: etiqueta P1 / P2 / P3 sobre cada nave en co-op (v4.15: hasta 3) */
+  if(players.length>=2){
     g.font='700 10px "Chakra Petch",monospace';g.textAlign='center';g.textBaseline='alphabetic';
     g.fillStyle=core;g.fillText('P'+(pl.slot+1),0,-30);
   }
@@ -611,8 +612,8 @@ function drawRadar(){
     if(pl.hp<=0)continue;
     const px=cx+clamp((pl.x/W-.5)*2,-1,1)*r*.82;
     const py=cy+clamp((pl.y/H-.5)*2,-1,1)*r*.82;
-    /* v4.8: puntos del radar con el color de cada jugador */
-    ctx.fillStyle=pl.slot===0?'#7FD1B9':'#FF7EB6';
+    /* v4.15: puntos del radar con el color de cada slot (P3 incluido) */
+    ctx.fillStyle=SLOT_COL[pl.slot]||'#7FD1B9';
     ctx.beginPath();ctx.arc(px,py,2,0,TAU);ctx.fill();
   }
   ctx.restore();

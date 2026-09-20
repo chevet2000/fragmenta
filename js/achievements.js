@@ -1,5 +1,8 @@
 'use strict';
 /* ============ logros ============ */
+/* v4.15: LOGROS POR RECLAMAR — alcanzar un logro ya no paga al instante:
+   suena el AVISO, se suma al CONTADOR del menú (#achBadge) y el jugador
+   viene a LOGROS a RECLAMAR sus gemas. */
 const ACHS=[
  {id:'k100', name:'CAZADOR NOVATO',   desc:'Elimina 100 enemigos en total',        rw:2, ck:()=>save.totKills>=100},
  {id:'k1000',name:'EXTERMINADOR',     desc:'Elimina 1000 enemigos en total',       rw:6, ck:()=>save.totKills>=1000},
@@ -40,15 +43,37 @@ const ACHS=[
  {id:'bio5',name:'VIAJERO DE SECTORES',desc:'Visita los 5 biomas',rw:5, ck:()=>Object.keys(save.biomesSeen||{}).length>=5},
  {id:'bp5', name:'DOMADOR DE GUARDIANES',desc:'Lleva a un Guardián a la FASE 5',rw:8, ck:()=>(save.totPhase5||0)>=1},
 ];
+/* v4.15: logros alcanzados que aún no han sido reclamados */
+function achPendingCount(){
+  if(!save.ach)return 0;
+  return ACHS.reduce((n,a)=>n+((save.ach[a.id]&&!(save.achClaimed&&save.achClaimed[a.id]))?1:0),0);
+}
+function refreshAchBadge(){
+  const b=$('#achBadge');if(!b)return;
+  const n=achPendingCount();
+  b.textContent=n;
+  b.classList.toggle('hidden',n<=0);
+}
 function checkAch(){
   let got=false;
   for(const a of ACHS){
     if(!save.ach[a.id]&&a.ck()){
-      save.ach[a.id]=1;save.gems+=a.rw;got=true;
-      banner('LOGRO CUMPLIDO',a.name+' · +'+a.rw+' gemas');
+      save.ach[a.id]=1;got=true;
+      banner('LOGRO CONSEGUIDO',a.name+' · +'+a.rw+' gemas por reclamar');
       SFX.relic();vib(50);
     }
   }
-  if(got)persist();
+  if(got){persist();refreshAchBadge();}
 }
-
+/* v4.15: reclamar la recompensa de un logro pendiente */
+function claimAch(id){
+  const a=ACHS.find(x=>x.id===id);if(!a)return;
+  if(!save.ach[id]||(save.achClaimed&&save.achClaimed[id]))return;
+  if(!save.achClaimed)save.achClaimed={};
+  save.achClaimed[id]=1;
+  save.gems+=a.rw;save.totGems=(save.totGems||0)+a.rw;
+  persist();
+  banner('LOGRO RECLAMADO',a.name+' · +'+a.rw+' gemas');
+  SFX.relic();vib(40);
+  refreshAchBadge();
+}

@@ -112,7 +112,7 @@ function makeElite(L,delay){
 }
 function buildWave(L){
   wave={type:'',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:1,side:1,pool:[]};
-  const coop=players.length===2&&net.mode==='host';
+  const coop=players.length>1&&net.mode==='host';
   /* v4.9: MODO FRENÉTICO — una sola oleada infinita con nivel creciente
      (run.level sube con el tiempo en updWaveSpawns) y jefes periódicos */
   if(frenzyMode){

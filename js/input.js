@@ -7,6 +7,8 @@ function clampShip(pl,x,y){
 }
 const activeTouches={};
 function slotFromPointer(clientX){
+  /* v4.15: con 3 naves, la pantalla se divide en tercios */
+  if(players.length>2)return clientX<W/3?0:clientX<2*W/3?1:2;
   if(players.length>1)return clientX<W/2?0:1;
   return localSlot;
 }
@@ -113,6 +115,41 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  bindEl('#btnGuideBack', 'click',()=>{refreshMenu();showScr('menu');});
  bindEl('#btnAch', 'click',openAch);
  bindEl('#btnAchBack', 'click',()=>{refreshMenu();showScr('menu');});
+/* v4.15: engranaje de AJUSTES + novedades colapsables + avatar */
+ bindEl('#btnSettings', 'click',openSettings);
+ bindEl('#btnSettingsBack', 'click',()=>{refreshMenu();showScr('menu');});
+ bindEl('#menuPilot', 'click',openSettings);
+ bindEl('#btnSetHangar', 'click',openHangar);
+ bindEl('#btnTag', 'click',()=>{
+  audio();
+  const body=$('#tagBody');
+  const open=!body.classList.contains('hidden');
+  body.classList.toggle('hidden',open);
+  $('#btnTag').textContent=open?'▸ NOVEDADES DE LA v'+VERSION:'▾ OCULTAR NOVEDADES';
+  try{localStorage.setItem('frag_tagopen',open?'0':'1');}catch(e){}
+});
+ bindEl('#btnEditPilot2','click',()=>{audio();
+  const pe=$('#pilotEdit2'),be=$('#btnEditPilot2'),i=$('#pilotInput2');
+  if(pe)pe.classList.remove('hidden');
+  if(be)be.classList.add('hidden');
+  if(i){i.value=getPilot();setTimeout(()=>i.focus(),60);}
+});
+ bindEl('#btnPilotCancel2','click',()=>{audio();
+  $('#pilotEdit2').classList.add('hidden');$('#btnEditPilot2').classList.remove('hidden');
+});
+function savePilotFromSettings(){
+  audio();
+  const i=$('#pilotInput2');
+  const err=setPilot(i?i.value:'');
+  if(err){banner('NOMBRE NO VÁLIDO',err);SFX.hurt();return;}
+  $('#pilotEdit2').classList.add('hidden');
+  $('#btnEditPilot2').classList.remove('hidden');
+  openSettings();refreshMenu();
+  banner('NOMBRE GUARDADO',getPilot()+' · viaja en el ranking y en co-op');
+}
+ bindEl('#btnPilotSave2','click',savePilotFromSettings);
+ bindEl('#pilotInput2','keydown',e=>{if(e.key==='Enter'){e.preventDefault();savePilotFromSettings();}});
+ bindEl('#btnSMus', 'click',()=>{save.mus=!save.mus;persist();updSoundBtns();if(!save.mus)musStop();else if(!runActive&&actx)musStart();});
 /* v4.8: BORRAR PARTIDA — reinicia el perfil local (doble toque de confirmación) */
 let wipeArm=false,wipeT=null;
  bindEl('#btnWipe', 'click',()=>{
@@ -126,9 +163,9 @@ let wipeArm=false,wipeT=null;
   b.textContent='BORRAR PARTIDA';b.classList.remove('danger');
   const pilot=save.pilot,mus=save.mus,diff=save.diff;
   save.tree={};save.gold=0;save.gems=0;save.best={lvl:0,kills:0};save.bestShip=1;save.bestAll=0;
-  save.prest=0;save.totKills=0;save.runs=0;save.ach={};save.totElite=0;save.totRescue=0;
+  save.prest=0;save.totKills=0;save.runs=0;save.totElite=0;save.totRescue=0;
   save.totChest=0;save.totCamp=0;save.bestHard=0;save.bossKills={};save.weekly=null;save.weekBestAll=0;
-  save.ranking=[];save.mShots=0;save.mHits=0;save.mDmg=0;save.mTaken=0;save.mPerfect=0;
+  save.ranking=[];save.ach={};save.achClaimed={};save.mShots=0;save.mHits=0;save.mDmg=0;save.mTaken=0;save.mPerfect=0;
   /* v4.12: también se reinician diario, misiones, hangar, combos, stats y bestiario */
   save.daily={seed:null,best:0};save.dailyBest=0;save.dailyM=null;
   save.skins={owned:['menta'],eq:null};save.bestCombo=0;save.totGold=0;save.totGems=0;save.seen={};
@@ -268,6 +305,7 @@ function updSoundBtns(){
   $('#btnSound').textContent='SONIDO: '+(muted?'NO':'SÍ');
   $('#btnPSound').textContent='SONIDO: '+(muted?'NO':'SÍ');
   $('#btnPMus').textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
+  const sm=$('#btnSMus');if(sm)sm.textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
 }
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
@@ -285,4 +323,9 @@ window.addEventListener('beforeunload',()=>{
 });
 buildManifest();
 refreshMenu();updSoundBtns();
+/* v4.15: estado recordado de las novedades colapsables del menú */
+try{if(localStorage.getItem('frag_tagopen')==='1'){
+  $('#tagBody').classList.remove('hidden');
+  $('#btnTag').textContent='▾ OCULTAR NOVEDADES';
+}}catch(e){}
 

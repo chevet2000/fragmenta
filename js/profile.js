@@ -1,8 +1,8 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.14';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.15';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
-  ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
+  ach:{},achClaimed:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
   /* v4.12: reto diario, misiones diarias, hangar, combos, estadísticas y bestiario */
   daily:{seed:null,best:0},dailyBest:0,dailyM:null,skins:{owned:['menta'],eq:null},
@@ -12,7 +12,7 @@ function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));
-    if(d)return Object.assign(blankSave(),d);
+    if(d){const s=Object.assign(blankSave(),d);migrateAch(s);return s;}
     if(migrate){
       const o=JSON.parse(localStorage.getItem(KEY_OLD));
       if(o){const s=blankSave();s.gold=o.gold||0;s.gems=o.gems||0;s.tree=o.tree||{};
@@ -21,6 +21,13 @@ function loadSave(key,migrate){
     }
   }catch(e){}
   return blankSave();
+}
+/* v4.15: LOGROS POR RECLAMAR — los logros que ya estaban concedidos en
+   versiones anteriores se marcan como reclamados (su gema ya se pagó);
+   solo los NUEVOS quedan pendientes de reclamar. */
+function migrateAch(s){
+  if(!s.achClaimed||typeof s.achClaimed!=='object')s.achClaimed={};
+  for(const k in s.ach)if(!s.achClaimed[k])s.achClaimed[k]=1;
 }
 let localSave=loadSave(KEY_LOCAL,true);
 let netSave=loadSave(KEY_NET,false);
@@ -109,17 +116,36 @@ function sortedRanking(){
 function makeGhostRef(trail){
   return t=>{let k=0;for(const s of trail){if(s.t<=t)k=s.k;else break;}return k;};
 }
+/* ============ v4.15: MODOS DEL RANKING ============
+   Cada registro lleva su modo: nm normal · dc difícil · hc hardcore ·
+   mp multijugador · wk semanal · fz frenético · dy diario.
+   Los modos fijos usan semilla permanente (NM/DC/HC/MP/FZ/DY) y se
+   deduplican por piloto conservando la mejor oleada. */
+const RANK_SEEDS={NM:'nm',DC:'dc',HC:'hc',MP:'mp',FZ:'fz',DY:'dy'};
+const RANK_MODE_LABEL={nm:'NORMAL',dc:'DIFÍCIL',hc:'HARDCORE',mp:'MULTI',wk:'SEMANAL',fz:'FRENÉTICO',dy:'DIARIO'};
+function modeOfEntry(r){
+  if(r&&RANK_MODE_LABEL[r.m])return r.m;
+  return RANK_SEEDS[r.seed]||'wk';
+}
+function addModeRecord(m,seed,wave,ship,sub){
+  const pilot=getPilot();
+  addRankingEntry({seed,code:pilot,wave,ship,sub,m,h:weekHash(seed,pilot,wave,ship),ok:true});
+}
 function sanitizeRankEntry(e){
   if(!e||typeof e!=='object')return null;
   const seed=String(e.seed||''),code=String(e.code||'').toUpperCase(),h=String(e.h||'').toUpperCase();
   const wave=parseInt(e.wave,10),ship=parseInt(e.ship,10);
-  if(!/^\d{4}W\d{1,2}$/.test(seed))return null;
+  /* v4.15: semilla semanal (YYYYWn) o semilla permanente de modo (NM/DC/…) */
+  if(!/^\d{4}W\d{1,2}$/.test(seed)&&!RANK_SEEDS[seed])return null;
   /* v4.11: admite códigos de 4 letras Y nombres personalizados (2–12 seguro) */
   if(!/^[A-Z0-9ÁÉÍÓÚÜÑ _-]{2,12}$/.test(code))return null;
   if(!(wave>0&&wave<1000)||!(ship>0&&ship<100))return null;
   if(!/^[0-9A-F]{4}$/.test(h))return null;
   if(weekHash(seed,code,wave,ship)!==h)return null;
-  return{seed,code,wave,ship,h,ok:true};
+  const m=modeOfEntry(e);
+  /* sub: dato extra corto y saneado (p. ej. bajas del frenético) */
+  const sub=e.sub?String(e.sub).replace(/[^A-Z0-9]/gi,'').slice(0,8):undefined;
+  return{seed,code,wave,ship,h,ok:true,m,sub};
 }
 function mergeRanking(list){
   if(!Array.isArray(list))return 0;
@@ -130,7 +156,7 @@ function mergeRanking(list){
     const e=sanitizeRankEntry(raw);if(!e)continue;
     const key=e.seed+'|'+e.code,ex=had[key];
     if(!ex){save.ranking.push(e);had[key]=e;n++;}
-    else if(e.wave>ex.wave){ex.wave=e.wave;ex.ship=e.ship;ex.h=e.h;ex.ok=true;n++;}
+    else if(e.wave>ex.wave){ex.wave=e.wave;ex.ship=e.ship;ex.h=e.h;ex.ok=true;ex.m=e.m;if(e.sub)ex.sub=e.sub;n++;}
   }
   if(save.ranking.length>60)save.ranking=save.ranking.slice(-60);
   if(n)persist();

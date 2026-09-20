@@ -18,13 +18,13 @@ function loop(now){
     updHoles(dt); /* v4.14: agujeros negros */
     updEBullets(dt);
     updCollisions();
-    if(players.length===2)updWrecks(dt);
+    if(players.length>1)updWrecks(dt);
     updPickups(dt);
     updFx(dt);
     checkClear(dt);
     enemies=enemies.filter(e=>!e.dead);
     if(pendingShipLevels>0){
-      if(net.mode==='host'&&players.length===2&&net.connected)beginShipChoiceHost();
+      if(net.mode==='host'&&players.length>1&&net.connected)beginShipChoiceHost();
       else showShipLevelLocal();
     }
     if(net.mode==='host'){
@@ -46,8 +46,9 @@ function loop(now){
   if(state==='shipwait'&&net.mode==='host'){
     if(!net.connected){
       shipwaitT+=dt;
-      if(shipwaitT>6&&!net.clientChosen){
-        net.clientChosen=true;net.clientCard='dmg1';
+      /* v4.15: si faltan pilotos, se les asigna la mejora por defecto */
+      if(shipwaitT>6){
+        for(let s=1;s<players.length;s++)if(!net.chosen[s]){net.chosen[s]=true;net.cards[s]='dmg1';}
         checkShipChoice();
       }
     }else shipwaitT=0;
@@ -59,9 +60,11 @@ function loop(now){
       chestReward('gold');
     }
   }
-  if(state==='postboss'&&net.mode==='host'&&!net.connected&&!net.clientRelic){
-    net.clientRelic=true;net.clientRelicId=RELICS[0].id;
-    applyRelicChoice();
+  if(state==='postboss'&&net.mode==='host'&&players.length>1&&!net.connected){
+    /* v4.15: sin conexión, las elecciones faltantes se resuelven solas */
+    let missing=false;
+    for(let s=0;s<players.length;s++)if(!net.relicOk[s]){net.relicOk[s]=true;net.relicId[s]=RELICS[0].id;missing=true;}
+    if(missing)applyRelicChoice();
   }
   hudAcc+=dt;
   if(hudAcc>.1){hudAcc=0;if(runActive)refreshHUD();}

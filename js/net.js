@@ -1,23 +1,30 @@
 'use strict';
 /* ============ RED (PeerJS) ============ */
+/* v4.15: CO-OP DE 2–3 JUGADORES — el anfitrión acepta hasta DOS conexiones
+   (estrella): cada cliente entra con su SLOT (1 y 2), recibe el mismo
+   snapshot y su oro/gemas viajan por su propia conexión (wallet por conn).
+   Las elecciones de cartas/reliquias esperan a TODOS los slots. */
 let pingTimer=null;
-const net={mode:null,peer:null,conn:null,code:'',connected:false,ping:0,
+const net={mode:null,peer:null,conn:null,conns:[],code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
   hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal',
-  remotePilot:null}; /* v4.11: nombre del rival para el lobby */
+  remotePilot:null,remotePilots:[],mySlot:1,
+  chosen:{},cards:{},relicOk:{},relicId:{}}; /* v4.15: elecciones por slot + lista de pilotos */
 const amClient=()=>net.mode==='client';
-function sendMsg(o){ if(net.conn&&net.connected){ try{net.conn.send(o);}catch(e){} } }
+const connsOpen=()=>net.conns.filter(c=>c.open).length;
+function sendMsg(o){for(const c of net.conns){if(!c.open)continue;try{c.c.send(o);}catch(e){}}}
 function peerReady(){ return typeof Peer!=='undefined'; }
 function mkPeerId(code){ return 'frg43-'+code; }
 function destroyNet(){
   if(pingTimer){clearInterval(pingTimer);pingTimer=null;}
-  try{if(net.conn)net.conn.close();}catch(e){}
   try{if(net.peer)net.peer.destroy();}catch(e){}
-  net.mode=null;net.peer=null;net.conn=null;net.connected=false;net.code='';
+  net.mode=null;net.peer=null;net.conn=null;net.conns=[];net.connected=false;net.code='';
   net.walletG=0;net.walletM=0;net.retries=0;net.ping=0;
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
   net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;
+  net.remotePilots=[];net.mySlot=1;
+  net.chosen={};net.cards={};net.relicOk={};net.relicId={};
 }
 function computeStatblock(){
   const b=blankStats();
@@ -43,6 +50,15 @@ function blankStats(){
     /* v4.14: 2ª DEFINITIVA · Agujero Negro */
     bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false};
 }
+/* v4.15: lobby del anfitrión con lista de pilotos conectados (1–2 pueden entrar) */
+function lobbyStatus(){
+  const n=connsOpen();
+  const names=net.remotePilots.length?net.remotePilots.map(p=>'● PILOTO '+p).join('<br>'):'Esperando pilotos…';
+  $('#lobbyStat').innerHTML='<span class="ok">PILOTOS CONECTADOS: '+n+'/2</span><br><span class="prof">'+names+'</span><br><span class="prof">Ranking sincronizado</span>';
+  const bt=$('#btnStartCoop');
+  bt.classList.toggle('hidden',n<1);
+  if(n>=1)bt.textContent='COMENZAR · '+(n+1)+' JUGADORES';
+}
 function hostLobby(){
   if(!peerReady()){
     showScr('lobby');
@@ -60,95 +76,126 @@ function hostLobby(){
   $('#btnStartCoop').classList.add('hidden');
   showScr('lobby');state='lobby';
   peer.on('open',()=>{
-    $('#lobbyStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Sala activa. Esperando a tu compañero…';
+    $('#lobbyStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Sala activa · pueden entrar hasta 2 pilotos…';
   });
   peer.on('connection',conn=>{
-    if(net.conn&&net.connected){ try{conn.close();}catch(e){} return; }
+    if(connsOpen()>=2){ try{conn.on('open',()=>{conn.send({t:'ev',k:'end'});setTimeout(()=>conn.close(),300);});}catch(e){} return; }
     const md=conn.metadata||{};
     if(md.v!==VERSION){
       try{conn.on('open',()=>{conn.send({t:'ver'});setTimeout(()=>conn.close(),400);});}catch(e){}
       return;
     }
-    net.conn=conn;
+    /* v4.15: slot libre (1 o 2) para el recién llegado */
+    const used=net.conns.map(x=>x.slot);
+    const slot=used.includes(1)?2:1;
+    const wrap={c:conn,slot,open:false,wg:0,wm:0,rankSeen:false};
+    net.conns.push(wrap);
+    if(!net.conn)net.conn=conn;
     conn.on('open',()=>{
-      net.connected=true;net.retries=0;net.rankSent=true;
-      conn.send({t:'welcome',diff:net.lobbyDiff||'normal',name:getPilot()});
+      wrap.open=true;net.connected=true;net.retries=0;
+      conn.send({t:'welcome',diff:net.lobbyDiff||'normal',name:getPilot(),slot,np:1+connsOpen()});
       conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.8: el anfitrión también envía el suyo al conectar · v4.11: + nombre */
-      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Piloto rival: <b style="color:var(--sky)">'+(net.remotePilot?net.remotePilot:'sincronizando…')+'</b> · Ranking sincronizado</span>';
-      $('#btnStartCoop').classList.remove('hidden');
+      lobbyStatus();
       SFX.gem();vib(40);
     });
-    conn.on('data',d=>hostOnData(d));
-    conn.on('close',()=>hostLostClient());
-    conn.on('error',()=>hostLostClient());
+    conn.on('data',d=>hostOnData(d,wrap));
+    conn.on('close',()=>hostLostClient(wrap));
+    conn.on('error',()=>hostLostClient(wrap));
   });
   peer.on('error',e=>{
     if(e.type==='unavailable-id'){ destroyNet(); hostLobby(); return; }
     $('#lobbyStat').innerHTML='<span class="err">Error de red: '+e.type+'</span>';
   });
 }
-function hostLostClient(){
+function hostLostClient(wrap){
   if(net.mode!=='host')return;
-  net.connected=false;
+  /* v4.15: se retira la conexión caída; su slot queda libre para reconectar */
+  net.conns=net.conns.filter(x=>x!==wrap);
+  if(wrap.c){try{wrap.c.close();}catch(e){}}
+  net.connected=connsOpen()>0;
+  if(!net.conn)net.conn=net.conns.length?net.conns[0].c:null;
   if(!runActive){
-    $('#lobbyStat').innerHTML='El jugador se desconectó.<br>Esperando reconexión…';
-    $('#btnStartCoop').classList.add('hidden');
+    lobbyStatus();
+    return;
+  }
+  /* en partida: si queda otro piloto, la partida sigue; si no, pausa de siempre */
+  if(net.connected){
+    dropSlotShip(wrap.slot);
+    banner('PILOTO SALIDO','La partida continúa con '+(1+connsOpen()));
     return;
   }
   state='netwait';
   $('#netWait').classList.remove('hidden');
-  $('#nwKick').textContent='JUGADOR 2 DESCONECTADO';
+  $('#nwKick').textContent='PILOTO DESCONECTADO';
   $('#nwTitle').textContent='PARTIDA EN PAUSA';
   $('#nwStat').innerHTML='La sala sigue abierta.<br>Código para reconectar: <b style="color:var(--amber)">'+net.code+'</b>';
   $('#btnNwSolo').classList.remove('hidden');
   $('#btnNwCancel').textContent='TERMINAR PARTIDA';
 }
-function hostOnData(d){
+/* v4.15: la nave del piloto que se va cae como pecio (rescatable) */
+function dropSlotShip(slot){
+  const pl=players[slot];
+  if(!pl||pl.hp<=0)return;
+  pl.hp=0;burst(pl.x,pl.y,'#F2EFE6',16,160);
+  if(!players.every(p=>p.hp<=0)){
+    wrecks.push({slot,x:pl.x,y:pl.y,prog:0});
+    floater(pl.x,pl.y-20,'NAVE SIN PILOTO','#FF6B6B',12);
+  }
+}
+function hostOnData(d,wrap){
   if(!d||typeof d!=='object')return;
-  if(d.t==='ping'){ sendMsg({t:'pong',ts:d.ts}); return; }
-  if(d.t==='stats'){ net.remoteStats=d.b; remoteBase=d.b; if(runActive)recompute(); return; }
+  const slot=wrap.slot;
+  if(d.t==='ping'){ try{wrap.c.send({t:'pong',ts:d.ts});}catch(e){} return; }
+  if(d.t==='stats'){ net.remoteStats=d.b; remoteBase[slot]=d.b; if(runActive)recompute(); return; }
   if(d.t==='rank'){
     /* v4.11: el mensaje de ranking trae el nombre del rival para el lobby */
-    const nm=normalizeName(d.name);if(nm)net.remotePilot=nm;
+    const nm=normalizeName(d.name);
+    if(nm){net.remotePilot=nm;if(!net.remotePilots.includes(nm))net.remotePilots.push(nm);}
     const n=mergeRanking(d.list);
-    if(n)banner('RANKING','+'+n+' récords nuevos del rival');
-    if(!net.rankSent){net.rankSent=true;sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});}
-    if(nm&&state==='lobby'&&!runActive)
-      $('#lobbyStat').innerHTML='<span class="ok">¡JUGADOR 2 CONECTADO!</span><br><span class="prof">Piloto rival: <b style="color:var(--sky)">'+nm+'</b> · Ranking sincronizado</span>';
+    if(n)banner('RANKING','+'+n+' récords nuevos de tus pilotos');
+    if(!wrap.rankSeen){wrap.rankSeen=true;try{wrap.c.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});}catch(e){}}
+    if(state==='lobby'&&!runActive)lobbyStatus();
     return;
   }
-  if(d.t==='inp'&&players[1]&&players[1].hp>0){
-    players[1].x=clamp(d.x,16,W-16); players[1].y=clamp(d.y,16,H-16); return;
+  if(d.t==='inp'&&players[slot]&&players[slot].hp>0){
+    players[slot].x=clamp(d.x,16,W-16); players[slot].y=clamp(d.y,16,H-16); return;
   }
-  if(d.t==='nova'){ fireNovaSlot(1); return; }
-  if(d.t==='emo'){ addEmoFx(1,'emo',d.e); return; }
+  if(d.t==='nova'){ fireNovaSlot(slot); return; }
+  if(d.t==='emo'){
+    addEmoFx(slot,'emo',d.e);
+    for(const c of net.conns)if(c!==wrap&&c.open)try{c.c.send({t:'emo',e:d.e,s:slot});}catch(e2){}
+    return;
+  }
   if(d.t==='call'){
-    addEmoFx(1,'call',d.k);
-    const pl=players[1];
+    addEmoFx(slot,'call',d.k);
+    const pl=players[slot];
     if(pl)rings.push({x:pl.x,y:pl.y,r:14,R:100,t:0,life:.6,color:CALLS[d.k]?CALLS[d.k].color:'#F2EFE6'});
+    for(const c of net.conns)if(c!==wrap&&c.open)try{c.c.send({t:'call',k:d.k,s:slot});}catch(e2){}
     return;
   }
   if(d.t==='pickC'&&state==='shipwait'){
-    net.clientChosen=true; net.clientCard=d.id;
-    if(!net.hostChosen)setChoiceNote('JUGADOR 2 YA ELIGIÓ · ELIGE TÚ');
+    /* v4.15: la elección viaja con el slot de cada piloto */
+    net.chosen[slot]=true; net.cards[slot]=d.id;
+    if(!net.chosen[0])setChoiceNote('UN PILOTO YA ELIGIÓ · ELIGE TÚ');
     checkShipChoice(); return;
   }
   if(d.t==='pickR'&&state==='postboss'){
-    net.clientRelic=true; net.clientRelicId=d.id;
-    if(!net.hostRelic)setRelicNote('JUGADOR 2 YA ELIGIÓ · ELIGE TÚ');
+    net.relicOk[slot]=true; net.relicId[slot]=d.id;
+    if(!net.relicOk[0])setRelicNote('UN PILOTO YA ELIGIÓ · ELIGE TÚ');
     applyRelicChoice(); return;
   }
   if(d.t==='chestPick'&&state==='chestwait'){
-    chestSlot=1; chestReward(d.id,d.kind); return;
+    chestSlot=slot; chestReward(d.id,d.kind); return;
   }
   if(d.t==='bye'){ if(runActive)runActive=false; destroyNet(); goMenu(); }
 }
 function checkShipChoice(){
   if(state!=='shipwait')return;
-  if(!(net.hostChosen&&net.clientChosen))return;
-  applyShipCard(0,net.hostCard);   /* v4.8: tope 10 + curación instantánea por slot */
-  applyShipCard(1,net.clientCard);
-  net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
+  if(!net.chosen[0])return;
+  for(let s=1;s<players.length;s++)if(!net.chosen[s])return;
+  applyShipCard(0,net.cards[0]||'dmg1');
+  for(let s=1;s<players.length;s++)applyShipCard(s,net.cards[s]||'dmg1');
+  net.chosen={};net.cards={};
   pendingShipLevels--; recompute(); persist();
   if(pendingShipLevels>0)beginShipChoiceHost();
   else{ state='play'; showScr(null); sendMsg({t:'ev',k:'resume'}); }
@@ -156,24 +203,25 @@ function checkShipChoice(){
 function beginShipChoiceHost(){
   if(!net.connected){ showShipLevelLocal(); return; }
   state='shipwait';shipwaitT=0;
-  net.hostChosen=false;net.clientChosen=false;
-  const cnt0=id=>cardStacks(0,id),cnt1=id=>cardStacks(1,id);
+  net.chosen={};net.cards={};
+  const cnt=(slot,id)=>cardStacks(slot,id);
   const picks=[],used=new Set();
   for(let i=0;i<3;i++){
     const r=Math.random();
     let tier=r<.12&&run.level>=4?2:r<.40?1:0;
     for(let t2=tier;t2>=0;t2--){
-      const cands=CARDS.filter(c=>c.tier===t2&&!used.has(c.id)&&cnt0(c.id)<MAX_STACKS&&cnt1(c.id)<MAX_STACKS);
+      const cands=CARDS.filter(c=>c.tier===t2&&!used.has(c.id)&&
+        players.every(pl=>cnt(pl.slot,c.id)<MAX_STACKS));
       if(cands.length){const c=cands[irand(0,cands.length-1)];used.add(c.id);picks.push(c);break;}
     }
   }
   while(picks.length<3){
-    const c=CARDS.find(c=>cnt0(c.id)<MAX_STACKS&&cnt1(c.id)<MAX_STACKS&&!picks.includes(c))||CARDS[0];
+    const c=CARDS.find(c=>players.every(pl=>cnt(pl.slot,c.id)<MAX_STACKS)&&!picks.includes(c))||CARDS[0];
     picks.push(c);
   }
   sendMsg({t:'ev',k:'ship',lv:run.shipLv,ids:picks.map(c=>c.id)});
   showShipCards(picks,c=>{
-    net.hostChosen=true; net.hostCard=c.id; SFX.buy();
+    net.chosen[0]=true; net.cards[0]=c.id; SFX.buy();
     markChoiceDone('JUGADOR 1');
     checkShipChoice();
   },null);
@@ -267,14 +315,15 @@ function clientOnData(d){
   if(d.t==='ver'){ netEndLocal('El anfitrión tiene otra versión. Actualizad ambos a la misma.'); return; }
   if(d.t==='welcome'){
     runDiff=d.diff||'normal';
-    /* v4.11: nombre del anfitrión para el lobby del cliente */
+    /* v4.15: el anfitrión asigna tu slot (1 o 2) y el total de pilotos */
+    net.mySlot=clamp(d.slot||1,1,2);
     const nm=normalizeName(d.name);
     if(nm){net.remotePilot=nm;
       if(state==='clientwait')$('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Anfitrión: <b style="color:var(--sky)">'+nm+'</b> — esperando el inicio…';}
     return;
   }
   if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); return; }
-  if(d.t==='start'){ runDiff=d.diff||runDiff; startRunClient(); return; }
+  if(d.t==='start'){ runDiff=d.diff||runDiff; startRunClient(d); return; }
   if(d.t==='snap'){ applySnap(d); return; }
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }
   if(d.t==='fxr'){ rings.push({x:d.x,y:d.y,r:10,R:d.R,t:0,life:.45,color:d.c}); return; }
@@ -282,10 +331,11 @@ function clientOnData(d){
   if(d.t==='fxu'){ ultBeams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.55}); return; } /* v4.13: rayo del Aniquilador */
   if(d.t==='fxh'){ holes.push({x:d.x,y:d.y,t:0,life:d.life,rad:d.rad,dps:0,pull:0,slot:0,visual:true,spin:Math.random()*TAU}); return; } /* v4.14: agujero negro (visual) */
   if(d.t==='fxf'){ floats.push({x:d.x,y:d.y,txt:d.txt,color:d.c,size:d.s,t:0,life:.65}); return; }
-  if(d.t==='emo'){ addEmoFx(0,'emo',d.e); return; }
+  if(d.t==='emo'){ addEmoFx(d.s!=null?d.s:0,'emo',d.e); return; }
   if(d.t==='call'){
-    addEmoFx(0,'call',d.k);
-    const pl=players[0];
+    const rs=d.s!=null?d.s:0;
+    addEmoFx(rs,'call',d.k);
+    const pl=players[rs];
     if(pl)rings.push({x:pl.x,y:pl.y,r:14,R:100,t:0,life:.6,color:CALLS[d.k]?CALLS[d.k].color:'#F2EFE6'});
     return;
   }
@@ -332,6 +382,8 @@ function clientEvent(d){
     save.bestAll=Math.max(save.bestAll,d.level);
     save.bestShip=Math.max(save.bestShip,d.ship);
     if(d.hard)save.bestHard=Math.max(save.bestHard||0,d.level);
+    /* v4.15: el cliente también deja su récord en MULTI */
+    addModeRecord('mp','MP',d.level,d.ship);
     persist();
     runActive=false;state='over';
     musStop();

@@ -82,7 +82,7 @@ function killEnemy(e,bySlot){
 function doSplit(e){
   if(e.elite||e.tk==='kami'||e.camp)return;
   if(e.elvl<5&&e.tk!=='hive')return;
-  const cap=players.length===2?52:40;
+  const cap=players.length>2?64:players.length===2?52:40;
   if(enemies.length>cap)return;
   const minL=minLvlOf(run.level);
   if(e.elvl<=minL&&e.tk!=='hive')return;

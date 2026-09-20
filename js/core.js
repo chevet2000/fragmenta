@@ -8,8 +8,8 @@ function recompute(){
       for(const nd of TREE)if(has(nd.id))nd.fx(b);
       b.goldMul*=1+.25*save.prest;
     }
-    if(slot===1&&net.mode==='host'&&remoteBase){
-      const rb=remoteBase;
+    if(slot>0&&net.mode==='host'&&remoteBase&&remoteBase[slot]){
+      const rb=remoteBase[slot];
       for(const k2 in b){ if(rb[k2]!==undefined&&k2!=='heal'&&k2!=='nova')b[k2]=rb[k2]; }
       if(rb.nova)b.nova=rb.nova;
     }
@@ -177,12 +177,18 @@ function missionTick(kind,amt){
     m.p=Math.min(m.n,m.p+amt);
     if(m.p>=m.n){
       m.done=true;
-      const half=Math.floor(m.rw/2);
-      save.gold+=half;run.goldRun+=half;
-      if(m.gem)save.gems+=m.gem;
-      if(net.mode==='host'&&players.length===2){
-        net.walletG+=m.rw-half;
-        if(m.gem)net.walletM+=m.gem;
+      /* v4.15: en co-op (2–3) el premio se reparte: parte del anfitrión
+         y parte igual para cada cliente (via wallet de su conexión) */
+      if(net.mode==='host'&&players.length>1){
+        const np=players.length;
+        const host=Math.ceil(m.rw/np),per=Math.floor(m.rw/np);
+        save.gold+=host;
+        for(const c of net.conns)if(c.open)c.wg=(c.wg||0)+per;
+        if(m.gem){save.gems+=m.gem;
+          for(const c of net.conns)if(c.open)c.wm=(c.wm||0)+m.gem;}
+      }else{
+        save.gold+=m.rw;
+        if(m.gem)save.gems+=m.gem;
       }
       banner('MISIÓN CUMPLIDA','+'+m.rw+' de oro'+(m.gem?' · +'+m.gem+' gema':''));
       sendMiss();

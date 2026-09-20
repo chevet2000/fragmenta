@@ -47,7 +47,7 @@ function mkPlayer(slot){return{
 };}
 let players=[mkPlayer(0)];
 let P=players[0]; // se re-vincula en cada inicio de partida (ver bindP)
-let remoteBase=null;
+let remoteBase={}; /* v4.15: statblock de cada cliente por slot (remoteBase[1], remoteBase[2]) */
 let localSlot=0;
 
 /* ============ señales y emoticones ============ */

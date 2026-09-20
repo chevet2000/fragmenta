@@ -72,7 +72,7 @@ function fanAtk(b){
 function updBoss(dt){
   if(!boss)return;
   const b=boss;
-  const coop=players.length===2&&net.mode==='host';
+  const coop=players.length>1&&net.mode==='host';
   const easy=!!b.D.easy;
   b.t+=dt;b.rot+=dt*(0.9+0.22*(b.ph-1));b.flash=Math.max(0,b.flash-dt*5);
   if(b.burn){
@@ -522,7 +522,7 @@ function updEnemies(dt){
   formY=Math.min(formY+dt*4,H*.18);
   const offX=Math.sin(formT*.7)*(18+Math.min(24,run.level*1.2));
   let divers=0;for(const e of enemies)if(e.state==='dive')divers++;
-  const maxDivers=(1+Math.floor(run.level/3))*(players.length===2?1.5:1);
+  const maxDivers=(1+Math.floor(run.level/3))*(players.length>1?1.5:1);
   for(const sn of wave.snakes)sn.s+=sn.spd*dt;
   /* viento: repele alrededor de cada nave con afinidad de viento */
   for(const pl of players){
@@ -724,14 +724,15 @@ function updPickups(dt){
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     if(d<24&&p.t!=='schest'){
       p.dead=true;
-      const remote=pl.slot===1&&net.mode==='host';
+      /* v4.15: el botín va a la billetera del piloto que lo recoge (slot>0 = cliente) */
+      const remote=pl.slot>0&&net.mode==='host';
       if(p.t==='gold'){
-        if(remote)net.walletG+=p.val;
-        else{save.gold+=p.val;run.goldRun+=p.val;save.totGold=(save.totGold||0)+p.val;} /* v4.12 */
+        if(remote)walletGold(pl.slot,p.val);else save.gold+=p.val;
+        run.goldRun+=p.val;save.totGold=(save.totGold||0)+p.val;
         missionTick('gold',p.val);SFX.coin();
       }else if(p.t==='gem'){
-        if(remote)net.walletM+=1;
-        else{save.gems++;run.gemsRun++;save.totGems=(save.totGems||0)+1;} /* v4.12 */
+        if(remote)walletGems(pl.slot,1);else save.gems++;
+        run.gemsRun++;save.totGems=(save.totGems||0)+1;
         SFX.gem();floater(pl.x,pl.y-26,'+1 GEMA','#64C7FF',11);
       }else if(p.t==='chest'){
         openChest(pl.slot,p.kind);
@@ -739,11 +740,13 @@ function updPickups(dt){
         SFX.chest();
         if(R()<.6){
           const v=Math.round((80+run.level*10)*players[0].goldMul);
-          if(remote)net.walletG+=v;else{save.gold+=v;run.goldRun+=v;save.totGold=(save.totGold||0)+v;} /* v4.12 */
+          if(remote)walletGold(pl.slot,v);else save.gold+=v;
+          run.goldRun+=v;save.totGold=(save.totGold||0)+v;
           banner('COFRE PEQUEÑO','+'+v+' DE ORO');
         }else{
           const v=2;
-          if(remote)net.walletM+=v;else{save.gems+=v;run.gemsRun+=v;save.totGems=(save.totGems||0)+v;} /* v4.12 */
+          if(remote)walletGems(pl.slot,v);else save.gems+=v;
+          run.gemsRun+=v;save.totGems=(save.totGems||0)+v;
           banner('COFRE PEQUEÑO','+'+v+' GEMAS');
         }
         persist();
@@ -788,9 +791,12 @@ function checkClear(dt){
       if(wave.wasBoss)showPostBoss();
       else{
         const bonus=8+run.level*2;
-        if(players.length===2){
-          const half=Math.ceil(bonus/2);
-          save.gold+=half;net.walletG+=bonus-half;
+        /* v4.15: en co-op de 2–3 el bono se reparte (anfitrión + clientes) */
+        if(players.length>1){
+          const np=players.length;
+          save.gold+=Math.ceil(bonus/np);
+          const per=Math.floor(bonus/np);
+          for(const c of net.conns)if(c.open)c.wg=(c.wg||0)+per;
         }else save.gold+=bonus;
         run.goldRun+=bonus;
         banner('OLEADA DESPEJADA','+'+bonus+' de oro');

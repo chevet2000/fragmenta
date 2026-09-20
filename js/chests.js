@@ -1,13 +1,27 @@
 'use strict';
 /* ============ cofres ============ */
+/* v4.15: billetera por SLOT — en co-op de 2–3, el oro/gemas de cada piloto
+   viaja por SU conexión (conn.wg/conn.wm) en vez de una bolsa común. */
+function walletGold(slot,v){
+  if(net.mode==='host'&&slot>0){
+    const c=net.conns.find(x=>x.slot===slot&&x.open);
+    if(c){c.wg=(c.wg||0)+v;return;}
+  }
+  save.gold+=v;save.totGold=(save.totGold||0)+v;
+}
+function walletGems(slot,v){
+  if(net.mode==='host'&&slot>0){
+    const c=net.conns.find(x=>x.slot===slot&&x.open);
+    if(c){c.wm=(c.wm||0)+v;return;}
+  }
+  save.gems+=v;save.totGems=(save.totGems||0)+v;
+}
 function grantGold(slot,v){
-  if(slot===1&&net.mode==='host')net.walletG+=v;
-  else{save.gold+=v;save.totGold=(save.totGold||0)+v;} /* v4.12: estadística */
+  walletGold(slot,v);
   run.goldRun+=v;
 }
 function grantGems(slot,v){
-  if(slot===1&&net.mode==='host')net.walletM+=v;
-  else{save.gems+=v;save.totGems=(save.totGems||0)+v;} /* v4.12: estadística */
+  walletGems(slot,v);
   run.gemsRun+=v;
 }
 function openChest(slot,kind){
@@ -22,8 +36,9 @@ function openChest(slot,kind){
     chestReward(rid,'arm');
     return;
   }
-  if(net.mode==='host'&&slot===1&&net.connected){
-    chestSlot=1;chestwaitT=0;
+  /* v4.15: el cofre de cualquier CLIENTE (slot 1 o 2) espera su elección */
+  if(net.mode==='host'&&slot>0&&net.connected){
+    chestSlot=slot;chestwaitT=0;
     state='chestwait';
     sendMsg({t:'ev',k:'chest',lv:run.level,kind});
     return;

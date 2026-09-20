@@ -4,6 +4,8 @@ const DIFFS={solo:1,normal:2.2,dificil:3,hardcore:5};
 const DIFF_LABEL={solo:'SOLO ×1',normal:'NORMAL ×2.2',dificil:'DIFÍCIL ×3',hardcore:'HARDCORE ×5'};
 let runDiff='solo';
 const multHP=()=>DIFFS[runDiff]||1;
+/* v4.15: color de cada slot en co-op de 2–3 (P1 menta · P2 rosa · P3 cielo) */
+const SLOT_COL=['#7FD1B9','#FF7EB6','#64C7FF'];
 
 /* v4.9: mercado de gemas — cambia oro por gemas en el ARSENAL.
    Así el oro conserva uso incluso con todas las mejoras al máximo:

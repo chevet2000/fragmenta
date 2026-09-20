@@ -341,3 +341,66 @@ button{font-family:inherit}
 /* ==== v4.12: bestiario (entradas sin registrar atenuadas) ==== */
 .arow.unk{opacity:.62}
 .arow.unk .at b{color:var(--dim)!important}
+
+/* ==== v4.15: menú compacto — novedades colapsables ==== */
+.tagbtn{margin-top:2px;font-size:9px;letter-spacing:.26em;font-weight:700;color:var(--dim);
+  background:rgba(12,16,22,.55);border:1px solid var(--line);padding:6px 14px;cursor:pointer;text-transform:uppercase}
+.tagbtn:active{color:var(--amber);border-color:var(--amber)}
+#tagBody{margin-top:8px}
+
+/* ==== v4.15: tira de piloto con avatar en el menú ==== */
+#menuPilot{display:flex;align-items:center;gap:9px;justify-content:center;margin-top:10px;cursor:pointer}
+#menuPilot canvas{width:34px;height:34px;border:1px solid var(--line);background:rgba(7,9,13,.6);flex:none}
+#menuPilot small{display:block;font-size:7.5px;letter-spacing:.3em;color:var(--dim);text-align:left}
+#menuPilot b{display:block;font-size:14px;letter-spacing:.3em;color:var(--sky);text-align:left}
+
+/* ==== v4.15: rejilla de botones secundarios (2 columnas) ==== */
+.menu-grid{width:min(290px,84vw);display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.menu-grid .btn{padding:10px 4px;font-size:10.5px;letter-spacing:.12em}
+.menu-grid #btnAch{position:relative}
+#achBadge{display:inline-block;min-width:17px;height:17px;line-height:17px;padding:0 4px;margin-left:6px;
+  background:var(--coral);color:#0A0C10;border-radius:9px;font-size:10px;font-weight:700;vertical-align:1px}
+#achBadge.hidden{display:none}
+.btn.setb{border-style:dashed;color:var(--dim)}
+.btn.setb:active{color:var(--amber);border-color:var(--amber)}
+
+/* ==== v4.15: pantalla AJUSTES ==== */
+.setsec{font-size:8.5px;letter-spacing:.32em;color:var(--dim);font-weight:700;text-align:center;
+  margin:14px 0 7px;border-bottom:1px dashed var(--line);padding-bottom:5px}
+.pilotbox2{border:1px solid var(--sky);padding:12px;display:grid;grid-template-columns:72px 1fr auto;gap:9px;align-items:center}
+.pilotbox2 canvas{width:72px;height:72px;background:#07090D;border:1px solid var(--line)}
+.pilotbox2 .pi-info{min-width:0}
+.pilotbox2 .pi-info small{display:block;font-size:7.5px;letter-spacing:.2em;color:var(--dim);margin-bottom:4px}
+.pilotbox2 .pi-info b{font-size:19px;letter-spacing:.24em;color:var(--sky);word-break:break-all}
+.pilotbox2 .pi-hint{grid-column:1/-1;font-size:8px;letter-spacing:.18em;color:var(--dim);text-align:center}
+#btnEditPilot2{font-size:9px;letter-spacing:.18em;font-weight:700;padding:7px 10px;
+  background:none;border:1px solid var(--sky);color:var(--sky);cursor:pointer}
+#pilotEdit2{grid-column:1/-1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;align-items:center}
+#pilotEdit2.hidden{display:none}
+#pilotInput2{flex:1;min-width:120px;max-width:190px;background:#0B0F15;border:1px solid var(--line);color:var(--ink);
+  font:700 13px "Chakra Petch",monospace;letter-spacing:.14em;padding:8px 9px;text-transform:uppercase;
+  text-align:center;outline:none}
+#pilotInput2:focus{border-color:var(--mint)}
+#pilotEdit2 button{font-size:9px;letter-spacing:.14em;font-weight:700;padding:8px 10px;
+  background:none;border:1px solid var(--line);color:var(--dim);cursor:pointer}
+#btnPilotSave2{border-color:var(--mint)!important;color:var(--mint)!important}
+
+/* ==== v4.15: filtros del ranking por modo ==== */
+.ftabs{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:2px 0 10px}
+.ftabs button{font-size:8.5px;letter-spacing:.12em;font-weight:700;padding:6px 8px;
+  background:rgba(12,16,22,.6);border:1px solid var(--line);color:var(--dim);cursor:pointer}
+.ftabs button.on{border-color:var(--amber);color:var(--amber)}
+.mchip{display:inline-block;font-size:7.5px;letter-spacing:.14em;font-weight:700;padding:1px 5px;
+  margin-right:5px;border:1px solid var(--line);color:var(--dim);vertical-align:1px}
+.mchip.m-nm{border-color:var(--mint);color:var(--mint)}
+.mchip.m-dc{border-color:var(--amber);color:var(--amber)}
+.mchip.m-hc{border-color:var(--coral);color:var(--coral)}
+.mchip.m-mp{border-color:var(--sky);color:var(--sky)}
+.mchip.m-wk{border-color:var(--vio);color:var(--vio)}
+.mchip.m-fz{border-color:#FF9F43;color:#FF9F43}
+.mchip.m-dy{border-color:#FF7EB6;color:#FF7EB6}
+/* botón RECLAMAR en logros */
+.arow .claim{font-size:9px;letter-spacing:.14em;font-weight:700;padding:7px 10px;
+  background:rgba(255,209,102,.08);border:1px solid var(--amber);color:var(--amber);cursor:pointer;flex:none}
+.arow.pend{border-color:rgba(255,209,102,.55)}
+.arow.pend .amk{background:var(--amber);border-color:var(--amber);color:#0A0C10}

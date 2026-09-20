@@ -66,7 +66,7 @@ function refreshHUD(){
     $('#novaArc').style.strokeDashoffset=163.4*(1-k);
     nb.classList.toggle('ready',k>=1);
   }else nb.classList.add('hidden');
-  $('#btnEmo').classList.toggle('hidden',!(players.length===2&&net.mode&&net.connected&&state==='play'));
+  $('#btnEmo').classList.toggle('hidden',!(players.length>=2&&net.mode&&net.connected&&state==='play'));
   const nt=$('#netTag');
   if(net.mode&&runActive){
     nt.classList.remove('hidden');
@@ -74,7 +74,7 @@ function refreshHUD(){
       nt.textContent='ONLINE · '+net.ping+' MS';
       nt.classList.toggle('bad',!net.connected);
     }else{
-      nt.textContent=net.connected?('ANFITRIÓN · SALA '+net.code):'ANFITRIÓN · SIN JUGADOR 2';
+      nt.textContent=net.connected?('ANFITRIÓN · SALA '+net.code+' · '+(1+connsOpen())+' JUG.'):'ANFITRIÓN · SIN PILOTOS';
       nt.classList.toggle('bad',!net.connected);
     }
   }else nt.classList.add('hidden');

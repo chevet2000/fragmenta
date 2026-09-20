@@ -170,8 +170,12 @@ function updAbilities(pl,dt){
     pl.intAcc+=dt*pl.goldRate;
     while(pl.intAcc>=1){
       pl.intAcc-=1;
-      if(pl.slot===1&&net.mode==='host')net.walletG+=1;
-      else{save.gold+=1;run.goldRun+=1;save.totGold=(save.totGold||0)+1;} /* v4.12: estadística */
+      /* v4.15: en co-op el oro del cliente viaja por su conexión */
+      if(pl.slot>0&&net.mode==='host'){
+        const c=net.conns.find(x=>x.slot===pl.slot&&x.open);
+        if(c)c.wg=(c.wg||0)+1;else{save.gold+=1;save.totGold=(save.totGold||0)+1;}
+      }else{save.gold+=1;save.totGold=(save.totGold||0)+1;} /* v4.12: estadística */
+      run.goldRun+=1;
       missionTick('gold',1);
     }
   }

@@ -2,7 +2,9 @@
 /* ============ pantallas ============ */
 const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver'),
   /* v4.12: hangar de naves, misiones diarias, perfil y bestiario */
-  hangar:$('#scrHangar'),missions:$('#scrMissions'),stats:$('#scrStats'),best:$('#scrBest')};
+  hangar:$('#scrHangar'),missions:$('#scrMissions'),stats:$('#scrStats'),best:$('#scrBest'),
+  /* v4.15: ajustes (engranaje) */
+  settings:$('#scrSettings')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
 function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
 function setChoiceNote(txt){
@@ -30,26 +32,54 @@ function refreshMenu(){
   $('#mGold').innerHTML=`${icoGold} ${save.gold}`;
   $('#mGems').innerHTML=`${icoGem} ${save.gems}`;
   $('#mPrest').textContent=save.prest>0?`ASCENSOS ×${save.prest}`:'';
-  $('#btnArsenal').textContent=`ARSENAL · ÁRBOL (${ownedCount()}/${TREE.length})`;
+  $('#btnArsenal').textContent=`ARSENAL (${ownedCount()}/${TREE.length})`;
   const na=ACHS.filter(a=>save.ach[a.id]).length;
-  $('#btnAch').textContent=`LOGROS (${na}/${ACHS.length})`;
+  $('#btnAch').innerHTML=`LOGROS (${na}/${ACHS.length})<span id="achBadge" class="hidden">0</span>`;
+  refreshAchBadge();
   const wb=(save.weekly&&save.weekly.seed===weekSeed())?save.weekly.best:0;
   $('#btnWeekly').textContent=`DESAFÍO SEMANAL · RÉCORD ${wb}`;
   /* v4.12: reto diario, misiones, hangar y nuevas pantallas */
   const db=(save.daily&&save.daily.seed===daySeed())?(save.daily.best||0):0;
   $('#btnDaily').textContent=`RETO DIARIO · RÉCORD ${db}`;
   ensureDailyM();
-  $('#btnMissions').textContent=`MISIONES DEL DÍA (${dailyMDone()}/3)`;
+  $('#btnMissions').textContent=`MISIONES (${dailyMDone()}/3)`;
   const sk=getSkin();
-  $('#btnHangar').textContent=`HANGAR · NAVE (${sk.name})`;
+  $('#btnHangar').textContent=`HANGAR (${sk.name})`;
   const nr=(save.ranking||[]).length;
-  $('#btnRank').textContent=`RANKING SEMANAL (${nr})`;
+  $('#btnRank').textContent=`RANKING · RÉCORDS (${nr})`;
   $('#diffName').textContent=DIFF_LABEL[save.diff]||'SOLO ×1';
   document.querySelectorAll('#diffRow button').forEach(b=>b.classList.toggle('on',b.dataset.d===save.diff));
   const asc=$('#btnAscend');
   asc.classList.toggle('hidden',save.bestAll<50);
   asc.textContent=ascConfirm?'¿SEGURO? TOCA DE NUEVO':`ASCENDER ×${save.prest+1} (+25% ORO)`;
+  /* v4.15: tira de piloto con avatar (tu nave con el aspecto equipado) */
+  $('#menuPilotName').textContent=getPilot();
+  drawPilotAvatar($('#pilotCv'),34);
 }
+/* v4.15: AVATAR DEL PILOTO — tu nave con su aspecto equipado en miniatura */
+function drawPilotAvatar(c,size){
+  if(!c)return;
+  const g=c.getContext('2d');
+  g.clearRect(0,0,c.width,c.height);
+  const sk=getSkin();
+  const cc=sk.color==='prisma'?'hsl('+Math.floor((time*40)%360)+',85%,66%)':sk.color;
+  const hc=sk.color==='prisma'?'#FFD166':(sk.color==='menta'?null:sk.color);
+  g.save();g.translate(c.width/2,c.height/2+2);
+  drawShipIcon(g,size/26,cc,hc);
+  g.restore();
+}
+/* v4.15: pantalla de AJUSTES (engranaje) */
+function openSettings(){
+  $('#setName').textContent=getPilot();
+  const pe=$('#pilotEdit2'),be=$('#btnEditPilot2');
+  if(pe)pe.classList.add('hidden');
+  if(be)be.classList.remove('hidden');
+  drawPilotAvatar($('#setAva'),56);
+  showScr('settings');
+}
+/* v4.15: FILTROS DEL RANKING por modo (se recuerdan entre sesiones) */
+let rankFilter='all';
+try{const rf=localStorage.getItem('frag_rf');if(rf&&['all','nm','dc','hc','mp','wk','fz','dy'].includes(rf))rankFilter=rf;}catch(e){}
 function openRank(){
   const pilot=getPilot();
   const ws=weekSeed();
@@ -63,31 +93,36 @@ function openRank(){
   $('#pilotRec').innerHTML=mine
     ?('RÉCORD DE ESTA SEMANA<br>OLEADA '+mine.wave+' · NAVE NV '+mine.ship)
     :'Aún sin registro esta semana.<br>Juega el DESAFÍO SEMANAL para generarlo.';
+  document.querySelectorAll('#rankTabs button').forEach(b=>b.classList.toggle('on',b.dataset.f===rankFilter));
   renderRankList();
   showScr('rank');
 }
 function renderRankList(){
   const box=$('#rankList');box.innerHTML='';
-  const list=sortedRanking();
+  /* v4.15: filtra por modo · los registros antiguos (sin modo) eran semanales */
+  const list=sortedRanking().filter(r=>rankFilter==='all'||modeOfEntry(r)===rankFilter);
   if(list.length===0){
+    const lbl=rankFilter==='all'?'':RANK_MODE_LABEL[rankFilter]+' · ';
     box.innerHTML='<div style="font-size:10px;letter-spacing:.2em;color:var(--dim);text-align:center;padding:10px 0">'+
-      'SIN REGISTROS · los ranking se sincronizan solos<br>al conectaros en el lobby co-op</div>';
+      'SIN REGISTROS '+lbl+'· los ranking se sincronizan solos<br>al conectaros en el lobby co-op</div>';
     return;
   }
   list.forEach((r,i)=>{
     const el=document.createElement('div');
     el.className='rentry'+(i===0?' p1':i===1?' p2':i===2?' p3':'')+(r.ok?'':' unv');
     const medal=i<3?['1','2','3'][i]:(i+1);
+    const mk=modeOfEntry(r);
+    const isFz=mk==='fz';
     el.innerHTML=`<div class="rk">${medal}</div>`+
-      `<div class="rt"><b>${r.code}</b><small>${r.seed}${r.ok?'':' · sin verificar'}</small></div>`+
-      `<div class="rw">${r.wave}<small>OLEADA</small></div>`+
+      `<div class="rt"><b>${r.code}</b><small><span class="mchip m-${mk}">${RANK_MODE_LABEL[mk]}</span>${r.seed}${r.ok?'':' · sin verificar'}</small></div>`+
+      `<div class="rw">${isFz?(r.sub||r.wave):r.wave}<small>${isFz?'BAJAS':'OLEADA'}</small></div>`+
       `<button class="rdel" data-c="${r.code}" data-s="${r.seed}">×</button>`;
     box.appendChild(el);
   });
   box.querySelectorAll('.rdel').forEach(b=>{
     b.addEventListener('click',()=>{
       save.ranking=(save.ranking||[]).filter(r=>!(r.code===b.dataset.c&&r.seed===b.dataset.s));
-      persist();renderRankList();
+      persist();renderRankList();refreshMenu();
     });
   });
   const ws=weekSeed();
@@ -100,6 +135,15 @@ function renderRankList(){
     sincroniza automáticamente al conectar dos jugadores en el lobby co-op */
  bindEl('#btnRank', 'click',openRank);
  bindEl('#btnRankBack', 'click',()=>{refreshMenu();showScr('menu');});
+/* v4.15: pestañas de filtro del ranking */
+document.querySelectorAll('#rankTabs button').forEach(b=>{
+  b.addEventListener('click',()=>{audio();
+    rankFilter=b.dataset.f;
+    try{localStorage.setItem('frag_rf',rankFilter);}catch(e){}
+    document.querySelectorAll('#rankTabs button').forEach(x=>x.classList.toggle('on',x===b));
+    renderRankList();
+  });
+});
 /* v4.11: editor del nombre de piloto — el nombre se usa en el ranking,
    viaja en el co-op (lobby) y en la copia de perfil (FRGT2). Al cambiar,
    tus récords guardados se renombran y re-firman al nuevo nombre. */
@@ -153,12 +197,26 @@ function openGuide(){
 }
 function openAch(){
   const box=$('#achList');box.innerHTML='';
+  const pend=achPendingCount();
+  if(pend>0){
+    const head=document.createElement('div');
+    head.className='choicenote';
+    head.textContent='◆ TIENES '+pend+' LOGRO'+(pend>1?'S':'')+' POR RECLAMAR';
+    box.appendChild(head);
+  }
   ACHS.forEach(a=>{
     const done=!!save.ach[a.id];
+    const pending=done&&!(save.achClaimed&&save.achClaimed[a.id]);
     const el=document.createElement('div');
-    el.className='arow'+(done?' done':'');
-    el.innerHTML=`<div class="amk">${done?'✓':''}</div><div class="at"><b>${a.name}</b><small>${a.desc}</small></div><div class="arw">${icoGem}${a.rw}</div>`;
+    el.className='arow'+(done?' done':'')+(pending?' pend':'');
+    const right=pending
+      ?`<button class="claim" data-a="${a.id}">RECLAMAR +${a.rw}</button>`
+      :`<div class="arw">${icoGem}${a.rw}</div>`;
+    el.innerHTML=`<div class="amk">${done?(pending?'◆':'✓'):''}</div><div class="at"><b>${a.name}</b><small>${a.desc}</small></div>${right}`;
     box.appendChild(el);
+  });
+  box.querySelectorAll('.claim').forEach(b=>{
+    b.addEventListener('click',()=>{audio();claimAch(b.dataset.a);openAch();refreshMenu();});
   });
   showScr('ach');
 }
@@ -302,7 +360,7 @@ function goMenu(){
 }
 function resetRunCommon(){
   P=players[0];
-  run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
+  run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=players.map(()=>[]);run.goldRun=0;run.gemsRun=0;
   run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;run.comboN=0;run.comboT=0;run.tempBuffs=[];rollMissions();
   run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
   pendingShipLevels=0;frenzyT=0;expFrac=0;run.frenzyBossT=50;frenzyMode=false; /* v4.13: primer jefe a 50 s */
@@ -332,7 +390,7 @@ function startRun(){
   runDiff=save.diff;
   save.runs++;persist();
   players=[mkPlayer(0)];localSlot=0;
-  remoteBase=null;
+  remoteBase={};
   resetRunCommon();
   recompute();
   primePlayers();
@@ -356,7 +414,7 @@ function startWeekly(){
   runDiff='normal';
   save.runs++;persist();
   players=[mkPlayer(0)];localSlot=0;
-  remoteBase=null;
+  remoteBase={};
   resetRunCommon();
   recompute();
   primePlayers();
@@ -383,7 +441,7 @@ function startDaily(){
   runDiff='normal';
   save.runs++;persist();
   players=[mkPlayer(0)];localSlot=0;
-  remoteBase=null;
+  remoteBase={};
   resetRunCommon();
   recompute();
   primePlayers();
@@ -406,7 +464,7 @@ function startFrenzy(){
   runDiff='hardcore';
   save.runs++;persist();
   players=[mkPlayer(0)];localSlot=0;
-  remoteBase=null;
+  remoteBase={};
   resetRunCommon();
   frenzyMode=true;
   if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
@@ -427,38 +485,50 @@ function startFrenzy(){
 function startCoop(){
   runDiff=net.lobbyDiff||'normal';
   save.runs++;persist();
-  players=[mkPlayer(0),mkPlayer(1)];localSlot=0;
+  /* v4.15: CO-OP DE 3 — el anfitrión monta un slot por piloto conectado */
+  const np=1+net.conns.filter(c=>c.open).length;
+  players=[mkPlayer(0)];
+  for(let i=1;i<np;i++)players.push(mkPlayer(i));
+  localSlot=0;
   resetRunCommon();
   recompute();
   primePlayers();
   players[0].x=W*.42;players[0].y=H-130;
   players[1].x=W*.58;players[1].y=H-130;
+  if(players[2]){players[2].x=W*.5;players[2].y=H-92;}
   runActive=true;state='play';
   showScr(null);
   $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
   $('#netTag').classList.remove('hidden');
   refreshHUD();
-  sendMsg({t:'start',diff:runDiff});
+  sendMsg({t:'start',diff:runDiff,np});
   musStart();
+  banner('CO-OP · '+np+' JUGADORES','Dificultad: '+DIFF_LABEL[runDiff]);
   nextWave();
 }
-function startRunClient(){
+function startRunClient(d){
   run.level=1;run.kills=0;run.goldRun=0;run.gemsRun=0;
-  run.relics=[];run.shipLv=1;run.exp=0;run.buffs=[[],[]];run.combo=0;
+  run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;
   run.missions=[
     {txt:'Destruye 40 enemigos',n:40,p:0,rw:60},
     {txt:'Recoge 120 de oro',n:120,p:0,rw:40},
     {txt:'Caza 2 élites',n:2,p:0,rw:80},
   ];
   pendingShipLevels=0;frenzyT=0;
-  players=[mkPlayer(0),mkPlayer(1)];localSlot=1;
+  /* v4.15: el cliente monta tantos slots como diga el anfitrión (2 o 3) */
+  const np=clamp(d.np||2,2,3);
+  players=[];
+  for(let i=0;i<np;i++)players.push(mkPlayer(i));
+  localSlot=clamp(net.mySlot||1,1,np-1);
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
+  run.buffs=players.map(()=>[]);
   recompute();
   for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
-  players[1].x=W*.58;players[1].y=H-130;
   players[0].x=W*.42;players[0].y=H-130;
+  if(players[1]){players[1].x=W*.58;players[1].y=H-130;}
+  if(players[2]){players[2].x=W*.5;players[2].y=H-92;}
   runActive=true;state='play';
   showScr(null);
   $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
@@ -480,11 +550,12 @@ function nextWave(){
       if(run.level>(save.weekly.best||0)){
         save.weekly.best=run.level;
         save.weekBestAll=Math.max(save.weekBestAll||0,run.level);
-        const pilot=getPilot();
-        addRankingEntry({seed:ws,code:pilot,wave:run.level,ship:run.shipLv,
-          h:weekHash(ws,pilot,run.level,run.shipLv),ok:true});
+        addModeRecord('wk',ws,run.level,run.shipLv);
       }
     }
+    /* v4.15: en co-op también queda el récord del equipo en MULTI */
+    if(net.mode==='host'&&players.length>1)
+      addModeRecord('mp','MP',run.level,run.shipLv);
     /* v4.12: el récord del Reto Diario también se guarda OLEADA A OLEADA
        (salir por lag no lo pierde) */
     if(dailyMode){
@@ -576,17 +647,20 @@ function showRelicCards(list,onPick){
 }
 function applyRelicChoice(){
   if(state!=='postboss')return;
-  if(!(net.mode==='host'&&players.length===2))return;
-  if(net.hostRelic&&net.clientRelic){
-    if(!run.relics.includes(net.hostRelicId))run.relics.push(net.hostRelicId);
-    if(!run.relics.includes(net.clientRelicId))run.relics.push(net.clientRelicId);
-    net.hostRelic=false;net.clientRelic=false;
-    recompute();persist();
-    setRelicNote('AMBOS ELIGIERON · PULSA CONTINUAR');
-    const pu=$('#pbUnlock');
-    pu.classList.remove('warn');
-    pu.textContent='AMBOS LISTOS · PULSA CONTINUAR';
+  if(!(net.mode==='host'&&players.length>1))return;
+  /* v4.15: esperan las elecciones de TODOS los slots (2–3 pilotos) */
+  if(!net.relicOk||!net.relicOk[0])return;
+  for(let s=1;s<players.length;s++)if(!net.relicOk[s])return;
+  for(let s=1;s<players.length;s++){
+    const id=net.relicId[s]||RELICS[0].id;
+    if(!run.relics.includes(id))run.relics.push(id);
   }
+  net.relicOk={};net.relicId={};
+  recompute();persist();
+  setRelicNote('TODOS ELIGIERON · PULSA CONTINUAR');
+  const pu=$('#pbUnlock');
+  pu.classList.remove('warn');
+  pu.textContent='TODOS LISTOS · PULSA CONTINUAR';
 }
 function showPostBoss(){
   const key=bossName?bossName.split('-')[0]:'';
@@ -596,8 +670,8 @@ function showPostBoss(){
   save.bossKills=bk;
   checkAch();persist();
   state='postboss';relicChosen=false;
-  const coop=net.mode==='host'&&players.length===2;
-  if(coop){net.hostRelic=false;net.clientRelic=false;}
+  const coop=net.mode==='host'&&players.length>1;
+  if(coop){net.relicOk={};net.relicId={};}
   const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;
   $('#pbStats').innerHTML=
     st('GUARDIÁN PURGADO',bossName)+st('OLEADA',run.level)+
@@ -605,10 +679,10 @@ function showPostBoss(){
   $('#pbMinLv').textContent=`▲ NIVEL MÍNIMO ENEMIGO: ${minLvlOf(run.level+1)}`;
   const pu=$('#pbUnlock');pu.classList.remove('warn');
   if(coop){
-    pu.textContent='CADA JUGADOR ELIGE UNA RELIQUIA (AMBAS SE APLICAN)';
+    pu.textContent='CADA PILOTO ELIGE UNA RELIQUIA (TODAS SE APLICAN)';
     curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
     sendMsg({t:'ev',k:'relics',ids:curRelics.map(r=>r.id)});
-    showRelicCards(curRelics,r=>{net.hostRelic=true;net.hostRelicId=r.id;applyRelicChoice();});
+    showRelicCards(curRelics,r=>{net.relicOk[0]=true;net.relicId[0]=r.id;applyRelicChoice();});
     showScr('post');
     return;
   }
@@ -664,21 +738,32 @@ function gameOver(){
       if(run.level>(save.weekly.best||0)){save.weekly.best=run.level;weeklyRec=true;}
     }
     save.weekBestAll=Math.max(save.weekBestAll||0,run.level);
-    const pilot=getPilot();
-    lastWeeklyRec={seed:ws,code:pilot,wave:run.level,ship:run.shipLv,
-      h:weekHash(ws,pilot,run.level,run.shipLv),ok:true};
-    addRankingEntry(lastWeeklyRec);
+    addModeRecord('wk',ws,run.level,run.shipLv);
+    lastWeeklyRec=(save.ranking||[]).find(r=>r.seed===ws&&r.code===getPilot())||null;
   }
-  /* v4.12: récord del Reto Diario */
+  /* v4.12: récord del Reto Diario · v4.15: registro por modo en el ranking */
   if(dailyMode){
     const ds=daySeed();
     if(!save.daily||save.daily.seed!==ds)save.daily={seed:ds,best:0};
     if(run.level>(save.daily.best||0)){save.daily.best=run.level;dailyRec=true;}
     save.dailyBest=Math.max(save.dailyBest||0,run.level);
+    addModeRecord('dy','DY',run.level,run.shipLv);
+  }else if(frenzyMode){
+    addModeRecord('fz','FZ',Math.max(1,run.level),run.shipLv,String(run.kills));
+  }else if(weeklyMode){
+    /* ya registrado arriba */
+  }else if(net.mode==='host'&&players.length>1){
+    addModeRecord('mp','MP',run.level,run.shipLv);
+  }else if(runDiff==='dificil'){
+    addModeRecord('dc','DC',run.level,run.shipLv);
+  }else if(runDiff==='hardcore'){
+    addModeRecord('hc','HC',run.level,run.shipLv);
+  }else{
+    addModeRecord('nm','NM',run.level,run.shipLv);
   }
   checkAch();
   persist();
-  if(net.mode==='host'&&players.length===2){
+  if(net.mode==='host'&&players.length>1){
     sendMsg({t:'ev',k:'over',level:run.level,ship:run.shipLv,yg:run.goldRun,hard:runDiff==='hardcore'});
   }
   const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;

@@ -35,9 +35,12 @@ function sendSnap(){
   const nc=novaCdGlobal>0?clamp(1-novaCdGlobal/((cN?cN.cd:18)*(cN?players[1].novaCdMul:1)),0,1):1;
   sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,
     sv:run.shipLv,se:run.exp,wl:run.level,nc:nc});
-  if(net.walletG>0||net.walletM>0){
-    sendMsg({t:'ev',k:'wallet',g:net.walletG,m:net.walletM});
-    net.walletG=0;net.walletM=0;
+  /* v4.15: la billetera de CADA cliente viaja por SU conexión (oro/gemas propios) */
+  for(const c of net.conns){
+    if(c.open&&(c.wg>0||c.wm>0)){
+      try{c.c.send({t:'ev',k:'wallet',g:c.wg,m:c.wm});}catch(e){}
+      c.wg=0;c.wm=0;
+    }
   }
 }
 
