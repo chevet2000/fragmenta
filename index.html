@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.13">
+<html lang="es" data-v="4.14">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.13 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.14 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.13">
+<link rel="stylesheet" href="css/styles.css?v=4.14">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -31,6 +31,7 @@
     <div class="buffbar hidden" id="buffBar"></div>
     <div class="wavebar"><i id="waveFill"></i></div>
     <div id="comboTag" class="hidden"></div>
+    <div id="ghostTag" class="hidden"></div>
     <div id="netTag" class="hidden"></div>
   </div>
   <button id="btnPause" aria-label="Pausa"><svg viewBox="0 0 14 14"><rect x="1.5" y="1" width="4" height="12" fill="#F2EFE6"/><rect x="8.5" y="1" width="4" height="12" fill="#F2EFE6"/></svg></button>
@@ -92,7 +93,7 @@
     <canvas id="heroCv" width="640" height="340"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <p class="tagline">La <b>v4.13</b> aprieta: <b>MÚSICA DEL MENÚ</b> con más volumen y más cuerpo, el modo <b>FRENÉTICO rehecho</b> — los enemigos acechan desde arriba y solo algunos bajan, con élites al azar —, tu nave <b>EVOLUCIONA VISUALMENTE</b> al comprar armas (pistolas dobles, cañones, lanzamisiles…), 3 <b>aspectos nuevos</b> en el Hangar y la rama <b>DEFINITIVA</b>: desbloquea el <b>CAÑÓN ANIQUILADOR</b> y mejora su puntería, carga, daño y sobrecarga.</p>
+  <p class="tagline">La <b>v4.14</b> abre el abismo: 2ª arma definitiva — el <b>AGUJERO NEGRO</b> que atrae, devora y desintegra balas, con 5 mejoras —, <b>FANTASMA DEL RANKING</b> (corre contra tu mejor partida frenética), <b>BIOMAS VISUALES</b> cada 10 oleadas y <b>GUARDIANES DE 3 A 5 FASES</b> según la oleada: espirales, refuerzos y anillos de desesperación.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -127,7 +128,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.13 · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · MÚSICA DE MENÚ · RETO DIARIO · MISIONES DEL DÍA · HANGAR DE NAVES · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ORO POR PARTES · ALIADO BOT · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.14 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES DEL DÍA · HANGAR DE NAVES · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -324,30 +325,30 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.13"></script>
-<script src="js/profile.js?v=4.13"></script>
-<script src="js/achievements.js?v=4.13"></script>
-<script src="js/audio.js?v=4.13"></script>
-<script src="js/config.js?v=4.13"></script>
-<script src="js/tree.js?v=4.13"></script>
-<script src="js/relics.js?v=4.13"></script>
-<script src="js/state.js?v=4.13"></script>
-<script src="js/net.js?v=4.13"></script>
-<script src="js/core.js?v=4.13"></script>
-<script src="js/enemies.js?v=4.13"></script>
-<script src="js/waves.js?v=4.13"></script>
-<script src="js/boss.js?v=4.13"></script>
-<script src="js/loot.js?v=4.13"></script>
-<script src="js/player.js?v=4.13"></script>
-<script src="js/azar.js?v=4.13"></script>
-<script src="js/chests.js?v=4.13"></script>
-<script src="js/netsync.js?v=4.13"></script>
-<script src="js/render.js?v=4.13"></script>
-<script src="js/screens.js?v=4.13"></script>
-<script src="js/treeui.js?v=4.13"></script>
-<script src="js/hud.js?v=4.13"></script>
-<script src="js/input.js?v=4.13"></script>
-<script src="js/game.js?v=4.13"></script>
-<script src="js/update.js?v=4.13"></script>
+<script src="js/utils.js?v=4.14"></script>
+<script src="js/profile.js?v=4.14"></script>
+<script src="js/achievements.js?v=4.14"></script>
+<script src="js/audio.js?v=4.14"></script>
+<script src="js/config.js?v=4.14"></script>
+<script src="js/tree.js?v=4.14"></script>
+<script src="js/relics.js?v=4.14"></script>
+<script src="js/state.js?v=4.14"></script>
+<script src="js/net.js?v=4.14"></script>
+<script src="js/core.js?v=4.14"></script>
+<script src="js/enemies.js?v=4.14"></script>
+<script src="js/waves.js?v=4.14"></script>
+<script src="js/boss.js?v=4.14"></script>
+<script src="js/loot.js?v=4.14"></script>
+<script src="js/player.js?v=4.14"></script>
+<script src="js/azar.js?v=4.14"></script>
+<script src="js/chests.js?v=4.14"></script>
+<script src="js/netsync.js?v=4.14"></script>
+<script src="js/render.js?v=4.14"></script>
+<script src="js/screens.js?v=4.14"></script>
+<script src="js/treeui.js?v=4.14"></script>
+<script src="js/hud.js?v=4.14"></script>
+<script src="js/input.js?v=4.14"></script>
+<script src="js/game.js?v=4.14"></script>
+<script src="js/update.js?v=4.14"></script>
 </body>
 </html>

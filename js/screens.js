@@ -244,6 +244,9 @@ function openStats(){
     ['RÉCORD SEMANAL','OLEADA '+(save.weekBestAll||0)],
     ['RETO DIARIO',(save.daily&&save.daily.seed===daySeed()&&save.daily.best>0)?('HOY · OLEADA '+save.daily.best):((save.dailyBest||0)?('MEJOR · OLEADA '+save.dailyBest):'—')],
     ['FRENÉTICO',save.frenzy&&(save.frenzy.bestT||save.frenzy.bestK)?('MEJOR '+fmtT(save.frenzy.bestT)+' · '+save.frenzy.bestK+' BAJAS'):'—'],
+    ['FANTASMA (MEJOR CARRERA)',save.ghost&&save.ghost.t?(fmtT(save.ghost.t)+' · '+save.ghost.k+' bajas'):'—'],
+    ['DEVORADOS · AGUJERO NEGRO',save.totDevour||0],
+    ['BIOMAS VISITADOS',Object.keys(save.biomesSeen||{}).length+' / '+BIOMES.length],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -304,8 +307,10 @@ function resetRunCommon(){
   run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
   pendingShipLevels=0;frenzyT=0;expFrac=0;run.frenzyBossT=50;frenzyMode=false; /* v4.13: primer jefe a 50 s */
   run.frenzyEliteT=rand(20,35); /* v4.13: élites al azar */
+  /* v4.14: fantasma desactivado por defecto (startFrenzy lo activa si hay traza) */
+  run.ghostTrail=[];run.ghostAcc=0;run.ghostPassed=false;run.ghostRef=null;run.ghostLead=0;
   bots=[]; /* v4.9: sin aliados al empezar */
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];wrecks=[];emosFx=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
@@ -405,6 +410,8 @@ function startFrenzy(){
   resetRunCommon();
   frenzyMode=true;
   if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
+  /* v4.14: FANTASMA — compites contra la traza de tu mejor carrera (≥20 s) */
+  run.ghostRef=(save.ghost&&save.ghost.trail&&save.ghost.trail.length&&save.ghost.t>=20)?makeGhostRef(save.ghost.trail):null;
   recompute();
   primePlayers();
   players[0].x=W/2;players[0].y=H-130;
@@ -445,7 +452,7 @@ function startRunClient(){
   ];
   pendingShipLevels=0;frenzyT=0;
   players=[mkPlayer(0),mkPlayer(1)];localSlot=1;
-  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];wrecks=[];emosFx=[];
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
   recompute();
@@ -460,7 +467,7 @@ function startRunClient(){
   musStart();
 }
 function nextWave(){
-  ebullets=[];bullets=[];beams=[];ultBeams=[];
+  ebullets=[];bullets=[];beams=[];ultBeams=[];holes=[];
   const L=run.level;
   if(net.mode!=='client'){
     if(L>save.best.lvl)save.best.lvl=L;
@@ -633,11 +640,23 @@ function gameOver(){
   lastWeeklyRec=null;
   let frenRec=false;
   let dailyRec=false; /* v4.12 */
+  let ghostLine=''; /* v4.14 */
   if(frenzyMode){
     if(!save.frenzy)save.frenzy={bestT:0,bestK:0};
     if(Math.floor(run.time)>(save.frenzy.bestT||0)||run.kills>(save.frenzy.bestK||0))frenRec=true;
     save.frenzy.bestT=Math.max(save.frenzy.bestT||0,Math.floor(run.time));
     save.frenzy.bestK=Math.max(save.frenzy.bestK||0,run.kills);
+    /* v4.14: resultado contra el FANTASMA (antes de guardar la nueva traza) */
+    if(run.ghostRef&&save.ghost&&save.ghost.t>0){
+      if(Math.floor(run.time)>=save.ghost.t)
+        ghostLine='<span class="k1">⚡ ¡SUPERASTE A TU FANTASMA · '+fmtT(Math.floor(run.time))+' vs récord '+fmtT(save.ghost.t)+'</span><br>';
+      else{
+        const lead=run.kills-run.ghostRef(run.time);
+        ghostLine='<span class="'+(lead>=0?'k1':'k2')+'">FANTASMA: '+(lead>=0?'+':'')+lead+' bajas a los '+fmtT(Math.floor(run.time))+' (tu récord: '+fmtT(save.ghost.t)+')</span><br>';
+      }
+    }
+    if(!save.ghost||Math.floor(run.time)>(save.ghost.t||0))
+      save.ghost={t:Math.floor(run.time),k:run.kills,trail:run.ghostTrail.slice(-360)};
   }
   if(weeklyMode){
     const ws=weekSeed();
@@ -674,6 +693,7 @@ function gameOver(){
     `<div><small>JEFES SIN DAÑO</small><b>${run.stPerfect}</b></div>`;
   const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
+    (ghostLine||'')+
     (frenRec?`<span class="k1">★ ¡NUEVO RÉCORD FRENÉTICO · ${fmtT(save.frenzy.bestT)} · ${save.frenzy.bestK} BAJAS!</span><br>`:'')+
     (dailyRec?`<span class="k1">★ ¡NUEVO RÉCORD DEL RETO DIARIO · OLEADA ${save.daily.best}!</span><br>`:'')+
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+

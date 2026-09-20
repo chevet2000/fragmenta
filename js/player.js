@@ -150,6 +150,7 @@ function updPlayer(pl,dt){
   }
   updAbilities(pl,dt);
   updUltimate(pl,dt); /* v4.13: arma definitiva */
+  updBlackHole(pl,dt); /* v4.14: 2ª definitiva */
 }
 function nearestEnemy(x,y,excl,range){
   range=range||300;
@@ -281,6 +282,91 @@ function fireUltimate(pl,t){
   shake=Math.min(16,shake+10);
   SFX.ult();vib(60);
   floater(pl.x,pl.y-42,'¡ANIQ!','#B388FF',14);
+}
+
+/* ============ v4.14: 2ª DEFINITIVA · AGUJERO NEGRO ============
+   Cada X s abre un agujero negro sobre el enemigo más duro: atrae a los
+   enemigos, los DEVORA al tocar el núcleo, desintegra sus balas y hace
+   daño continuo. Mejorable: radio, duración, succión, colapso final,
+   oro por devorado, curación y recarga. Los jefes y élites no son
+   devorados (solo daño), y su atracción es reducida. */
+function updBlackHole(pl,dt){
+  if(!pl.bh||pl.hp<=0)return;
+  pl.bhT-=dt;
+  if(pl.bhT>0)return;
+  let t=null,bd=-1;
+  for(const e of enemies){if(!e.dead&&e.hp>bd){bd=e.hp;t=e;}}
+  if(boss&&boss.hp>bd)t=boss;
+  if(!t){pl.bhT=1;return;} /* sin objetivos: reintenta enseguida */
+  spawnHole(pl,clamp(t.x,60,W-60),clamp(t.y,80,H*.62));
+  pl.bhT=pl.bhCdMax;
+}
+function spawnHole(pl,x,y){
+  holes.push({x,y,t:0,life:pl.bhDur,rad:pl.bhRad,core:30,
+    dps:Math.max(4,Math.round(pl.dmg*.8*pl.bhDmgMul)),
+    pull:pl.bhPull,boom:pl.bhBoom,gold:pl.bhGold,heal:pl.bhHeal,
+    slot:pl.slot,spin:rand(0,TAU),devoured:0,dead:false});
+  hostHole(x,y,pl.bhRad,pl.bhDur);
+  floater(x,y-44,'AGUJERO NEGRO','#B388FF',15);
+  rings.push({x,y,r:8,R:pl.bhRad,t:0,life:.5,color:'#B388FF'});
+  SFX.warp();tone(150,45,.6,'sine',.07);vib(50);
+}
+function updHoles(dt){
+  if(!holes.length)return;
+  for(const h of holes){
+    h.t+=dt;
+    const live=h.t<h.life;
+    if(live&&h.pull>0){
+      for(const e of enemies){
+        if(e.dead||e.state==='enter'||e.state==='snake'||e.frozen>0)continue;
+        const dx=h.x-e.x,dy=h.y-e.y,d=Math.hypot(dx,dy)||1;
+        if(d>h.rad)continue;
+        const f=(e.elite?110:220)*h.pull*(1.25-d/h.rad);
+        e.x+=dx/d*f*dt;e.y+=dy/d*f*dt;
+        if(e.state==='form'){e.fx=clamp(e.fx+dx/d*f*dt,24,W-24);e.fy=clamp(e.fy+dy/d*f*dt,H*.06,H*.42);}
+        e.flash=Math.max(e.flash,.15);
+      }
+      for(const eb of ebullets){
+        const dx=h.x-eb.x,dy=h.y-eb.y,d=Math.hypot(dx,dy)||1;
+        if(d>h.rad)continue;
+        if(d<26){eb.dead=true;burst(eb.x,eb.y,'#B388FF',2,50);continue;}
+        eb.x+=dx/d*230*h.pull*dt;eb.y+=dy/d*230*h.pull*dt;
+      }
+      for(const e of enemies){
+        if(e.dead)continue;
+        const d=Math.hypot(e.x-h.x,e.y-h.y);
+        if(d>h.rad)continue;
+        if(d<h.core&&e.state!=='enter'&&!e.elite){ /* DEVORADO */
+          e.hp=0;h.devoured++;
+          save.totDevour=(save.totDevour||0)+1;checkAch(); /* v4.14 */
+          if(h.gold){grantGold(h.slot,2);floater(h.x,h.y-30,'+2','#FFD166',10);}
+          if(h.heal){const q=players[h.slot]||players[0];
+            if(q&&q.hp>0&&q.hp<q.maxHp){q.hp=Math.min(q.maxHp,q.hp+1);floater(q.x,q.y-26,'+1','#7DFF9E',11);}}
+          killEnemy(e,h.slot);
+          continue;
+        }
+        e.hp-=h.dps*dt;e.flash=Math.max(e.flash,.2);
+        if(e.hp<=0)killEnemy(e,h.slot);
+      }
+      if(boss&&Math.hypot(boss.x-h.x,boss.y-h.y)<h.rad+boss.r){
+        boss.hp-=h.dps*dt;boss.flash=Math.max(boss.flash,.25);
+        if(boss.hp<=0)killBoss();
+      }
+    }
+    if(h.t>=h.life){
+      if(h.boom){ /* COLAPSO FINAL */
+        const dmg=Math.round(h.dps*8);
+        rings.push({x:h.x,y:h.y,r:10,R:h.rad+60,t:0,life:.55,color:'#B388FF'});
+        hostRing(h.x,h.y,h.rad+60,'#B388FF');
+        for(const e of enemies){if(!e.dead&&Math.hypot(e.x-h.x,e.y-h.y)<h.rad+20)damageEnemy(e,dmg,false,h.slot);}
+        if(boss&&Math.hypot(boss.x-h.x,boss.y-h.y)<h.rad+boss.r+20)damageBoss(dmg,false,h.slot);
+        shake=Math.min(18,shake+10);SFX.nova();vib(60);
+        floater(h.x,h.y-52,'¡COLAPSO!','#B388FF',16);
+      }
+      h.dead=true;
+    }
+  }
+  holes=holes.filter(h=>!h.dead);
 }
 
 /* ============ rescate ============ */

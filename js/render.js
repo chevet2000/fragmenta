@@ -3,12 +3,127 @@
 const dust=Array.from({length:42},()=>({x:Math.random(),y:Math.random(),s:rand(.6,1.8),v:rand(12,34)}));
 const menuShapes=Array.from({length:7},()=>({x:Math.random(),y:Math.random(),r:rand(24,70),
   rot:rand(0,TAU),vr:rand(-.3,.3),vy:rand(4,12),shape:['tri','hexa','penta','diamond','square'][irand(0,4)]}));
-function drawGridDust(dt){
-  ctx.strokeStyle='rgba(130,150,180,.05)';ctx.lineWidth=1;ctx.beginPath();
+/* ============ v4.14: BIOMAS VISUALES — el sector cambia cada 10 oleadas ============
+   (en frenético, cada 4 niveles de frenesí ≈ 100 s). Solo estético:
+   fondo, rejilla, estrellas, nebulosas y motas flotantes propias. */
+const BIOMES=[
+ {name:'NEBULOSA',bg:[7,9,13],grid:[130,150,180],dust:[140,160,190],blob:'rgba(28,44,84,',mote:'127,178,255',desc:''},
+ {name:'SECTOR ÍGNEO',bg:[14,7,5],grid:[190,120,80],dust:[235,150,90],blob:'rgba(96,32,10,',mote:'255,159,67',rise:1,desc:'Ceniza y magma'},
+ {name:'CINTURÓN HELADO',bg:[6,11,16],grid:[120,170,205],dust:[195,225,245],blob:'rgba(20,60,90,',mote:'176,232,255',fall:1,desc:'Hielo a la deriva'},
+ {name:'VACÍO PROFUNDO',bg:[8,6,14],grid:[145,120,185],dust:[175,150,215],blob:'rgba(52,24,94,',mote:'179,136,255',desc:'La oscuridad observa'},
+ {name:'ENJAMBRE TÓXICO',bg:[6,12,7],grid:[115,175,125],dust:[150,215,165],blob:'rgba(16,62,26,',mote:'125,255,158',drift:1,desc:'Esporas en el aire'},
+];
+let curBiome=0,biomePrev=0,biomeK=1;
+const biomeMotes=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),s:rand(1,2.6),v:rand(.02,.08),ph:rand(0,TAU)}));
+function biomeTarget(){
+  if(!runActive)return 0;
+  const lv=run.level||1;
+  return frenzyMode?(Math.floor(lv/4)%BIOMES.length):Math.floor((lv-1)/10)%BIOMES.length;
+}
+function mixCol(a,b,k){return[Math.round(a[0]+(b[0]-a[0])*k),Math.round(a[1]+(b[1]-a[1])*k),Math.round(a[2]+(b[2]-a[2])*k)];}
+function updBiome(dt){
+  const tgt=biomeTarget();
+  if(tgt!==curBiome&&biomeK>=1){
+    biomePrev=curBiome;curBiome=tgt;biomeK=0;
+    if(state==='play'&&!amClient()){
+      banner('BIOMA: '+BIOMES[curBiome].name,BIOMES[curBiome].desc||'El sector cambia');
+      tone(220,440,.4,'sine',.05);
+    }
+  }
+  if(biomeK<1)biomeK=Math.min(1,biomeK+dt/2.4);
+  if(state==='play'&&!amClient()){
+    save.biomesSeen=save.biomesSeen||{};save.biomesSeen[curBiome]=1;
+  }
+}
+function drawBiomeBg(dt){
+  const k=easeOut(biomeK),A=BIOMES[biomePrev],B=BIOMES[curBiome];
+  const bg=mixCol(A.bg,B.bg,k);
+  ctx.fillStyle='rgb('+bg[0]+','+bg[1]+','+bg[2]+')';ctx.fillRect(0,0,W,H);
+  /* nebulosas de fondo (las del bioma anterior se apagan mientras entran las nuevas) */
+  const blobs=(Bm,fade)=>{
+    for(let i=0;i<3;i++){
+      const bx=(.22+.3*i)*W+Math.sin(time*.05+i*2.1)*W*.06;
+      const by=H*(.3+.18*((i*1.7+1)%2))+Math.cos(time*.04+i)*H*.05;
+      const rad=W*.28;
+      const gr=ctx.createRadialGradient(bx,by,0,bx,by,rad);
+      gr.addColorStop(0,Bm.blob+(0.18*fade)+')');
+      gr.addColorStop(1,Bm.blob+'0)');
+      ctx.fillStyle=gr;
+      ctx.fillRect(bx-rad,by-rad,rad*2,rad*2);
+    }
+  };
+  blobs(A,1-k);blobs(B,k);
+  /* motas del bioma (ascienden / caen / derivan según el sector) */
+  ctx.fillStyle='rgba('+B.mote+',.4)';
+  for(const m of biomeMotes){
+    if(B.rise){m.y-=m.v*dt*2.2;if(m.y<-.02){m.y=1.02;m.x=Math.random();}}
+    else if(B.fall){m.y+=m.v*dt*1.8;if(m.y>1.02){m.y=-.02;m.x=Math.random();}}
+    else if(B.drift){m.x+=m.v*dt*1.6;m.y+=Math.sin(time*.7+m.ph)*.02*dt;if(m.x>1.02){m.x=-.02;m.y=Math.random();}}
+    else{m.y+=m.v*dt*.8;if(m.y>1.02){m.y=-.02;m.x=Math.random();}}
+    ctx.fillRect(m.x*W,m.y*H,m.s,m.s);
+  }
+  const gm=mixCol(A.grid,B.grid,k).join(','),dm=mixCol(A.dust,B.dust,k).join(',');
+  drawGridDust(dt,gm,dm);
+}
+/* ============ v4.14: AGUJERO NEGRO — remolino violeta con horizonte ============ */
+function drawHoles(){
+  for(const h of holes){
+    const k=h.t/h.life;
+    const fade=k>.8?Math.max(0,(1-k)/.2):1;
+    const g=ctx;
+    g.save();g.translate(h.x,h.y);
+    /* límite del radio de succión */
+    g.globalAlpha=.3*fade+Math.sin(time*5)*.06;
+    g.strokeStyle='#B388FF';g.lineWidth=1.5;g.setLineDash([8,10]);
+    g.beginPath();g.arc(0,0,h.rad,0,TAU);g.stroke();g.setLineDash([]);
+    /* disco de acreción: 3 arcos girando */
+    g.globalAlpha=.8*fade;
+    for(let i=0;i<3;i++){
+      const a=time*(2.6+i*.9)*(i%2?-1:1)+h.spin+i*2.1;
+      g.strokeStyle=i===1?'#8A6CFF':'#B388FF';g.lineWidth=2.5-i*.5;
+      g.beginPath();g.arc(0,0,34+i*13,a,a+2.1);g.stroke();
+    }
+    /* chorros de succión */
+    g.globalAlpha=.3*fade;g.strokeStyle='#B388FF';g.lineWidth=1;
+    for(let i=0;i<6;i++){const a=h.spin+time*3+i*TAU/6;
+      g.beginPath();g.moveTo(Math.cos(a)*h.rad,Math.sin(a)*h.rad);
+      g.lineTo(Math.cos(a+.5)*46,Math.sin(a+.5)*46);g.stroke();}
+    /* horizonte de sucesos */
+    g.globalAlpha=fade;
+    g.fillStyle='#050308';
+    g.beginPath();g.arc(0,0,26,0,TAU);g.fill();
+    g.strokeStyle='#B388FF';g.lineWidth=2;
+    g.beginPath();g.arc(0,0,26,0,TAU);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=1;
+    g.beginPath();g.arc(0,0,22,time*4,time*4+4.4);g.stroke();
+    g.restore();
+  }
+  ctx.globalAlpha=1;
+}
+/* ============ v4.14: FANTASMA del ranking — tu mejor carrera frenética ============ */
+function drawGhost(){
+  const ref=run.ghostRef;if(!ref||amClient())return;
+  const lead=run.kills-ref(run.time);
+  run.ghostLead=lead;
+  const y=clamp(H*.42-lead*4,H*.14,H*.86);
+  const g=ctx,c=lead>=0?'#7DFF9E':'#FF6B6B';
+  g.save();g.globalAlpha=.5;g.translate(W-40,y);
+  g.strokeStyle=c;g.lineWidth=1.5;g.setLineDash([5,6]);
+  g.beginPath();g.moveTo(0,-13);g.lineTo(9,11);g.lineTo(0,5);g.lineTo(-9,11);g.closePath();g.stroke();
+  g.setLineDash([]);
+  g.globalAlpha=.85;
+  g.font='700 9px "Chakra Petch",monospace';g.textAlign='center';
+  g.fillStyle=c;
+  g.fillText('FANTASMA',0,24);
+  g.fillText((lead>=0?'+':'')+lead,0,34);
+  g.restore();
+}
+function drawGridDust(dt,gridCol,dustCol){
+  ctx.strokeStyle='rgba('+(gridCol||'130,150,180')+',.05)';ctx.lineWidth=1;ctx.beginPath();
   for(let x=22;x<W;x+=44){ctx.moveTo(x,0);ctx.lineTo(x,H);}
   for(let y=22;y<H;y+=44){ctx.moveTo(0,y);ctx.lineTo(W,y);}
   ctx.stroke();
-  ctx.fillStyle='rgba(140,160,190,.16)';
+  ctx.fillStyle='rgba('+(dustCol||'140,160,190')+',.16)';
   for(const d of dust){
     d.y+=d.v*dt/H;if(d.y>1.02){d.y=-.02;d.x=Math.random();}
     ctx.fillRect(d.x*W,d.y*H,d.s,d.s);
@@ -175,7 +290,7 @@ function drawWreck(w){
 }
 function drawBossCommon(){
   const b=boss;if(!b)return;
-  const g=ctx,col=b.ph===2?'#FF4757':(b.D?b.D.color:'#FF6B6B');
+  const g=ctx,col=b.ph>=2?'#FF4757':(b.D?b.D.color:'#FF6B6B');
   g.save();g.translate(b.x,b.y);
   if(b.gxA>0){
     g.save();
@@ -248,8 +363,40 @@ function drawBossCommon(){
   g.save();g.rotate((b.rot||0)*.5);
   g.lineWidth=2.5;g.strokeStyle=b.flash>.4?'#FFF':col;
   shapePath(g,b.D?b.D.shape:'nonagon',b.r);
-  g.fillStyle=b.ph===2?'rgba(255,71,87,.14)':'rgba(255,107,107,.12)';g.fill();g.stroke();
+  g.fillStyle=b.ph>=2?'rgba(255,71,87,.14)':'rgba(255,107,107,.12)';g.fill();g.stroke();
   g.restore();
+  /* v4.14: marcas visuales de las fases 3–5 */
+  if(!b.D||!b.D.easy){
+    if(b.ph>=3){
+      g.save();g.rotate((b.rot||0)*1.3);
+      g.strokeStyle='#FF4757';g.lineWidth=1.5;g.globalAlpha=.6;
+      for(let i=0;i<12;i++){const a=i*TAU/12;g.beginPath();g.arc(0,0,b.r+22,a,a+.3);g.stroke();}
+      g.restore();
+    }
+    if(b.ph>=4){
+      g.save();
+      g.globalAlpha=.10+Math.sin(time*6)*.05;
+      g.fillStyle='#FF4757';
+      g.beginPath();g.arc(0,0,b.r+30,0,TAU);g.fill();
+      g.restore();
+    }
+    if(b.ph>=5){
+      g.save();g.strokeStyle='#FF4757';g.lineWidth=1.6;g.globalAlpha=.85;
+      for(let i=0;i<5;i++){const a=i*TAU/5+1.1;
+        g.beginPath();
+        g.moveTo(Math.cos(a)*b.r*.2,Math.sin(a)*b.r*.2);
+        g.lineTo(Math.cos(a+.22)*b.r*.55,Math.sin(a+.22)*b.r*.55);
+        g.lineTo(Math.cos(a-.1)*b.r*.95,Math.sin(a-.1)*b.r*.95);
+        g.stroke();}
+      g.restore();
+    }
+    g.save();
+    g.font='700 10px "Chakra Petch",monospace';g.textAlign='center';
+    g.globalAlpha=.75;g.fillStyle='#FF4757';
+    g.fillText('FASE '+b.ph+(b.maxPh>2?'/'+b.maxPh:''),0,b.r+42);
+    g.restore();
+    g.globalAlpha=1;
+  }
   const nr=b.r*.42+Math.sin(time*5)*1.5;
   g.fillStyle='#0B0E13';g.beginPath();g.arc(0,0,nr+3,0,TAU);g.fill();
   g.strokeStyle='#F2EFE6';g.lineWidth=1.5;g.beginPath();g.arc(0,0,nr,0,TAU);g.stroke();
@@ -378,6 +525,11 @@ function drawShip(pl,isLocal){
     g.save();g.translate(-6,10);g.rotate(time*2.5);g.strokeRect(-2.5,-2.5,5,5);g.restore();
     g.save();g.translate(6,10);g.rotate(-time*2.5);g.strokeRect(-2.5,-2.5,5,5);g.restore();
   }
+  if(pl.bh){ /* v4.14: orbe de singularidad en el morro (2ª definitiva) */
+    g.fillStyle='#050308';g.beginPath();g.arc(0,-14,4,0,TAU);g.fill();
+    g.strokeStyle='rgba(179,136,255,'+(.6+Math.sin(time*5)*.3)+')';g.lineWidth=1.2;
+    g.beginPath();g.arc(0,-14,6+Math.sin(time*3)*1.2,0,TAU);g.stroke();
+  }
   if(pl.regenRate>0){ /* halo verde de regeneración */
     g.globalAlpha=.35+Math.sin(time*4)*.15;g.strokeStyle='#7DFF9E';g.lineWidth=1.2;
     g.beginPath();g.arc(0,-2,8,0,TAU);g.stroke();
@@ -466,8 +618,8 @@ function drawRadar(){
   ctx.restore();
 }
 function renderGame(dt){
-  ctx.fillStyle='#07090D';ctx.fillRect(0,0,W,H);
-  drawGridDust(dt);
+  drawBiomeBg(dt); /* v4.14: fondo por bioma */
+  drawHoles(); /* v4.14: agujeros negros bajo el resto */
   ctx.save();
   if(shake>.2)ctx.translate(rand(-shake,shake)*.5,rand(-shake,shake)*.5);
   for(const r of rings){
@@ -594,6 +746,7 @@ function renderGame(dt){
     if(amClient()&&pl.slot===localSlot){ pl.orbT=(pl.orbT||0)+dt*2.4; drawShip(pl,true); }
     else drawShip(pl,!amClient());
   }
+  drawGhost(); /* v4.14: fantasma del ranking (frenético) */
   for(const p of parts){
     const a=1-p.t/p.life;
     ctx.globalAlpha=a;ctx.strokeStyle=p.color;ctx.lineWidth=1.5;

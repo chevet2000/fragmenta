@@ -50,6 +50,10 @@ function recompute(){
     pl.ult=b.ult;pl.ultAim=b.ultAim;pl.ultBurn=b.ultBurn;pl.ultShock=b.ultShock;
     pl.ultCdMax=b.ultCd||14;pl.ultDmgMul=b.ultDmg||10;
     if(pl.ultT==null)pl.ultT=0;
+    /* v4.14: 2ª DEFINITIVA · Agujero Negro */
+    pl.bh=b.bh;pl.bhCdMax=b.bhCd||20;pl.bhRad=b.bhRad||130;pl.bhDur=b.bhDur||4;
+    pl.bhPull=b.bhPull||1;pl.bhDmgMul=b.bhDmgMul||1;pl.bhBoom=!!b.bhBoom;pl.bhGold=!!b.bhGold;pl.bhHeal=!!b.bhHeal;
+    if(pl.bhT==null)pl.bhT=0;
     if(b.heal)pl.hp=Math.min(pl.maxHp,pl.hp+b.heal);
     if(pl.maxHp>oldMax)pl.hp=Math.min(pl.maxHp,pl.hp+(pl.maxHp-oldMax));
     pl.hp=Math.min(pl.hp,pl.maxHp);
@@ -69,6 +73,7 @@ function floater(x,y,txt,color,size){
 function hostRing(x,y,R2,c){ if(net.mode==='host')sendMsg({t:'fxr',x:Math.round(x),y:Math.round(y),R:Math.round(R2),c}); }
 function hostBeam(x1,y1,x2,y2){ if(net.mode==='host')sendMsg({t:'fxb',x1:Math.round(x1),y1:Math.round(y1),x2:Math.round(x2),y2:Math.round(y2)}); }
 function hostUltBeam(x1,y1,x2,y2){ if(net.mode==='host')sendMsg({t:'fxu',x1:Math.round(x1),y1:Math.round(y1),x2:Math.round(x2),y2:Math.round(y2)}); } /* v4.13 */
+function hostHole(x,y,rad,life){ if(net.mode==='host')sendMsg({t:'fxh',x:Math.round(x),y:Math.round(y),rad:Math.round(rad),life}); } /* v4.14 */
 function burst(x,y,color,n,sp){
   for(let i=0;i<n;i++){const a=rand(0,TAU),v=rand(sp*.3,sp);
     parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-40,rot:rand(0,TAU),vr:rand(-8,8),

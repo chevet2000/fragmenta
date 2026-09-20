@@ -207,6 +207,17 @@ function updWaveSpawns(dt){
       const nEl=enemies.reduce((n,e)=>n+(e.elite&&!e.dead?1:0),0);
       if(nEl<2&&R()<.65){makeElite(run.level,1);wave.total++;}
     }
+    /* v4.14: FANTASMA — traza de la carrera (muestra cada 4 s) y adelantamiento */
+    run.ghostAcc=(run.ghostAcc||0)+dt;
+    if(run.ghostAcc>=4){
+      run.ghostAcc-=4;
+      if(run.ghostTrail.length<400)run.ghostTrail.push({t:Math.round(run.time),k:run.kills});
+    }
+    if(run.ghostRef&&!run.ghostPassed&&run.kills>run.ghostRef(run.time)){
+      run.ghostPassed=true;save.ghostBeat=true;
+      banner('¡ADELANTASTE A TU FANTASMA!','Vas por delante de tu récord de '+fmtT(save.ghost?save.ghost.t:0));
+      SFX.relic();checkAch();
+    }
     /* v4.13: primer jefe a los 50 s y luego cada 60 s (antes 30/45 — asfixiante) */
     if(run.frenzyBossT==null)run.frenzyBossT=50;
     run.frenzyBossT-=dt;

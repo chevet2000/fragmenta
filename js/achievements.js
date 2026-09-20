@@ -33,6 +33,12 @@ const ACHS=[
  {id:'cb50', name:'IMPARABLE',        desc:'Consigue un combo de 50 bajas',        rw:8, ck:()=>(save.bestCombo||0)>=50},
  {id:'skin1',name:'ESTILO PROPIO',    desc:'Compra un aspecto de nave en el HANGAR',rw:3, ck:()=>save.skins&&(save.skins.owned||[]).length>=2},
  {id:'dly10',name:'RUTA DIARIA',      desc:'Alcanza la oleada 10 en el Reto Diario',rw:5, ck:()=>(save.dailyBest||0)>=10},
+ /* v4.14: agujero negro, fantasma y biomas */
+ {id:'dfb', name:'DOBLE DEFINITIVA',  desc:'Desbloquea el AGUJERO NEGRO (2ª arma definitiva)',rw:6, ck:()=>has('df5')},
+ {id:'dv60',name:'DEVORADOR DE MUNDOS',desc:'Devora 60 enemigos con el AGUJERO NEGRO',rw:5, ck:()=>(save.totDevour||0)>=60},
+ {id:'ghb', name:'MÁS RÁPIDO QUE TU PASADO',desc:'Adelanta a tu FANTASMA en el modo frenético',rw:4, ck:()=>!!save.ghostBeat},
+ {id:'bio5',name:'VIAJERO DE SECTORES',desc:'Visita los 5 biomas',rw:5, ck:()=>Object.keys(save.biomesSeen||{}).length>=5},
+ {id:'bp5', name:'DOMADOR DE GUARDIANES',desc:'Lleva a un Guardián a la FASE 5',rw:8, ck:()=>(save.totPhase5||0)>=1},
 ];
 function checkAch(){
   let got=false;

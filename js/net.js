@@ -39,7 +39,9 @@ function blankStats(){
     /* v4.9: ALIADO · bot de combate */
     bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0,
     /* v4.13: DEFINITIVA · Cañón Aniquilador */
-    ult:false,ultCd:14,ultDmg:10,ultAim:false,ultBurn:false,ultShock:false};
+    ult:false,ultCd:14,ultDmg:10,ultAim:false,ultBurn:false,ultShock:false,
+    /* v4.14: 2ª DEFINITIVA · Agujero Negro */
+    bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false};
 }
 function hostLobby(){
   if(!peerReady()){
@@ -278,6 +280,7 @@ function clientOnData(d){
   if(d.t==='fxr'){ rings.push({x:d.x,y:d.y,r:10,R:d.R,t:0,life:.45,color:d.c}); return; }
   if(d.t==='fxb'){ beams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.18}); return; }
   if(d.t==='fxu'){ ultBeams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.55}); return; } /* v4.13: rayo del Aniquilador */
+  if(d.t==='fxh'){ holes.push({x:d.x,y:d.y,t:0,life:d.life,rad:d.rad,dps:0,pull:0,slot:0,visual:true,spin:Math.random()*TAU}); return; } /* v4.14: agujero negro (visual) */
   if(d.t==='fxf'){ floats.push({x:d.x,y:d.y,txt:d.txt,color:d.c,size:d.s,t:0,life:.65}); return; }
   if(d.t==='emo'){ addEmoFx(0,'emo',d.e); return; }
   if(d.t==='call'){

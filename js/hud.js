@@ -37,6 +37,16 @@ function refreshHUD(){
       ct.style.color=run.comboN>=50?'#FF6B6B':(run.comboN>=25?'#FF7EB6':'#FFD166');
     }else ct.classList.add('hidden');
   }
+  /* v4.14: marcador del FANTASMA del ranking (solo frenético con traza) */
+  const gt=$('#ghostTag');
+  if(gt){
+    if(frenzyMode&&run.ghostRef&&state==='play'){
+      const lead=run.kills-run.ghostRef(run.time);
+      gt.classList.remove('hidden');
+      gt.textContent=(lead>=0?'▲ FANTASMA +':'▼ FANTASMA ')+lead;
+      gt.style.color=lead>=0?'#7DFF9E':'#FF6B6B';
+    }else gt.classList.add('hidden');
+  }
   const alive=amClient()?cEnemies.size+(boss?1:0):enemies.length+(boss?1:0);
   const pend=amClient()?0:wave.pending+wave.pool.length;
   const killed=Math.max(0,wave.total-pend-alive);

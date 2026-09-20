@@ -1,12 +1,14 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.13';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.14';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
   /* v4.12: reto diario, misiones diarias, hangar, combos, estadísticas y bestiario */
   daily:{seed:null,best:0},dailyBest:0,dailyM:null,skins:{owned:['menta'],eq:null},
-  bestCombo:0,totGold:0,totGems:0,seen:{}};}
+  bestCombo:0,totGold:0,totGems:0,seen:{},
+  /* v4.14: fantasma del ranking, devorados por el agujero negro y biomas visitados */
+  ghost:null,totDevour:0,biomesSeen:{},ghostBeat:false};}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));
@@ -101,6 +103,11 @@ function addRankingEntry(entry){
 function sortedRanking(){
   return [...(save.ranking||[])].sort((a,b)=>
     b.wave-a.wave||b.ship-a.ship||a.code.localeCompare(b.code));
+}
+/* v4.14: FANTASMA del ranking — devuelve una función ref(t) con las bajas
+   que llevaba tu MEJOR carrera frenética en el segundo t (traza cada 4 s). */
+function makeGhostRef(trail){
+  return t=>{let k=0;for(const s of trail){if(s.t<=t)k=s.k;else break;}return k;};
 }
 function sanitizeRankEntry(e){
   if(!e||typeof e!=='object')return null;

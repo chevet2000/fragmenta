@@ -47,12 +47,17 @@ function spawnBoss(L){
   const hp=Math.round(hpForLevel(maxLvlOf(L))*(4+L*1.2)*D.hpM); /* v4.9: factor compensado al nuevo nivel base ~100 */
   boss={x:W/2,y:-90,ty:Math.max(110,H*.16),hp,maxhp:hp,r:D.r,t:0,ph:1,rot:0,flash:0,
     kind:key,D,burn:null,
+    /* v4.14: FASES 3–5 — base 3 fases; 4ª desde oleada 30; 5ª desde oleada 60
+       (en frenético: nivel 12+ → 4, nivel 25+ → 5). SEÑOR siempre +1. */
+    tier:frenzyMode?(run.level>=25?2:run.level>=12?1:0):(L>=60?2:L>=30?1:0),
+    sprT:3,sprT2:0,sum2T:6,ring5T:2.6,
     fanT:2.8,aimT:3.4,sumT:5,ringT:3,
     laT:3.2,clT:4,swT:2.5,swA:0,swDir:0,swT2:0,gnT:3,gxA:0,gyA:0,gnLife:0,shT:4,
     lemTp:0,gatherT:0,gather:null,gatherPhase:0,gatherPhaseT:0,
     clones:[],lasers:[],shields:[]};
+  boss.maxPh=D.easy?1:(key==='SEÑOR'?Math.min(5,4+boss.tier):3+boss.tier); /* v4.14: base 3 · 4ª OL30+ · 5ª OL60+ (SEÑOR +1) */
   $('#bossName').textContent=bossName;
-  banner('GUARDIÁN: '+D.name,D.mech+(D.easy?' · UNA FASE':''));
+  banner('GUARDIÁN: '+D.name,D.mech+(D.easy?' · UNA FASE':' · '+boss.maxPh+' FASES'));
 }
 function fanAtk(b){
   const n=5+Math.min(6,Math.floor(run.level/3));
@@ -69,7 +74,7 @@ function updBoss(dt){
   const b=boss;
   const coop=players.length===2&&net.mode==='host';
   const easy=!!b.D.easy;
-  b.t+=dt;b.rot+=dt*((b.ph===2?1.5:0.9));b.flash=Math.max(0,b.flash-dt*5);
+  b.t+=dt;b.rot+=dt*(0.9+0.22*(b.ph-1));b.flash=Math.max(0,b.flash-dt*5);
   if(b.burn){
     b.hp-=b.burn.dps*dt;
     if(Math.random()<dt*8)parts.push({x:b.x+rand(-b.r,b.r),y:b.y+rand(-b.r,b.r),vx:rand(-20,20),vy:rand(-60,-20),
@@ -79,21 +84,28 @@ function updBoss(dt){
   }
   const K=b.kind;
   const isSenor=(K==='SEÑOR');
+  const pM=b.ph>2?Math.pow(.87,b.ph-2):1; /* v4.14: temporizadores más cortos por fase */
   if(K!=='LEMNISCATA'){
     b.y+=(b.ty-b.y)*Math.min(1,dt*2);
-    b.x=W/2+Math.sin(b.t*(b.ph===2?.85:.5)*b.D.speed*1.6)*(Math.max(60,W*.30-40));
+    b.x=W/2+Math.sin(b.t*(0.5+0.14*(b.ph-1))*b.D.speed*1.6)*(Math.max(60,W*.30-40));
   }
-  if(!easy&&b.ph===1&&b.hp<b.maxhp*.5){
-    b.ph=2;banner('FASE 2','El guardián se enfurece');
-    rings.push({x:b.x,y:b.y,r:10,R:160,t:0,life:.5,color:'#FF4757'});
-    hostRing(b.x,b.y,160,'#FF4757');
-    SFX.boss();
+  if(!easy&&b.ph<b.maxPh){
+    const cuts=[.55,.30,.12,.05]; /* v4.14: umbral de cada fase siguiente */
+    if(b.hp<b.maxhp*cuts[b.ph-1]){
+      b.ph++;
+      if(b.ph>=5){save.totPhase5=(save.totPhase5||0)+1;checkAch();} /* v4.14 */
+      const subs=['El guardián se enfurece','El núcleo se agrieta','Patrones rotos · ¡refuerzos!','DESESPERACIÓN TOTAL'];
+      banner('FASE '+b.ph,subs[b.ph-2]||'');
+      rings.push({x:b.x,y:b.y,r:10,R:160,t:0,life:.5,color:'#FF4757'});
+      hostRing(b.x,b.y,160,'#FF4757');
+      SFX.boss();vib(60);
+    }
   }
   if(K==='MONOLITO'||isSenor){
     b.laT-=dt;
     const nL=isSenor?6:(easy?3:4);
     if(b.laT<=0){
-      b.laT=easy?(b.ph===2?3.0:3.6):(b.ph===2?2.2:3.0);
+      b.laT=((easy?(b.ph===2?3.0:3.6):(b.ph===2?2.2:3.0)))*pM;
       const a0=rand(0,TAU);
       const rotSp=easy?.35:(.5+(b.ph===2?.4:0));
       for(let i=0;i<nL;i++)b.lasers.push({a:a0+i*TAU/nL,rot:(Math.random()<.5?1:-1)*rotSp,t:0,life:2.2});
@@ -113,7 +125,7 @@ function updBoss(dt){
     }
     b.fanT-=dt;
     if(b.fanT<=0){
-      b.fanT=easy?4.2:(b.ph===2?2.2:3.2);
+      b.fanT=((easy?4.2:(b.ph===2?2.2:3.2)))*pM;
       const n=easy?4:(5+Math.min(6,Math.floor(run.level/3)));
       const sp=Math.min(230,(110+run.level*2))*players[0].slow;
       const span=1.5;
@@ -127,7 +139,7 @@ function updBoss(dt){
   if(K==='AXIOMA'||isSenor){
     b.clT-=dt;
     if(b.clT<=0&&b.clones.length===0){
-      b.clT=b.ph===2?4.5:6;
+      b.clT=(b.ph===2?4.5:6)*pM;
       const nC=isSenor?3:2;
       for(let i=0;i<nC;i++){
         const ang=rand(0,TAU);
@@ -143,7 +155,7 @@ function updBoss(dt){
       c.y=lerp(c.y,b.ty+Math.cos(c.ph+c.t*.9)*40,Math.min(1,dt*2));
     }
     b.aimT-=dt;if(b.aimT<=0){
-      b.aimT=b.ph===2?2.4:3.4;
+      b.aimT=(b.ph===2?2.4:3.4)*pM;
       const pl=nearestPlayer(b.x,b.y);
       const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(250,(150+run.level*3))*players[0].slow;
       for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.14)*sp,vy:Math.sin(a+i*.14)*sp,r:5,color:'#64C7FF',dead:false});
@@ -152,7 +164,7 @@ function updBoss(dt){
   if(K==='OCTAHEDRO'||isSenor){
     b.swT-=dt;
     if(b.swT<=0){
-      b.swT=b.ph===2?2.2:3.0;
+      b.swT=(b.ph===2?2.2:3.0)*pM;
       b.swA=rand(0,TAU);
       b.swDir=(Math.random()<.5?1:-1)*((b.ph===2?.35:.25)*(easy?.7:1));
     }
@@ -215,7 +227,7 @@ function updBoss(dt){
     b.y=b.ty+Math.sin(tt*2)*H*.12;
     if(b.ph===2){
       b.lemTp+=dt;
-      if(b.lemTp>2.5){
+      if(b.lemTp>2.5*pM){
         b.lemTp=0;
         rings.push({x:b.x,y:b.y,r:b.r,R:80,t:0,life:.3,color:'#FF6B6B'});
         hostRing(b.x,b.y,80,'#FF6B6B');
@@ -224,9 +236,9 @@ function updBoss(dt){
         SFX.warp();
       }
     }
-    b.fanT-=dt;if(b.fanT<=0){b.fanT=b.ph===2?1.6:2.2;fanAtk(b);}
+    b.fanT-=dt;if(b.fanT<=0){b.fanT=(b.ph===2?1.6:2.2)*pM;fanAtk(b);}
     b.aimT-=dt;if(b.aimT<=0){
-      b.aimT=b.ph===2?2.0:2.8;
+      b.aimT=(b.ph===2?2.0:2.8)*pM;
       const pl=nearestPlayer(b.x,b.y);
       const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(250,(150+run.level*3))*players[0].slow;
       ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF6B6B',dead:false});
@@ -234,7 +246,7 @@ function updBoss(dt){
   }
   if(K==='TESIS'||isSenor){
     b.gatherT+=dt;
-    if(b.gatherT>4&&!b.gather){
+    if(b.gatherT>4*pM&&!b.gather){
       b.gatherT=0;
       b.gather=[];
       const nG=isSenor?14:10;
@@ -263,18 +275,18 @@ function updBoss(dt){
         if(b.gatherPhaseT>.8)b.gather=null;
       }
     }
-    b.ringT-=dt;if(b.ringT<=0){b.ringT=b.ph===2?3.0:4.2;
+    b.ringT-=dt;if(b.ringT<=0){b.ringT=(b.ph===2?3.0:4.2)*pM;
       const n=10+Math.min(6,Math.floor(run.level/4)),sp=100*players[0].slow;
       for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
         ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false});}}
   }
   if(!(K==='MONOLITO'||K==='AXIOMA'||K==='OCTAHEDRO'||K==='VERTICE'||K==='CUATERNIO'||K==='LEMNISCATA'||K==='TESIS'||isSenor)){
-    b.fanT-=dt;if(b.fanT<=0){b.fanT=b.ph===2?1.7:2.5;fanAtk(b);}
+    b.fanT-=dt;if(b.fanT<=0){b.fanT=(b.ph===2?1.7:2.5)*pM;fanAtk(b);}
   }
   if(isSenor){
     b.sumT-=dt;
     if(b.sumT<=0){
-      b.sumT=6;
+      b.sumT=6*pM;
       if(enemies.length<30){
         const k=irand(2,3),minL=minLvlOf(run.level),maxL=maxLvlOf(run.level);
         for(let i=0;i<k;i++){
@@ -286,6 +298,49 @@ function updBoss(dt){
           e.x=e.sx;e.y=e.sy;
         }
         floater(b.x,b.y-b.r-14,'¡LEGIÓN!','#F2EFE6',12);
+      }
+    }
+  }
+  /* ===== v4.14: ataques nuevos de las FASES 3–5 (todos los guardianes no fáciles) ===== */
+  if(!easy){
+    if(b.ph>=3){ /* FASE 3: espiral doble roja continua */
+      b.sprT-=dt;
+      if(b.sprT<=0){b.sprT=3.2;b.sprA=rand(0,TAU);b.sprDir=(Math.random()<.5?1:-1);}
+      b.sprA+=b.sprDir*dt*2.4;
+      b.sprT2-=dt;
+      if(b.sprT2<=0){
+        b.sprT2=.13;
+        const sp=Math.min(215,(95+run.level*2))*players[0].slow;
+        for(const off of [0,Math.PI])
+          ebullets.push({x:b.x,y:b.y,vx:Math.cos(b.sprA+off)*sp,vy:Math.sin(b.sprA+off)*sp,r:5,color:'#FF4757',dead:false});
+      }
+    }
+    if(b.ph>=4){ /* FASE 4: invoca refuerzos */
+      b.sum2T-=dt;
+      if(b.sum2T<=0){
+        b.sum2T=7;
+        if(enemies.length<36){
+          const minL=minLvlOf(run.level),maxL=maxLvlOf(run.level);
+          for(let i=0;i<2;i++){
+            const elvl=clamp(irand(Math.round(maxL*.6),maxL),minL,maxL);
+            const e=spawnEnemy(typeForLevel(elvl),elvl,{after:'roam',delay:i*.2});
+            e.sx=b.x+rand(-40,40);e.sy=b.y+10;e.x=e.sx;e.y=e.sy;
+            e.cx=b.x+rand(-80,80);e.cy=b.y+70;
+            e.fx=clamp(b.x+rand(-120,120),30,W-30);e.fy=rand(90,H*.45);
+          }
+          floater(b.x,b.y-b.r-16,'¡REFUERZOS!','#FF4757',13);
+          SFX.warp();
+        }
+      }
+    }
+    if(b.ph>=5){ /* FASE 5: anillos de desesperación */
+      b.ring5T-=dt;
+      if(b.ring5T<=0){
+        b.ring5T=2.6;
+        const n=12,sp=150*players[0].slow;
+        for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
+          ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF4757',dead:false});}
+        tone(300,120,.25,'sawtooth',.05);
       }
     }
   }
@@ -713,6 +768,8 @@ function updFx(dt){
   /* v4.13: rayos del Aniquilador */
   for(const ub of ultBeams)ub.t+=dt;
   ultBeams=ultBeams.filter(b=>b.t<b.life);
+  /* v4.14: agujeros negros — en cliente solo avanzan como efecto visual */
+  if(amClient()){for(const h of holes)h.t+=dt;holes=holes.filter(h=>h.t<h.life);}
   for(const em of emosFx){em.t+=dt;em.y-=24*dt;}
   emosFx=emosFx.filter(em=>em.t<em.life);
   shake=Math.max(0,shake-dt*34);

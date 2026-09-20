@@ -5,10 +5,13 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   shipLv:1,exp:0,missions:[],combo:0,tempBuffs:[],
   /* v4.12: COMBOS — racha de bajas (comboN) y su cuenta atrás (comboT) */
   comboN:0,comboT:0,
-  stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false};
+  stShots:0,stHits:0,stDmg:0,stTaken:0,stPerfect:0,bossDmgTaken:false,
+  /* v4.14: FANTASMA del ranking — trazas de la mejor partida frenética */
+  ghostTrail:[],ghostAcc:0,ghostPassed:false,ghostRef:null};
 let pendingShipLevels=0,frenzyT=0,shipwaitT=0,chestwaitT=0,chestSlot=0;
 let dailyMode=false; /* v4.12: reto diario */
 let enemies=[],bullets=[],ebullets=[],parts=[],pickups=[],floats=[],rings=[],beams=[],ultBeams=[]; /* v4.13: ultBeams = rayos del Aniquilador */
+let holes=[]; /* v4.14: agujeros negros de la 2ª definitiva */
 let wrecks=[];
 let emosFx=[];
 let bots=[]; /* v4.9: aliados bot de combate */
@@ -36,6 +39,8 @@ function mkPlayer(slot){return{
   bot:0,botDmg:1,botRate:1,botMsl:false,botTwin:0,botPrc:0,
   /* v4.13: ARMA DEFINITIVA · Cañón Aniquilador */
   ult:false,ultAim:false,ultBurn:false,ultShock:false,ultCdMax:14,ultDmgMul:10,ultT:0,
+  /* v4.14: 2ª DEFINITIVA · Agujero Negro */
+  bh:false,bhCdMax:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false,bhT:0,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   touch:null

@@ -6,6 +6,7 @@ function loop(now){
   let dt=(now-last)/1000;last=now;
   dt=Math.min(dt,.05);
   time+=dt;
+  updBiome(dt); /* v4.14: biomas visuales */
   if(state==='play'&&!amClient()){
     run.time+=dt;
     for(const pl of players)updPlayer(pl,dt);
@@ -14,6 +15,7 @@ function loop(now){
     updWaveSpawns(dt);
     updEnemies(dt);
     updBoss(dt);
+    updHoles(dt); /* v4.14: agujeros negros */
     updEBullets(dt);
     updCollisions();
     if(players.length===2)updWrecks(dt);

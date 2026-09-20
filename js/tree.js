@@ -1,5 +1,5 @@
 'use strict';
-/* ============ árbol: nodos, 12 ramas + fusiones ============ */
+/* ============ árbol: nodos, 15 ramas + fusiones ============ */
 const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',mrg:'FUSIÓN'};
 const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290};
 const TREE=[
@@ -172,7 +172,13 @@ const TREE=[
  {id:'df1',b:'dfn',i:1,req:'df0',cost:{gems:30},wave:12,tag:'MIR',name:'MIRILLA TÁCTICA',desc:'El Aniquilador busca solo al enemigo con MÁS vida (élites y jefes primero).',fx:b=>b.ultAim=true},
  {id:'df2',b:'dfn',i:2,req:'df1',cost:{gems:40},wave:16,tag:'CRG',name:'CARGA RÁPIDA',desc:'El Aniquilador se recarga en 10 s en vez de 14.',fx:b=>b.ultCd=10},
  {id:'df3',b:'dfn',i:3,req:'df2',cost:{gems:55},wave:20,tag:'NCL',name:'NÚCLEO DENSO',desc:'Daño del rayo x10 → x16 y además incendia (12 de daño/s durante 4 s).',fx:b=>{b.ultDmg=16;b.ultBurn=true}},
- {id:'df4',b:'dfn',i:4,req:'df3',cost:{gems:75},wave:24,tag:'SRC',name:'SOBRECARGA TOTAL',desc:'TOPE · Cada disparo estalla en una onda (x4 de daño en radio 150) y borra todas las balas enemigas de la pantalla.',fx:b=>b.ultShock=true},
+ {id:'df4',b:'dfn',i:4,req:'df3',cost:{gems:75},wave:24,tag:'SRC',name:'SOBRECARGA TOTAL',desc:'Cada disparo estalla en una onda (x4 de daño en radio 150) y borra todas las balas enemigas de la pantalla.',fx:b=>b.ultShock=true},
+ /* ===== v4.14: 2ª ARMA DEFINITIVA · AGUJERO NEGRO ===== */
+ {id:'df5',b:'dfn',i:5,req:'df4',cost:{gold:2500,gems:60},wave:28,tag:'AGN',name:'AGUJERO NEGRO',desc:'SEGUNDA DEFINITIVA: cada 20 s abre un agujero negro que ATRAE a los enemigos, los DEVORA al tocar el núcleo y desintegra sus balas.',fx:b=>{b.bh=true;b.bhCd=20;b.bhRad=130;b.bhDur=4;b.bhPull=1;b.bhDmgMul=1;b.bhBoom=false;b.bhGold=false;b.bhHeal=false}},
+ {id:'df6',b:'dfn',i:6,req:'df5',cost:{gems:35},wave:32,tag:'HOR',name:'HORIZONTE AMPLIO',desc:'El agujero negro crece: radio 130 → 180.',fx:b=>b.bhRad=180},
+ {id:'df7',b:'dfn',i:7,req:'df6',cost:{gems:45},wave:36,tag:'MAR',name:'MAREA GRAVITATORIA',desc:'El agujero dura 6 s en vez de 4 y su succión es un 60% más fuerte.',fx:b=>{b.bhDur=6;b.bhPull=1.6}},
+ {id:'df8',b:'dfn',i:8,req:'df7',cost:{gems:60},wave:40,tag:'COL',name:'COLAPSO FINAL',desc:'Al cerrarse, el agujero ESTALLA (x8 de daño en todo el radio) y cada enemigo devorado paga +2 de oro.',fx:b=>{b.bhBoom=true;b.bhGold=true}},
+ {id:'df9',b:'dfn',i:9,req:'df8',cost:{gems:85},wave:44,tag:'EVT',name:'EVENTO HORIZONTE',desc:'TOPE · Recarga 20 → 13 s, daño x2 y cada enemigo devorado cura 1 PS a tu nave.',fx:b=>{b.bhCd=13;b.bhDmgMul=2;b.bhHeal=true}},
 ];
 TREE.forEach(nd=>{
   if(nd.b==='mrg')return;
