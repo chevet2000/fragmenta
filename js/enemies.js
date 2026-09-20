@@ -1,0 +1,187 @@
+'use strict';
+/* ============ enemigos ============ */
+function spawnEnemy(tk,elvl,o){
+  o=o||{};
+  const T=TYPES[tk];
+  const hp=Math.max(1,Math.round(hpForLevel(elvl)*T.mult));
+  const e={id:eid++,tk,T,elvl,hp,maxhp:hp,x:0,y:0,
+    r:clamp(10+Math.sqrt(elvl)*3.0,12,30)*(tk==='hive'?1.18:1)*(tk==='kami'?0.8:1),
+    state:'enter',after:o.after||'form',t:0,delay:o.delay||0,flash:0,wob:rand(0,TAU),
+    diveT:rand(4.5,8),shootT:rand(2,5),healT:rand(2.5,4.5),rt:0,ds:0,sumT:0,
+    diveSpd:rand(.55,.75)+Math.min(.5,run.level*.02),
+    armor:tk==='block'?1+Math.floor(elvl/10):0,
+    elite:!!o.elite,snake:(o.snake!=null)?o.snake:null,snIdx:o.snIdx||0,
+    inT:0,inDelay:0,dvy:0,sx:0,sy:0,cx:0,cy:0,fx:0,fy:0,tx:0,ty:0,dead:false,
+    refCD:0,kamArm:tk==='kami'?rand(1.2,2.6):0,kamT:0,kamV:0,
+    camp:o.camp||null,CD:null,campT:2.2,beam:null,
+    frozen:0,burn:null,shockT:0};
+  if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
+  enemies.push(e);return e;
+}
+function pickRoamTarget(e){e.tx=rand(40,W-40);e.ty=rand(70,H*.52);e.rt=rand(1.6,3);}
+function nearestPlayer(x,y){
+  let best=null,bd=1e9;
+  for(const pl of players){if(pl.hp<=0)continue;const d=Math.hypot(pl.x-x,pl.y-y);if(d<bd){bd=d;best=pl;}}
+  return best||players[0];
+}
+function startDive(e){
+  const pl=nearestPlayer(e.x,e.y);
+  e.state='dive';e.ds=0;e.sx=e.x;e.sy=e.y;
+  e.tx=clamp(pl.x+rand(-70,70),30,W-30);e.ty=H+80;
+  e.cx=e.x+(pl.x-e.x)*.15+rand(-40,40);e.cy=e.y+(H-e.y)*.45;
+  e.diveT=rand(6,11);
+}
+function snakePos(sn,s){
+  return{x:W/2+Math.sin(s*.85+sn.ph)*(W*.30),
+         y:H*.30+Math.sin(s*1.55+sn.ph*.7)*(H*.20)+Math.cos(s*.5)*H*.05};
+}
+function kamiExplode(e,damaging){
+  burst(e.x,e.y,'#FF4757',16,170);
+  rings.push({x:e.x,y:e.y,r:6,R:70,t:0,life:.35,color:'#FF4757'});
+  hostRing(e.x,e.y,70,'#FF4757');
+  shake=Math.min(14,shake+4);
+  tone(500,80,.25,'sawtooth',.07);
+  if(damaging){
+    for(const pl of players){
+      if(pl.hp>0&&Math.hypot(pl.x-e.x,pl.y-e.y)<70)hitPlayer(pl,1);
+    }
+  }
+  killEnemy(e,0);
+}
+
+/* ============ CAMPISTAS ============ */
+const CAMP_DEFS={
+ CENTINELA:{name:'CENTINELA',color:'#FFD166',tip:'abanicos giratorios'},
+ HERALDO:{name:'HERALDO',color:'#FF7EB6',tip:'invoca refuerzos'},
+ TITAN:{name:'TITÁN',color:'#B0F2FF',tip:'láser de barrido'},
+};
+function spawnCamper(L){
+  const keys=Object.keys(CAMP_DEFS);
+  const key=keys[Math.floor(R()*keys.length)];
+  const D=CAMP_DEFS[key];
+  const hp=Math.round(hpForLevel(maxLvlOf(L))*5.5);
+  const e=spawnEnemy(typeForLevel(maxLvlOf(L)),maxLvlOf(L),{after:'roam',delay:1,camp:key});
+  e.hp=e.maxhp=hp;
+  e.r=30;
+  e.CD=D;
+  e.campT=2.2;
+  e.beam=null;
+  return e;
+}
+function camperAI(e,dt){
+  const pl=nearestPlayer(e.x,e.y);
+  e.campT-=dt;
+  if(e.campT<=0){
+    if(e.camp==='CENTINELA'){
+      e.campT=2.6;
+      const a0=rand(0,TAU);
+      const sp=Math.min(210,(110+run.level*2))*players[0].slow;
+      for(let i=0;i<7;i++){
+        const a=a0+i*TAU/7;
+        ebullets.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:e.CD.color,dead:false});
+      }
+      tone(400,180,.15,'square',.04);
+    }else if(e.camp==='HERALDO'){
+      e.campT=5;
+      if(enemies.length<26){
+        const minL=minLvlOf(run.level),maxL=maxLvlOf(run.level);
+        for(let i=0;i<2;i++){
+          const elvl=clamp(irand(minL,maxL),minL,maxL);
+          const c=spawnEnemy(typeForLevel(elvl),elvl,{after:'roam',delay:i*.2});
+          c.sx=e.x+rand(-20,20);c.sy=e.y+rand(-10,10);
+          c.cx=e.x+rand(-70,70);c.cy=e.y+rand(20,60);
+          c.fx=clamp(e.x+rand(-90,90),30,W-30);c.fy=rand(80,H*.5);
+          c.x=c.sx;c.y=c.sy;
+        }
+        floater(e.x,e.y-e.r-12,'¡REFUERZOS!','#FF7EB6',11);
+      }
+      if(pl){
+        const a=Math.atan2(pl.y-e.y,pl.x-e.x);
+        const sp=Math.min(220,(120+run.level*2))*players[0].slow;
+        for(let i=-1;i<=1;i++)
+          ebullets.push({x:e.x,y:e.y,vx:Math.cos(a+i*.16)*sp,vy:Math.sin(a+i*.16)*sp,r:5,color:'#FF7EB6',dead:false});
+      }
+      tone(300,120,.2,'square',.04);
+    }else if(e.camp==='TITAN'){
+      e.campT=4.5;
+      const a0=pl?Math.atan2(pl.y-e.y,pl.x-e.x):Math.PI/2;
+      e.beam={a:a0,rot:(Math.random()<.5?1:-1)*.9,t:0,life:1.6};
+      SFX.laser();
+    }
+  }
+  if(e.beam){
+    const B=e.beam;
+    B.t+=dt;B.a+=B.rot*dt;
+    if(B.t>B.life)e.beam=null;
+    else{
+      for(const q of players){
+        if(q.hp<=0||q.invul>0)continue;
+        const pdx=q.x-e.x,pdy=q.y-e.y,d=Math.hypot(pdx,pdy);
+        if(d<e.r+6)continue;
+        const ad=Math.atan2(pdy,pdx);
+        const dd=Math.abs(Math.atan2(Math.sin(ad-B.a),Math.cos(ad-B.a)));
+        if(dd<0.07)hitPlayer(q,1);
+      }
+    }
+  }
+}
+
+/* ============ ELEMENTOS ============ */
+function applyBurn(e,f,slot){
+  const burn={dps:f.dps,t:f.dur,spread:f.spread,boom:f.boom,slot:slot||0};
+  if(e===boss){ boss.burn=burn; return; }
+  if(e.burn)return;
+  e.burn=burn;
+  if(f.spread>0){
+    let n=f.spread;
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<100){
+        o.burn={dps:Math.max(2,Math.round(f.dps*.6)),t:f.dur*.8,spread:0,boom:f.boom,slot:burn.slot};
+        floater(o.x,o.y-o.r-6,'🔥','#FF9F43',10);
+        n--;
+      }
+    }
+  }
+}
+function elementProcs(e,pl){
+  if(e.dead||!pl)return;
+  if(pl.fire&&Math.random()<pl.fire.ch){
+    applyBurn(e,pl.fire,pl.slot);
+    floater(e.x,e.y-e.r-8,'🔥','#FF9F43',11);
+    SFX.ignite();
+  }
+  if(pl.ice&&Math.random()<pl.ice.ch){
+    let n=pl.ice.n;
+    e.frozen=Math.max(e.frozen,pl.ice.dur);
+    floater(e.x,e.y-e.r-8,'❄','#B0E8FF',11);
+    SFX.freeze();
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<110){
+        o.frozen=Math.max(o.frozen,pl.ice.dur);
+        floater(o.x,o.y-o.r-8,'❄','#B0E8FF',10);
+        n--;
+      }
+    }
+  }
+  if(pl.elec&&Math.random()<pl.elec.ch){
+    let n=pl.elec.n;
+    const dmg=pl.elec.dmg;
+    e.shockT=Math.max(e.shockT,pl.elec.stun?1:.4);
+    floater(e.x,e.y-e.r-14,'⚡','#FFE666',12);
+    SFX.zap();
+    for(const o of enemies){
+      if(o.dead||o===e||n<=0)continue;
+      if(Math.hypot(o.x-e.x,o.y-e.y)<110){
+        o.shockT=Math.max(o.shockT,pl.elec.stun?1:.3);
+        damageEnemy(o,dmg,false,pl.slot);
+        floater(o.x,o.y-o.r-8,'⚡','#FFE666',10);
+        n--;
+      }
+    }
+    damageEnemy(e,Math.round(dmg*.6),false,pl.slot);
+    if(boss&&Math.hypot(boss.x-e.x,boss.y-e.y)<140)damageBoss(Math.round(dmg*.6),false,pl.slot);
+  }
+}
+

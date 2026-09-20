@@ -1,0 +1,474 @@
+'use strict';
+/* ============ pantallas ============ */
+const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver')};
+function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
+function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
+function setChoiceNote(txt){
+  const box=$('#cards');
+  let n=box.querySelector('.choicenote');
+  if(!n){n=document.createElement('div');n.className='choicenote';box.appendChild(n);}
+  n.textContent=txt;
+}
+function markChoiceDone(who){
+  document.querySelectorAll('#cards .card').forEach(el=>{el.disabled=true;});
+  setChoiceNote('✓ '+who+' · ESPERANDO AL OTRO JUGADOR…');
+}
+function setRelicNote(txt){
+  const box=$('#relicCards');
+  let n=box.querySelector('.choicenote');
+  if(!n){n=document.createElement('div');n.className='choicenote';box.appendChild(n);}
+  n.textContent=txt;
+}
+function markRelicDone(who){
+  document.querySelectorAll('#relicCards .rbtn').forEach(el=>{el.disabled=true;});
+  setRelicNote('✓ '+who+' · ESPERANDO AL OTRO JUGADOR…');
+}
+function refreshMenu(){
+  $('#mBest').textContent=save.bestAll?`RÉCORD · OLEADA ${save.bestAll}`:'PRIMERA INCURSIÓN';
+  $('#mGold').innerHTML=`${icoGold} ${save.gold}`;
+  $('#mGems').innerHTML=`${icoGem} ${save.gems}`;
+  $('#mPrest').textContent=save.prest>0?`ASCENSOS ×${save.prest}`:'';
+  $('#btnArsenal').textContent=`ARSENAL · ÁRBOL (${ownedCount()}/${TREE.length})`;
+  const na=ACHS.filter(a=>save.ach[a.id]).length;
+  $('#btnAch').textContent=`LOGROS (${na}/${ACHS.length})`;
+  const wb=(save.weekly&&save.weekly.seed===weekSeed())?save.weekly.best:0;
+  $('#btnWeekly').textContent=`DESAFÍO SEMANAL · RÉCORD ${wb}`;
+  const nr=(save.ranking||[]).length;
+  $('#btnRank').textContent=`RANKING SEMANAL (${nr})`;
+  $('#diffName').textContent=DIFF_LABEL[save.diff]||'SOLO ×1';
+  document.querySelectorAll('#diffRow button').forEach(b=>b.classList.toggle('on',b.dataset.d===save.diff));
+  const asc=$('#btnAscend');
+  asc.classList.toggle('hidden',save.bestAll<50);
+  asc.textContent=ascConfirm?'¿SEGURO? TOCA DE NUEVO':`ASCENDER ×${save.prest+1} (+25% ORO)`;
+}
+function openRank(){
+  const pilot=getPilot();
+  const ws=weekSeed();
+  $('#rankWeek').textContent=ws;
+  $('#pilotCode').textContent=pilot;
+  const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
+  const myStr=mine?makeRecordString(mine.seed,mine.code,mine.wave,mine.ship):null;
+  $('#pilotRec').innerHTML=mine
+    ?('OLEADA '+mine.wave+' · NAVE NV '+mine.ship+'<br>'+myStr)
+    :'Aún sin registro esta semana.<br>Juega el DESAFÍO SEMANAL para generarlo.';
+  $('#btnCopyMyRec').style.display=mine?'block':'none';
+  renderRankList();
+  showScr('rank');
+}
+function renderRankList(){
+  const box=$('#rankList');box.innerHTML='';
+  const list=sortedRanking();
+  if(list.length===0){
+    box.innerHTML='<div style="font-size:10px;letter-spacing:.2em;color:var(--dim);text-align:center;padding:10px 0">'+
+      'SIN REGISTROS · comparte tu código con<br>tus amigos y añade los suyos aquí</div>';
+    return;
+  }
+  list.forEach((r,i)=>{
+    const el=document.createElement('div');
+    el.className='rentry'+(i===0?' p1':i===1?' p2':i===2?' p3':'')+(r.ok?'':' unv');
+    const medal=i<3?['1','2','3'][i]:(i+1);
+    el.innerHTML=`<div class="rk">${medal}</div>`+
+      `<div class="rt"><b>${r.code}</b><small>${r.seed}${r.ok?'':' · sin verificar'}</small></div>`+
+      `<div class="rw">${r.wave}<small>OLEADA</small></div>`+
+      `<button class="rdel" data-c="${r.code}" data-s="${r.seed}">×</button>`;
+    box.appendChild(el);
+  });
+  box.querySelectorAll('.rdel').forEach(b=>{
+    b.addEventListener('click',()=>{
+      save.ranking=(save.ranking||[]).filter(r=>!(r.code===b.dataset.c&&r.seed===b.dataset.s));
+      persist();renderRankList();
+    });
+  });
+  const ws=weekSeed();
+  const pilot=getPilot();
+  let card=sortedRanking().find(r=>r.seed===ws&&r.code===pilot);
+  if(!card)card=sortedRanking().find(r=>r.seed===ws);
+  drawRankCard($('#rankCard'),card||{seed:ws});
+}
+ $('#btnAddRec').addEventListener('click',()=>{
+  const s=$('#recInput').value;
+  const p=parseRecordString(s);
+  const m=$('#rankMsg');
+  if(!p){
+    m.className='err';m.textContent='Formato no válido. Debe ser: FRG9.SEMANA.CODIGO.OLEADA.NAVE.HASH';
+    return;
+  }
+  addRankingEntry(p);
+  $('#recInput').value='';
+  m.className='ok';
+  m.textContent=(p.ok?'✓ Registro verificado':'≈ Registro añadido (sin verificar)')+' · '+p.code+' · oleada '+p.wave;
+  renderRankList();
+  SFX.buy();
+});
+ $('#btnCopyMyRec').addEventListener('click',()=>{
+  const pilot=getPilot(),ws=weekSeed();
+  const mine=(save.ranking||[]).find(r=>r.seed===ws&&r.code===pilot);
+  if(!mine)return;
+  copyText(makeRecordString(mine.seed,mine.code,mine.wave,mine.ship),
+    'Envíalo a tus amigos para el ranking');
+});
+ $('#btnRank').addEventListener('click',openRank);
+ $('#btnRankBack').addEventListener('click',()=>{refreshMenu();showScr('menu');});
+function openGuide(){
+  const box=$('#guideList');box.innerHTML='';
+  for(const key of BOSS_ORDER){
+    const D=BOSS_DEFS[key];
+    const el=document.createElement('div');
+    el.className='grow';
+    const c=document.createElement('canvas');
+    c.width=c.height=72;
+    const g=c.getContext('2d');
+    g.save();g.translate(36,36);
+    g.strokeStyle=D.color;g.lineWidth=2;
+    g.fillStyle='rgba(255,255,255,.05)';
+    shapePath(g,D.shape,26);
+    g.fill();g.stroke();
+    g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=1;
+    for(let i=0;i<9;i++){const a=i*TAU/9;g.beginPath();g.arc(0,0,33,a,a+.4);g.stroke();}
+    g.restore();
+    el.appendChild(c);
+    const t=document.createElement('div');
+    t.className='at';
+    t.innerHTML=`<b style="color:${D.color}">${D.name}</b><span class="gm">${D.mech}</span><span class="gt">◈ ${D.tip}</span>`;
+    el.appendChild(t);
+    box.appendChild(el);
+  }
+  showScr('guide');
+}
+function openAch(){
+  const box=$('#achList');box.innerHTML='';
+  ACHS.forEach(a=>{
+    const done=!!save.ach[a.id];
+    const el=document.createElement('div');
+    el.className='arow'+(done?' done':'');
+    el.innerHTML=`<div class="amk">${done?'✓':''}</div><div class="at"><b>${a.name}</b><small>${a.desc}</small></div><div class="arw">${icoGem}${a.rw}</div>`;
+    box.appendChild(el);
+  });
+  showScr('ach');
+}
+function goMenu(){
+  state='menu';runActive=false;
+  destroyNet();
+  wrecks=[];emosFx=[];closeEmoPanel();
+  weeklyMode=false;R=Math.random;
+  musStop();
+  useProfile('local');
+  refreshMenu();showScr('menu');
+  $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
+}
+function resetRunCommon(){
+  P=players[0];
+  run.level=1;run.kills=0;run.eliteKills=0;run.time=0;run.buffs=[[],[]];run.goldRun=0;run.gemsRun=0;
+  run.relics=[];run.shipLv=1;run.exp=0;run.combo=0;run.tempBuffs=[];rollMissions();
+  run.stShots=0;run.stHits=0;run.stDmg=0;run.stTaken=0;run.stPerfect=0;run.bossDmgTaken=false;
+  pendingShipLevels=0;frenzyT=0;
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
+  closeEmoPanel();
+  dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];
+  shake=0;bannerT=0;novaCdGlobal=0;
+  freeNovaGiven=false;
+}
+function primePlayers(){
+  for(const pl of players){
+    pl.hp=pl.maxHp;pl.invul=1;pl.shots=0;pl.fireAcc=0;pl.emerUsed=false;
+    pl.shieldLvl=true;pl.regAcc=0;pl.shieldUp=false;pl.shieldCd=0;
+    pl.homeCd=1;pl.priCd=3;pl.intAcc=0;pl.orbT=0;pl.dashCd=0;pl.vengeT=0;
+    pl.touch=null;
+  }
+}
+function startRun(){
+  audio();goFullscreen();
+  useProfile('local');
+  weeklyMode=false;R=Math.random;
+  runDiff=save.diff;
+  save.runs++;persist();
+  players=[mkPlayer(0)];localSlot=0;
+  remoteBase=null;
+  resetRunCommon();
+  recompute();
+  primePlayers();
+  players[0].x=W/2;players[0].y=H-130;
+  runActive=true;state='play';
+  showScr(null);
+  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+  $('#netTag').classList.add('hidden');
+  refreshHUD();
+  musStart();
+  nextWave();
+}
+function startWeekly(){
+  audio();goFullscreen();
+  useProfile('local');
+  weeklyMode=true;
+  const ws=weekSeed();
+  if(!save.weekly||save.weekly.seed!==ws){save.weekly={seed:ws,best:0};}
+  persist();
+  R=mulberry32(hashStr('FRG-'+ws));
+  runDiff='normal';
+  save.runs++;persist();
+  players=[mkPlayer(0)];localSlot=0;
+  remoteBase=null;
+  resetRunCommon();
+  recompute();
+  primePlayers();
+  players[0].x=W/2;players[0].y=H-130;
+  runActive=true;state='play';
+  showScr(null);
+  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+  $('#netTag').classList.add('hidden');
+  refreshHUD();
+  musStart();
+  banner('DESAFÍO SEMANAL','Semilla '+ws+' · NORMAL ×2.2 · igual para todos');
+  nextWave();
+}
+function startCoop(){
+  runDiff=net.lobbyDiff||'normal';
+  save.runs++;persist();
+  players=[mkPlayer(0),mkPlayer(1)];localSlot=0;
+  resetRunCommon();
+  recompute();
+  primePlayers();
+  players[0].x=W*.42;players[0].y=H-130;
+  players[1].x=W*.58;players[1].y=H-130;
+  runActive=true;state='play';
+  showScr(null);
+  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+  $('#netTag').classList.remove('hidden');
+  refreshHUD();
+  sendMsg({t:'start',diff:runDiff});
+  musStart();
+  nextWave();
+}
+function startRunClient(){
+  run.level=1;run.kills=0;run.goldRun=0;run.gemsRun=0;
+  run.relics=[];run.shipLv=1;run.exp=0;run.buffs=[[],[]];run.combo=0;
+  run.missions=[
+    {txt:'Destruye 40 enemigos',n:40,p:0,rw:60},
+    {txt:'Recoge 120 de oro',n:120,p:0,rw:40},
+    {txt:'Caza 2 élites',n:2,p:0,rw:80},
+  ];
+  pendingShipLevels=0;frenzyT=0;
+  players=[mkPlayer(0),mkPlayer(1)];localSlot=1;
+  enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];wrecks=[];emosFx=[];
+  closeEmoPanel();
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
+  recompute();
+  for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
+  players[1].x=W*.58;players[1].y=H-130;
+  players[0].x=W*.42;players[0].y=H-130;
+  runActive=true;state='play';
+  showScr(null);
+  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+  $('#netTag').classList.remove('hidden');
+  banner('CO-OP CONECTADO','Dificultad: '+DIFF_LABEL[runDiff]);
+  musStart();
+}
+function nextWave(){
+  ebullets=[];bullets=[];beams=[];
+  const L=run.level;
+  if(net.mode!=='client'){
+    if(L>save.best.lvl)save.best.lvl=L;
+    if(L>save.bestAll)save.bestAll=L;
+    checkAch();
+    persist();
+  }
+  for(const pl of players)if(pl.hp<=0){pl.hp=Math.ceil(pl.maxHp/2);floater(pl.x,pl.y-30,'REDESPLIEGUE','#7FD1B9',13);}
+  wrecks=[];
+  for(const pl of players){pl.shieldLvl=true;pl.emerUsed=false;}
+  if(P.secondWind&&L%5===0)for(const pl of players){pl.hp=pl.maxHp;floater(pl.x,pl.y-30,'SEGUNDO AIRE','#7FD1B9',13);}
+  if(L>=3&&!freeNovaGiven){
+    freeNovaGiven=true;
+    for(const pl of players){
+      if(!pl.nova){
+        pl.nova={d:15,cd:18};
+        floater(pl.x,pl.y-40,'NOVA DE EMERGENCIA','#FFD166',14);
+      }
+    }
+    banner('NOVA DE EMERGENCIA','Prepárate: el primer Guardián llega en la oleada 5');
+  }
+  formY=0;formT=0;
+  if(net.mode!=='client')updTempBuffs();
+  buildWave(L);
+  waveState='play';clearTimer=0;
+}
+function showShipCards(picks,onPick,waitNote){
+  $('#lvKick').textContent='EXPERIENCIA OBTENIDA';
+  $('#lvNum').textContent=run.shipLv;
+  const box=$('#cards');box.innerHTML='';
+  picks.forEach(c=>{
+    const el=document.createElement('button');
+    el.className='card t'+c.tier;
+    el.innerHTML=`<div class="c-side"></div><div class="c-main"><div class="c-top"><span class="tag">${['COMÚN','RARO','ÉPICO'][c.tier]}</span><b>${c.name}</b></div><p>${c.desc}</p></div>`;
+    el.addEventListener('click',()=>onPick(c.id));
+    box.appendChild(el);
+  });
+  if(waitNote){
+    const note=document.createElement('div');
+    note.className='choicenote';
+    note.textContent=waitNote;
+    box.appendChild(note);
+  }
+  showScr('level');
+}
+function showShipLevelLocal(){
+  state='levelup';SFX.lvl();
+  const picks=[],used=new Set();
+  for(let i=0;i<3;i++){
+    const r=Math.random();
+    let tier=r<.12&&run.level>=4?2:r<.40?1:0;
+    for(let t=tier;t>=0;t--){
+      const cands=CARDS.filter(c=>c.tier===t&&!used.has(c.id));
+      if(cands.length){const c=cands[irand(0,cands.length-1)];used.add(c.id);picks.push(c);break;}
+    }
+  }
+  while(picks.length<3)picks.push(CARDS[0]);
+  showShipCards(picks,id=>{
+    run.buffs[0].push(id);SFX.buy();
+    recompute();
+    pendingShipLevels--;
+    if(pendingShipLevels>0)showShipLevelLocal();
+    else{state='play';showScr(null);persist();}
+  },null);
+}
+function showRelicCards(list,onPick){
+  const box=$('#relicCards');box.innerHTML='';
+  list.forEach((r,i)=>{
+    const el=document.createElement('button');
+    el.className='rbtn';
+    el.innerHTML=`<b>◈ ${r.name}</b><p>${r.desc}</p>`;
+    el.addEventListener('click',()=>{
+      if(relicChosen)return;
+      relicChosen=true;SFX.relic();vib(40);
+      box.querySelectorAll('.rbtn').forEach((b2,j)=>{if(j!==i)b2.classList.add('got');});
+      onPick(r);
+    });
+    box.appendChild(el);
+  });
+}
+function applyRelicChoice(){
+  if(state!=='postboss')return;
+  if(!(net.mode==='host'&&players.length===2))return;
+  if(net.hostRelic&&net.clientRelic){
+    if(!run.relics.includes(net.hostRelicId))run.relics.push(net.hostRelicId);
+    if(!run.relics.includes(net.clientRelicId))run.relics.push(net.clientRelicId);
+    net.hostRelic=false;net.clientRelic=false;
+    recompute();persist();
+    setRelicNote('AMBOS ELIGIERON · PULSA CONTINUAR');
+    const pu=$('#pbUnlock');
+    pu.classList.remove('warn');
+    pu.textContent='AMBOS LISTOS · PULSA CONTINUAR';
+  }
+}
+function showPostBoss(){
+  const key=bossName?bossName.split('-')[0]:'';
+  const bk=save.bossKills||{};
+  if(BOSS_DEFS[key])bk[key]=(bk[key]||0)+1;
+  else if(key==='SEÑOR DE FORMAS')bk['SEÑOR']=(bk['SEÑOR']||0)+1;
+  save.bossKills=bk;
+  checkAch();persist();
+  state='postboss';relicChosen=false;
+  const coop=net.mode==='host'&&players.length===2;
+  if(coop){net.hostRelic=false;net.clientRelic=false;}
+  const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;
+  $('#pbStats').innerHTML=
+    st('GUARDIÁN PURGADO',bossName)+st('OLEADA',run.level)+
+    st('ORO DE LA INCURSIÓN',run.goldRun)+st('GEMAS',run.gemsRun);
+  $('#pbMinLv').textContent=`▲ NIVEL MÍNIMO ENEMIGO: ${minLvlOf(run.level+1)}`;
+  const pu=$('#pbUnlock');pu.classList.remove('warn');
+  if(coop){
+    pu.textContent='CADA JUGADOR ELIGE UNA RELIQUIA (AMBAS SE APLICAN)';
+    curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
+    sendMsg({t:'ev',k:'relics',ids:curRelics.map(r=>r.id)});
+    showRelicCards(curRelics,r=>{net.hostRelic=true;net.hostRelicId=r.id;applyRelicChoice();});
+    showScr('post');
+    return;
+  }
+  const n=TREE.filter(nd=>!has(nd.id)&&(nd.wave<=1||save.best.lvl>=nd.wave)&&save.bestShip>=(nd.ship||1)).length;
+  pu.textContent=n>0?`► ${n} MEJORA${n>1?'S':''} DESBLOQUEABLE${n>1?'S':''} EN EL ARSENAL`:'';
+  curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
+  showRelicCards(curRelics,r=>{
+    run.relics.push(r.id);recompute();persist();
+    banner('RELIQUIA',r.name);
+  });
+  showScr('post');
+}
+function gameOver(){
+  state='over';
+  shake=18;vib(200);
+  musStop();
+  save.mShots=(save.mShots||0)+run.stShots;
+  save.mHits=(save.mHits||0)+run.stHits;
+  save.mDmg=(save.mDmg||0)+Math.round(run.stDmg);
+  save.mTaken=(save.mTaken||0)+run.stTaken;
+  save.mPerfect=(save.mPerfect||0)+run.stPerfect;
+  save.best.lvl=Math.max(save.best.lvl,run.level);
+  save.best.kills=Math.max(save.best.kills,run.kills);
+  save.bestAll=Math.max(save.bestAll,run.level);
+  save.bestShip=Math.max(save.bestShip,run.shipLv);
+  if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,run.level);
+  let weeklyRec=false;
+  lastWeeklyRec=null;
+  if(weeklyMode){
+    const ws=weekSeed();
+    if(save.weekly&&save.weekly.seed===ws){
+      if(run.level>(save.weekly.best||0)){save.weekly.best=run.level;weeklyRec=true;}
+    }
+    save.weekBestAll=Math.max(save.weekBestAll||0,run.level);
+    const pilot=getPilot();
+    lastWeeklyRec={seed:ws,code:pilot,wave:run.level,ship:run.shipLv,
+      h:weekHash(ws,pilot,run.level,run.shipLv),ok:true};
+    addRankingEntry(lastWeeklyRec);
+  }
+  checkAch();
+  persist();
+  if(net.mode==='host'&&players.length===2){
+    sendMsg({t:'ev',k:'over',level:run.level,ship:run.shipLv,yg:run.goldRun,hard:runDiff==='hardcore'});
+  }
+  const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;
+  $('#ovStats').innerHTML=
+    st('OLEADA ALCANZADA',run.level)+st('NAVE NIVEL',run.shipLv)+
+    st('DESTRUIDOS',run.kills)+st('TIEMPO',fmtT(run.time))+
+    st('ORO CONSEGUIDO',run.goldRun)+st('GEMAS',run.gemsRun);
+  const acc=run.stShots>0?Math.round(run.stHits/run.stShots*100):0;
+  $('#ovMast').innerHTML=
+    `<div><small>PRECISIÓN</small><b>${acc}%</b></div>`+
+    `<div><small>DAÑO TOTAL</small><b>${Math.round(run.stDmg)}</b></div>`+
+    `<div><small>JEFES SIN DAÑO</small><b>${run.stPerfect}</b></div>`;
+  const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
+  $('#ovKeep').innerHTML=
+    (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
+    `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
+    `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
+  const cr=$('#btnCopyRec');
+  if(lastWeeklyRec){
+    cr.classList.remove('hidden');
+    cr.onclick=()=>{
+      copyText(makeRecordString(lastWeeklyRec.seed,lastWeeklyRec.code,lastWeeklyRec.wave,lastWeeklyRec.ship),
+        'Pégalo en el ranking de tus amigos');
+    };
+  }else cr.classList.add('hidden');
+  $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');
+  $('#bossBar').classList.add('hidden');
+  closeEmoPanel();
+  showScr('over');
+}
+function pauseGame(){
+  if(state!=='play')return;
+  state='pause';persist();
+  closeEmoPanel();
+  const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;
+  const acc=run.stShots>0?Math.round(run.stHits/run.stShots*100):0;
+  $('#psStats').innerHTML=
+    st('DAÑO',P.dmg)+st('CADENCIA',P.fireRate.toFixed(1)+'/s')+
+    st('PROYECTILES',P.bullets+(P.files>1?` ×${P.files} filas`:''))+
+    st('CRÍTICO',Math.round(P.crit*100)+'%')+
+    st('NAVE',run.shipLv+' · '+run.exp+'/'+shipNeed(run.shipLv)+' XP')+
+    st('VIDA',players.map(p=>p.hp+'/'+p.maxHp).join(' · '))+
+    st('PERMANENTES',ownedCount()+'/'+TREE.length)+st('DIFICULTAD',DIFF_LABEL[runDiff]);
+  $('#psMiss').innerHTML='<small>MISIONES DE LA INCURSIÓN</small>'+
+    run.missions.map(m=>`<div class="${m.done?'ok':''}">${m.done?'✓':'·'} ${m.txt} — ${m.p}/${m.n}</div>`).join('')+
+    `<div style="margin-top:5px">· PRECISIÓN — ${acc}% · DAÑO ${Math.round(run.stDmg)}</div>`;
+  showScr('pause');
+}
+
