@@ -145,7 +145,8 @@ function buildWave(L){
   banner('OLEADA '+L+(comps.length>1?' · MIXTA':''),names+' · nv '+minLvlOf(L)+'–'+maxLvlOf(L)+' · '+DIFF_LABEL[runDiff]);
   /* ---- cofre blindado cada 2 oleadas ---- */
   if(L>=2&&L%2===0&&L%5!==0&&!pickups.some(p=>p.t==='schest')){
-    const sh=18+L*3;
+    /* escudo = 2x la vida del enemigo de nivel más alto de la oleada (nunca menor que la fórmula antigua) */
+    const sh=Math.max(18+L*3,Math.round(hpForLevel(maxLvlOf(L))*2));
     const cx=clamp(W/2+rand(-W*.3,W*.3),50,W-50);
     pickups.push({t:'schest',x:cx,y:-46,vx:0,vy:0,shield:sh,shieldMax:sh,kind:'arm'});
     floater(cx,110,'COFRE BLINDADO','#64C7FF',13);

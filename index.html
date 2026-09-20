@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.6 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.7 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=4.7">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -111,12 +111,14 @@
     <button class="btn hidden" id="btnAscend">ASCENDER</button>
     <button class="btn" id="btnFS">PANTALLA COMPLETA</button>
     <button class="btn" id="btnSound">SONIDO: SÍ</button>
+    <button class="btn" id="btnCheckUpd">BUSCAR ACTUALIZACIÓN</button>
+    <button class="btn week hidden" id="btnUpdate">⟳ ACTUALIZAR</button>
   </div>
   <div class="menu-stats">
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.6 · RANKING AUTO CO-OP · REGEN PS · MOVIMIENTO TOTAL · FUSIONES · COFRE BLINDADO · AZAR · IMÁN · ENLACE · CO-OP<br>
+  <div class="ver">FRAGMENTA v4.7 · ACTUALIZADOR DE VERSIÓN · ESCUDO DE COFRE SEGÚN LA OLEADA · REGEN 1 VIDA/MIN · RANKING AUTO CO-OP · MOVIMIENTO TOTAL · FUSIONES · COFRE BLINDADO · AZAR · IMÁN · ENLACE · CO-OP<br>
   INSTALAR · Android/Chrome: INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -275,29 +277,30 @@
   </div>
 </div>
 
-<script src="js/utils.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/achievements.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/config.js"></script>
-<script src="js/tree.js"></script>
-<script src="js/relics.js"></script>
-<script src="js/state.js"></script>
-<script src="js/net.js"></script>
-<script src="js/core.js"></script>
-<script src="js/enemies.js"></script>
-<script src="js/waves.js"></script>
-<script src="js/boss.js"></script>
-<script src="js/loot.js"></script>
-<script src="js/player.js"></script>
-<script src="js/azar.js"></script>
-<script src="js/chests.js"></script>
-<script src="js/netsync.js"></script>
-<script src="js/render.js"></script>
-<script src="js/screens.js"></script>
-<script src="js/treeui.js"></script>
-<script src="js/hud.js"></script>
-<script src="js/input.js"></script>
-<script src="js/game.js"></script>
+<script src="js/utils.js?v=4.7"></script>
+<script src="js/profile.js?v=4.7"></script>
+<script src="js/achievements.js?v=4.7"></script>
+<script src="js/audio.js?v=4.7"></script>
+<script src="js/config.js?v=4.7"></script>
+<script src="js/tree.js?v=4.7"></script>
+<script src="js/relics.js?v=4.7"></script>
+<script src="js/state.js?v=4.7"></script>
+<script src="js/net.js?v=4.7"></script>
+<script src="js/core.js?v=4.7"></script>
+<script src="js/enemies.js?v=4.7"></script>
+<script src="js/waves.js?v=4.7"></script>
+<script src="js/boss.js?v=4.7"></script>
+<script src="js/loot.js?v=4.7"></script>
+<script src="js/player.js?v=4.7"></script>
+<script src="js/azar.js?v=4.7"></script>
+<script src="js/chests.js?v=4.7"></script>
+<script src="js/netsync.js?v=4.7"></script>
+<script src="js/render.js?v=4.7"></script>
+<script src="js/screens.js?v=4.7"></script>
+<script src="js/treeui.js?v=4.7"></script>
+<script src="js/hud.js?v=4.7"></script>
+<script src="js/input.js?v=4.7"></script>
+<script src="js/game.js?v=4.7"></script>
+<script src="js/update.js?v=4.7"></script>
 </body>
 </html>
