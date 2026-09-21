@@ -760,7 +760,7 @@ function showPostBoss(){
 }
 function gameOver(){
   state='over';
-  shake=18;vib(200);
+  shake=18;vib(200,true);
   hitStopT=0;
   musStop();
   /* v4.18: captura del récord ANTES de actualizarlo — para el gancho "TAN CERCA" */

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.21">
+<html lang="es" data-v="4.22">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.21 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.22 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.21">
+<link rel="stylesheet" href="css/styles.css?v=4.22">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -96,8 +96,8 @@
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.21</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.21</b> abre <b>LA BÓVEDA</b>: en partida caen <b>COFRES SELLADOS</b> (con candado y aura según su rareza) que NO se abren en la oleada — se guardan en tu perfil y los abres desde el botón <b>COFRES</b> del menú. Abrirlos cuesta la <b>CERRADURA DE PULSOS</b>: toca cuando el marcador cruce la zona de tu color. RARO = 1 cerradura · ÉPICO = 2 · LEGENDARIO = 3 con zona trampa. Cada 3 fallos el cofre <b>baja de calidad</b> (hasta COMÚN, que se abre directo y puede salir vacío). El premio son <b>MEJORAS ARMADAS</b> al azar (+daño, +vida, +cadencia, +crítico…): se aplican al empezar tu próxima partida y duran <b>HASTA QUE MUERAS</b>. Legendario = 3 mejoras · épico = 2 · raro = 1. Las oleadas <b>1–10 sueltan mucho más</b> y todo Guardián deja uno garantizado. Bóveda con tope de 15 cofres.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.22</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.22</b> trae el <b>CONTROL DE PULSO</b>: la vibración ahora tiene <b>gobernador</b> — mínimo 110 ms entre pulsos — para que una masacre de explosiones no convierta el teléfono en un zumbido continuo ni pese en el hilo principal. El daño recibido, tu muerte, el Guardián y el rescate <b>SIEMPRE se sienten</b>. Además el <b>HIT-STOP</b> ahora tiene presupuesto: solo las <b>4 primeras bajas</b> de cada cadena frenan el tiempo a cámara lenta — a partir de la 5.ª la acción sigue fluida (élites y figuras grandes siempre golpean) y el temblor de pantalla se suaviza en los colapsos grandes. Se acabó el "lag" de las oleadas llenas. Y sigue abierta <b>LA BÓVEDA</b> (v4.21): cofres sellados con cerradura de pulsos y mejoras armadas que duran hasta que mueres.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -134,7 +134,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.21 · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.22 · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -399,32 +399,32 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.21"></script>
-<script src="js/profile.js?v=4.21"></script>
-<script src="js/achievements.js?v=4.21"></script>
-<script src="js/audio.js?v=4.21"></script>
-<script src="js/config.js?v=4.21"></script>
-<script src="js/tree.js?v=4.21"></script>
-<script src="js/relics.js?v=4.21"></script>
-<script src="js/state.js?v=4.21"></script>
-<script src="js/net.js?v=4.21"></script>
-<script src="js/core.js?v=4.21"></script>
-<script src="js/enemies.js?v=4.21"></script>
-<script src="js/waves.js?v=4.21"></script>
-<script src="js/boss.js?v=4.21"></script>
-<script src="js/loot.js?v=4.21"></script>
-<script src="js/player.js?v=4.21"></script>
-<script src="js/azar.js?v=4.21"></script>
-<script src="js/curses.js?v=4.21"></script>
-<script src="js/chests.js?v=4.21"></script>
-<script src="js/netsync.js?v=4.21"></script>
-<script src="js/render.js?v=4.21"></script>
-<script src="js/screens.js?v=4.21"></script>
-<script src="js/treeui.js?v=4.21"></script>
-<script src="js/hud.js?v=4.21"></script>
-<script src="js/vault.js?v=4.21"></script>
-<script src="js/input.js?v=4.21"></script>
-<script src="js/game.js?v=4.21"></script>
-<script src="js/update.js?v=4.21"></script>
+<script src="js/utils.js?v=4.22"></script>
+<script src="js/profile.js?v=4.22"></script>
+<script src="js/achievements.js?v=4.22"></script>
+<script src="js/audio.js?v=4.22"></script>
+<script src="js/config.js?v=4.22"></script>
+<script src="js/tree.js?v=4.22"></script>
+<script src="js/relics.js?v=4.22"></script>
+<script src="js/state.js?v=4.22"></script>
+<script src="js/net.js?v=4.22"></script>
+<script src="js/core.js?v=4.22"></script>
+<script src="js/enemies.js?v=4.22"></script>
+<script src="js/waves.js?v=4.22"></script>
+<script src="js/boss.js?v=4.22"></script>
+<script src="js/loot.js?v=4.22"></script>
+<script src="js/player.js?v=4.22"></script>
+<script src="js/azar.js?v=4.22"></script>
+<script src="js/curses.js?v=4.22"></script>
+<script src="js/chests.js?v=4.22"></script>
+<script src="js/netsync.js?v=4.22"></script>
+<script src="js/render.js?v=4.22"></script>
+<script src="js/screens.js?v=4.22"></script>
+<script src="js/treeui.js?v=4.22"></script>
+<script src="js/hud.js?v=4.22"></script>
+<script src="js/vault.js?v=4.22"></script>
+<script src="js/input.js?v=4.22"></script>
+<script src="js/game.js?v=4.22"></script>
+<script src="js/update.js?v=4.22"></script>
 </body>
 </html>

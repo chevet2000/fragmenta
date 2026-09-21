@@ -53,7 +53,7 @@ function hitPlayer(pl,d){
   run.comboN=0; /* v4.12: recibir daño corta el combo de bajas */
   run.stTaken+=d;
   if(pl.venge)pl.vengeT=4;
-  SFX.hurt();vib(70);shake=Math.min(16,shake+8);redFlash();
+  SFX.hurt();vib(70,true);shake=Math.min(16,shake+8);redFlash();
   if(pl.neb)shockNova(pl,150,pl.dmg+4,'#FF7EB6',slot);
   if(pl.hp<=0){
     pl.hp=0;burst(pl.x,pl.y,'#F2EFE6',20,180);
@@ -430,7 +430,7 @@ function updWrecks(dt){
           floater(resc.x,resc.y-30,'-1 VIDA','#FF6B6B',11);
           hostRing(w.x,w.y,90,'#7FD1B9');
           SFX.rescue();
-          vib(60);
+          vib(60,true);
           save.totRescue=(save.totRescue||0)+1;
           checkAch();
           w.remove=true;

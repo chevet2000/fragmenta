@@ -51,11 +51,16 @@ function killEnemy(e,bySlot){
   bySlot=bySlot||0;
   const pl=players[bySlot]||players[0];
   burst(e.x,e.y,e.camp?'#FFD166':e.T.color,e.r>18?20:12,e.r>18?180:120);
-  shake=Math.min(14,shake+(e.r>18?5:1.5));
-  /* v4.18: JUICE — tono en escalera por racha + micro cámara lenta al matar */
+  /* v4.18: tono en escalera por racha (la racha se cuenta ANTES para decidir shake y hit-stop) */
   if(time-kcLast<1.1)kcN++;else kcN=1;kcLast=time;
+  /* v4.22: shake encadenado más suave — un colapso de 20 bajas ya no vibra sin parar */
+  shake=Math.min(14,shake+(e.r>18?5:(kcN>6?.6:1.5)));
   SFX.kill(1+Math.min(14,kcN-1)*.055);
-  hitStopT=Math.max(hitStopT,(e.r>18||e.elite)?.09:.04);
+  /* v4.18: JUICE — micro cámara lenta al matar · v4.22: CON PRESUPUESTO — solo las
+     4 primeras bajas de cada cadena re-ensamblan el hit-stop; a partir de la 5.ª la
+     cámara lenta ya no se encadena (antes una masacre dejaba el juego al 12% casi
+     continuo y se sentía como lag). Élites y figuras grandes SIEMPRE golpean. */
+  if(kcN<=4||e.r>18||e.elite)hitStopT=Math.max(hitStopT,(e.r>18||e.elite)?.09:.04);
   dropLoot(e);
   if(e.tk==='hive')hiveBurst(e);
   doSplit(e);
@@ -223,7 +228,7 @@ function killBoss(){
   burst(b.x,b.y,b.D.color,34,240);burst(b.x,b.y,'#F2EFE6',20,160);
   rings.push({x:b.x,y:b.y,r:10,R:220,t:0,life:.6,color:b.D.color});
   hostRing(b.x,b.y,220,b.D.color);
-  shake=20;vib(120);
+  shake=20;vib(120,true);
   hitStopT=.16; /* v4.18: la muerte del Guardián se congela un instante */
   tone(500,60,.5,'sawtooth',.1);tone(300,40,.6,'square',.08,.1);
   const gMul=players[0].goldMul;

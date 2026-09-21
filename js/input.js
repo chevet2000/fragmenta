@@ -186,7 +186,7 @@ let wipeArm=false,wipeT=null;
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}
   recompute();refreshMenu();
-  SFX.hurt();vib(80);
+  SFX.hurt();vib(80,true);
   banner('PARTIDA BORRADA','Progreso local reiniciado por completo');
 });
  bindEl('#btnInstall', 'click',async()=>{

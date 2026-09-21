@@ -24,7 +24,20 @@ function distToSeg(px,py,x1,y1,x2,y2){
   let t=L2?((px-x1)*dx+(py-y1)*dy)/L2:0;t=clamp(t,0,1);
   return Math.hypot(px-(x1+dx*t),py-(y1+dy*t));
 }
-function vib(ms){ if(navigator.vibrate){ try{navigator.vibrate(ms)}catch(e){} } }
+/* v4.22: GOBERNADOR DE VIBRACIÓN — en plena batalla llegan llamadas de muchas
+   fuentes (combos, cubos, meteoritos, élites, cofres) y cada vibrate() INTERRUMPE
+   la anterior: zumbido continuo + trabajo extra del hilo principal que se nota
+   cuando hay muchas explosiones. Ahora hay un mínimo de 110 ms entre pulsos y
+   los momentos que de verdad importan (daño recibido, muerte, Guardián, rescate)
+   pasan force=true y se sienten siempre. */
+let vibLast=0;
+function vib(ms,force){
+  if(!navigator.vibrate)return;
+  const n=performance.now();
+  if(!force&&n-vibLast<110)return;
+  vibLast=n;
+  try{navigator.vibrate(Math.min(ms,120))}catch(e){}
+}
 const fmtT=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=irand(0,i);[a[i],a[j]]=[a[j],a[i]];}return a;}
 function interleave(arrs){const out=[];let go=true,i=0;
