@@ -46,6 +46,9 @@ function bumpModeRecord(L){
   else if(runDiff==='dificil')addModeRecord('dc','DC',L,run.shipLv);
   else if(runDiff==='hardcore')addModeRecord('hc','HC',L,run.shipLv);
   else addModeRecord('nm','NM',L,run.shipLv);
+  /* v4.25: en co-op el anfitrión REENVÍA su ranking en cada récord — el
+     cliente ve los récords MULTI de la sesión en vivo (y viceversa al morir) */
+  netRankSync();
 }
 /* v4.15: color de cada slot en co-op de 2–3 (P1 menta · P2 rosa · P3 cielo) */
 const SLOT_COL=['#7FD1B9','#FF7EB6','#64C7FF'];

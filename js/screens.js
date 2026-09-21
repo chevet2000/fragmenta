@@ -562,7 +562,7 @@ function startCoop(){
   $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
   $('#netTag').classList.remove('hidden');
   refreshHUD();
-  sendMsg({t:'start',diff:runDiff,np});
+  sendMsg({t:'start',diff:runDiff,np,skin:skinColorOf()}); /* v4.25: +aspecto */
   musStart();
   banner('CO-OP · '+np+' JUGADORES','Dificultad: '+DIFF_LABEL[runDiff]);
   nextWave();
@@ -845,6 +845,7 @@ function gameOver(){
   persist();
   if(net.mode==='host'&&players.length>1){
     sendMsg({t:'ev',k:'over',level:run.level,ship:run.shipLv,yg:run.goldRun,hard:runDiff==='hardcore'});
+    netRankSync(); /* v4.25: el ranking final (con el récord del anfitrión) viaja ya al cliente */
   }
   const st=(k,v)=>`<div><small>${k}</small><b>${v}</b></div>`;
   $('#ovStats').innerHTML=

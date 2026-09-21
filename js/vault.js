@@ -21,6 +21,7 @@ function openVault(){
   $('#vaultGame').classList.add('hidden');
   $('#vaultMain').classList.remove('hidden');
   $('#vgSvg').classList.remove('hidden');
+  $('#vgKeys').classList.add('hidden');
   $('#btnVgCancel').textContent='DEJARLO PARA LUEGO';
   renderVault();
   showScr('vault');
@@ -40,7 +41,7 @@ function renderVault(){
       el.className='vchest';
       el.style.borderColor=RAR_COL[r];
       el.innerHTML='<b style="color:'+RAR_COL[r]+'">🔒 COFRE '+RAR_NAME[r]+'</b>'+
-        '<small>'+(r==='c'?'Se abre directo · 1 de cada 4 sale vacío':r==='r'?'1 cerradura':r==='e'?'2 cerraduras':'3 cerraduras · zona trampa')+'</small>'+
+        '<small>'+(r==='c'?'Se abre directo · 1 de cada 4 sale vacío':r==='r'?'1 cerradura de pulsos':r==='e'?'2 cerraduras · la última de LLAVES':'3 cerraduras · trampa + LLAVES')+'</small>'+
         '<em>ABRIR</em>';
       el.addEventListener('click',()=>{audio();tryOpen(r);});
       box.appendChild(el);
@@ -53,32 +54,40 @@ function tryOpen(rar){
   if(rar==='c'){resolveVault('c','c');return;} /* el común no tiene cerradura */
   startLockGame(rar,rar);
 }
-/* ---- CERRADURA DE PULSOS ----
-   raro: 1 cerradura ancha y lenta · épico: 2 más estrechas y rápidas ·
-   legendario: 3 estrechas, rápidas y con ZONA TRAMPA.
+/* ---- CERRADURA DE PULSOS + CERRADURA DE LLAVES ----
+   raro: 1 cerradura ancha y lenta · épico: 2 más estrechas y rápidas (la 2.ª
+   de LLAVES) · legendario: 2 de pulsos con ZONA TRAMPA + 1 de LLAVES.
    v4.23: más justas — zonas más anchas, giro algo más lento y la
    cerradura aguanta 4 fallos antes de bajar de calidad (antes 3).
-   v4.24: ANÁLISIS DEL «LE DOY BIEN Y FALLA» — tres culpables corregidos:
-   1) cada pointerdown contaba: los dobles registros del táctil (y los
-      toques de rebote) se comían resistencia de la cerradura → ahora hay
-      un freno de 220 ms entre toques registrados;
-   2) la LATENCIA TÁCTIL: el toque llega cuando el marcador ya cruzó lo que
-      veías → gracia de +7° en el borde de salida de la zona;
-   3) zonas algo más anchas y giro algo más lento (r 88/130 · e 66/160 ·
-      l 50/205 con trampa 36) y el marcador ya no nace DENTRO de la trampa. */
+   v4.24: freno anti doble-toque de 220 ms + gracia de +7° por latencia.
+   v4.25: EL LEGENDARIO YA ES GANABLE — diagnóstico del «solo abrí 1»:
+   1) la zona nacía en CUALQUIER sitio (a veces pegada al marcador: había
+      cerraduras imposibles de reaccionar) → ahora SIEMPRE nace al menos
+      110° por delante del marcador (mínimo ~0,6 s para reaccionar);
+   2) la trampa podía caer justo tras la zona y cazaba el toque tardío →
+      ahora queda como mínimo 80° después del borde de la zona;
+   3) giro 205→180 y zona 50→56: la ventana buena dura 0,35 s (antes 0,28).
+   La FRANJA ROJA (trampa) SOLO existe en el legendario — validado: raro y
+   épico nunca la tuvieron (decoy 0); se conserva como identidad del
+   legendario pero ya no es una celada.
+   v4.25: puzzle ELIGE LA LLAVE — 5 llaves, 1 correcta, 3 intentos; fallar
+   los 3 consume 1 punto de resistencia (el mismo contador de 4) y se
+   rehace la cerradura con llaves nuevas. */
 const VG_C=2*Math.PI*46; /* circunferencia del anillo (r=46 en el SVG) */
 function vgSpec(rar){
-  if(rar==='r')return{locks:1,spd:130,zw:88,decoy:0};
-  if(rar==='e')return{locks:2,spd:160,zw:66,decoy:0};
-  return{locks:3,spd:205,zw:50,decoy:36};
+  if(rar==='r')return{locks:1,spd:130,zw:88,decoy:0,keyAt:0};
+  if(rar==='e')return{locks:2,spd:160,zw:66,decoy:0,keyAt:2};
+  return{locks:3,spd:180,zw:56,decoy:32,keyAt:3};
 }
 /* orig = la rareza del cofre REAL guardado en la bóveda (no cambia al
    degradarse); rar = la calidad ACTUAL de la cerradura y del premio */
 function startLockGame(rar,orig){
   const s=vgSpec(rar);
   vg={rar,orig:orig||rar,fails:0,lock:0,locks:s.locks,spd:s.spd,zw:s.zw,decoyW:s.decoy,
+      keyAt:s.keyAt||0,key:null,
       zs:rand(0,360),ds:-999,ang:rand(0,360),raf:0,last:0,dead:false};
-  vgNextLock();
+  $('#vgKeys').classList.add('hidden');$('#vgSvg').classList.remove('hidden');
+  if(vgKeyLock())vgStartKeys();else vgNextLock();
   /* v4.24: el marcador no puede NACER dentro de la zona trampa */
   if(vg.decoyW>0&&(((vg.ang-vg.ds)%360+360)%360)<=vg.decoyW)
     vg.ang=(vg.ds+vg.decoyW+15+rand(0,120))%360;
@@ -103,8 +112,10 @@ function startLockGame(rar,orig){
 }
 function vgNextLock(){
   if(!vg)return;
-  vg.zs=rand(0,360);
-  if(vg.decoyW>0)vg.ds=(vg.zs+vg.zw+50+rand(0,130))%360; /* trampa separada de la zona */
+  /* v4.25: la zona SIEMPRE nace al menos 110° por delante del marcador —
+     antes podía nacer pegada a él y había cerraduras imposibles */
+  vg.zs=(vg.ang+110+rand(0,180))%360;
+  if(vg.decoyW>0)vg.ds=(vg.zs+vg.zw+80+rand(0,110))%360; /* trampa lejos del borde de la zona */
 }
 function vgDraw(){
   const zone=$('#vgZone'),decoy=$('#vgDecoy'),mark=$('#vgMark');
@@ -129,6 +140,7 @@ function vgStop(){
 }
 function vgTap(ev){
   if(!vg||vg.dead)return;
+  if(vg.key)return; /* v4.25: en el puzzle de llaves los toques van a los botones, no aquí */
   ev.preventDefault();
   /* v4.24: FRENO DE TOQUE — un mismo toque físico genera a veces dos
      pointerdown (fantasma del táctil) y los toques nerviosos se cuentan
@@ -150,33 +162,94 @@ function vgTap(ev){
        épico) y el legendario original se quedaba en la bóveda para siempre */
     if(vg.lock>=vg.locks){const o=vg.orig;vgStop();resolveVault(vg.rar,o);return;}
     if(lk)lk.textContent=(vg.lock+1)+'/'+vg.locks;
-    vgNextLock();vgDraw();
-    $('#vgMsg').textContent='¡CLIC! SIGUIENTE CERRADURA…';
+    if(vgKeyLock())vgStartKeys(); /* v4.25: toca el puzzle de llaves */
+    else{vgNextLock();vgDraw();}
+    $('#vgMsg').className='';
+    $('#vgMsg').textContent=vgKeyLock()?'AHORA TOCA: ELIGE LA LLAVE CORRECTA':'¡CLIC! SIGUIENTE CERRADURA…';
   }else{
     SFX.lockFail();vib(70);
-    vg.fails++;vgHearts();
-    if(vg.fails>=4){ /* v4.23: degradación a los 4 fallos (antes 3) */
-      const order=['l','e','r','c'];
-      const nr=order[Math.min(order.length-1,order.indexOf(vg.rar)+1)];
-      const orig=vg.orig;
-      vgStop();
-      if(nr==='c'){
-        $('#vgMsg').className='bad';
-        $('#vgMsg').textContent='LA CERRADURA CEDIÓ DEL TODO… CALIDAD FINAL: COMÚN';
-        setTimeout(()=>{resolveVault('c',orig);},700);
-      }else{
-        $('#vgMsg').className='bad';
-        $('#vgMsg').textContent='DEMASIADOS FALLOS · EL COFRE BAJA A '+RAR_NAME[nr];
-        setTimeout(()=>startLockGame(nr,orig),950);
-      }
-      return;
+    vgFail(); /* v4.25: degradación compartida */
+  }
+}
+/* v4.25: degradación compartida entre cerraduras de pulsos y de llaves.
+   Devuelve true si el cofre se degradó (el minijuego terminó). */
+function vgFail(custom){
+  vg.fails++;vgHearts();
+  if(vg.fails>=4){ /* degradación a los 4 fallos */
+    const order=['l','e','r','c'];
+    const nr=order[Math.min(order.length-1,order.indexOf(vg.rar)+1)];
+    const orig=vg.orig;
+    vgStop();
+    if(nr==='c'){
+      $('#vgMsg').className='bad';
+      $('#vgMsg').textContent='LA CERRADURA CEDIÓ DEL TODO… CALIDAD FINAL: COMÚN';
+      setTimeout(()=>{resolveVault('c',orig);},700);
+    }else{
+      $('#vgMsg').className='bad';
+      $('#vgMsg').textContent='DEMASIADOS FALLOS · EL COFRE BAJA A '+RAR_NAME[nr];
+      setTimeout(()=>startLockGame(nr,orig),950);
     }
-    $('#vgMsg').className='bad';
-    $('#vgMsg').textContent='FALLO · te quedan '+(4-vg.fails)+' antes de bajar de calidad';
+    return true;
+  }
+  $('#vgMsg').className='bad';
+  $('#vgMsg').textContent=custom||('FALLO · te quedan '+(4-vg.fails)+' antes de bajar de calidad');
+  return false;
+}
+/* ---- v4.25: CERRADURA DE LLAVES — 5 llaves, una abre, 3 intentos ---- */
+const VG_KEY_SVG='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><g fill="none" stroke="#FFD166" stroke-width="2" stroke-linecap="round"><circle cx="7.5" cy="7.5" r="4.2"/><path d="M10.8 10.8 L19.5 19.5 M15.8 15.8l2.8-2.8 M13 13l2.2-2.2"/></g></svg>';
+function vgKeyLock(){return !!vg&&vg.keyAt>0&&vg.lock+1===vg.keyAt;}
+function vgStartKeys(){
+  vg.key={ok:irand(0,4),tries:3,dead:[]};
+  $('#vgSvg').classList.add('hidden');
+  const box=$('#vgKeys');
+  box.classList.remove('hidden');box.innerHTML='';
+  for(let i=0;i<5;i++){
+    const b=document.createElement('button');
+    b.className='vgkey';b.type='button';
+    b.innerHTML=VG_KEY_SVG+'<i>LLAVE '+(i+1)+'</i>';
+    b.addEventListener('click',()=>vgKeyPick(i));
+    box.appendChild(b);
+  }
+  $('#vgMsg').className='';
+  $('#vgMsg').textContent='ELIGE LA LLAVE CORRECTA · '+vg.key.tries+' INTENTOS';
+}
+function vgKeyPick(i){
+  if(!vg||vg.dead||!vg.key)return;
+  audio();
+  if(vg.key.dead.indexOf(i)>=0)return;
+  const btn=$('#vgKeys').children[i];
+  if(i===vg.key.ok){
+    SFX.lockHit();vib(20);
+    if(btn)btn.classList.add('ok');
+    vg.key=null;
+    vg.lock++;
+    const lk=$('#vgLock');
+    if(vg.lock>=vg.locks){
+      setTimeout(()=>{$('#vgKeys').classList.add('hidden');},240);
+      const o=vg.orig;vgStop();resolveVault(vg.rar,o);return;
+    }
+    if(lk)lk.textContent=(vg.lock+1)+'/'+vg.locks;
+    setTimeout(()=>{$('#vgKeys').classList.add('hidden');$('#vgSvg').classList.remove('hidden');},240);
+    vgNextLock();vgDraw();
+    $('#vgMsg').className='';
+    $('#vgMsg').textContent='¡LLAVE CORRECTA! SIGUIENTE CERRADURA…';
+  }else{
+    SFX.lockFail();vib(70);
+    if(btn)btn.classList.add('dead');
+    vg.key.dead.push(i);vg.key.tries--;
+    if(vg.key.tries<=0){
+      /* los 3 intentos gastados: 1 punto de resistencia y cerradura nueva */
+      const ended=vgFail('NINGUNA LLAVE ABRIÓ… SE HACE UNA CERRADURA NUEVA');
+      if(!ended)vgStartKeys();
+    }else{
+      $('#vgMsg').className='bad';
+      $('#vgMsg').textContent='LLAVE EQUIVOCADA · te quedan '+vg.key.tries+' intento'+(vg.key.tries===1?'':'s');
+    }
   }
 }
 function resolveVault(tier,orig){
   vgStop();vg=null;
+  $('#vgKeys').classList.add('hidden');
   orig=orig||tier;
   /* se consume el cofre ORIGINAL (el que guardaste); la calidad del premio
      es la del tier final tras la degradación */
@@ -214,6 +287,7 @@ bindEl('#btnVgCancel','click',()=>{
   $('#vaultGame').classList.add('hidden');
   $('#vaultMain').classList.remove('hidden');
   $('#vgSvg').classList.remove('hidden');
+  $('#vgKeys').classList.add('hidden');
   $('#btnVgCancel').textContent='DEJARLO PARA LUEGO';
   renderVault();
 });

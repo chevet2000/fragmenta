@@ -472,6 +472,18 @@ button{font-family:inherit}
 #vgMsg small{font-size:8px;letter-spacing:.1em;color:var(--dim)}
 #vgMsg.bad{color:var(--coral)}
 #vgMsg b{color:var(--mint);display:inline-block;margin-top:2px}
+/* v4.25: cerradura de LLAVES — 5 botones, 3 intentos */
+#vgKeys{display:flex;justify-content:center;gap:7px;margin:10px 0 2px}
+#vgKeys.hidden{display:none}
+.vgkey{width:54px;height:60px;border:1.5px solid #FFD166;border-radius:9px;
+  background:rgba(255,209,102,.06);color:var(--amber);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:4px 0 6px;touch-action:manipulation}
+.vgkey i{font-style:normal;font-size:7.5px;letter-spacing:.16em;color:var(--dim)}
+.vgkey:active{background:rgba(255,209,102,.16)}
+.vgkey.dead{opacity:.22;filter:grayscale(1);pointer-events:none}
+.vgkey.ok{border-color:#7FD1B9;box-shadow:0 0 14px rgba(127,209,185,.55);background:rgba(127,209,185,.14)}
+.vgkey.ok i{color:var(--mint)}
 .vnote{margin-top:7px;font-size:7.5px;letter-spacing:.16em;color:var(--dim)}
 
 /* ============ v4.23: MERCADER PIRATA ============ */

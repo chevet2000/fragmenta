@@ -8,11 +8,29 @@ let pingTimer=null;
 const net={mode:null,peer:null,conn:null,conns:[],code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
   hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal',
-  remotePilot:null,remotePilots:[],mySlot:1,
+  remotePilot:null,remotePilots:[],mySlot:1,remoteSkin:{},
   chosen:{},cards:{},relicOk:{},relicId:{}}; /* v4.15: elecciones por slot + lista de pilotos */
 const amClient=()=>net.mode==='client';
 const connsOpen=()=>net.conns.filter(c=>c.open).length;
-function sendMsg(o){for(const c of net.conns){if(!c.open)continue;try{c.c.send(o);}catch(e){}}}
+/* v4.25: BUG HISTÓRICO (desde v4.15) — en modo CLIENTE net.conns está vacía,
+   así que TODO lo que el cliente enviaba por aquí ('inp' de posición, cartas,
+   cofres, emoticonos, nova, ranking…) NUNCA SALÍA del dispositivo. Por eso la
+   nave del P2 en la pantalla del anfitrión solo se movía cuando el anfitrión
+   la arrastraba él. Ahora el cliente envía por SU conexión (net.conn). */
+function sendMsg(o){
+  if(net.mode==='client'){ if(net.conn&&net.conn.open){try{net.conn.send(o);}catch(e){}} return; }
+  for(const c of net.conns){if(!c.open)continue;try{c.c.send(o);}catch(e){}}
+}
+/* v4.25: color del aspecto equipado — viaja por la conexión para que AMBAS
+   pantallas pinten a cada piloto con SU color (antes el rival salía con el
+color del slot y las parejas de colores no coincidían entre dispositivos). */
+function skinColorOf(){const s=getSkin();return s?s.color:null;}
+/* v4.25: el ranking se REENVÍA cuando cambia (antes solo viajaba al conectar:
+   los récords MULTI hechos durante la partida nunca llegaban al otro jugador). */
+function netRankSync(){
+  if(net.mode!=='host'||!net.connected)return;
+  sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});
+}
 function peerReady(){ return typeof Peer!=='undefined'; }
 function mkPeerId(code){ return 'frg43-'+code; }
 function destroyNet(){
@@ -25,6 +43,7 @@ function destroyNet(){
   net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;
   net.remotePilots=[];net.mySlot=1;
   net.chosen={};net.cards={};net.relicOk={};net.relicId={};
+  net.remoteSkin={};
 }
 function computeStatblock(){
   const b=blankStats();
@@ -93,7 +112,7 @@ function hostLobby(){
     if(!net.conn)net.conn=conn;
     conn.on('open',()=>{
       wrap.open=true;net.connected=true;net.retries=0;
-      conn.send({t:'welcome',diff:net.lobbyDiff||'normal',name:getPilot(),slot,np:1+connsOpen()});
+      conn.send({t:'welcome',diff:net.lobbyDiff||'normal',name:getPilot(),slot,np:1+connsOpen(),skin:skinColorOf()});
       conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.8: el anfitrión también envía el suyo al conectar · v4.11: + nombre */
       lobbyStatus();
       SFX.gem();vib(40);
@@ -146,7 +165,7 @@ function hostOnData(d,wrap){
   if(!d||typeof d!=='object')return;
   const slot=wrap.slot;
   if(d.t==='ping'){ try{wrap.c.send({t:'pong',ts:d.ts});}catch(e){} return; }
-  if(d.t==='stats'){ net.remoteStats=d.b; remoteBase[slot]=d.b; if(runActive)recompute(); return; }
+  if(d.t==='stats'){ net.remoteStats=d.b; remoteBase[slot]=d.b; if(d.sk)net.remoteSkin[slot]=d.sk; if(runActive)recompute(); return; }
   if(d.t==='rank'){
     /* v4.11: el mensaje de ranking trae el nombre del rival para el lobby */
     const nm=normalizeName(d.name);
@@ -317,13 +336,14 @@ function clientOnData(d){
     runDiff=d.diff||'normal';
     /* v4.15: el anfitrión asigna tu slot (1 o 2) y el total de pilotos */
     net.mySlot=clamp(d.slot||1,1,2);
+    if(d.skin)net.remoteSkin[0]=d.skin; /* v4.25: aspecto del anfitrión */
     const nm=normalizeName(d.name);
     if(nm){net.remotePilot=nm;
       if(state==='clientwait')$('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Anfitrión: <b style="color:var(--sky)">'+nm+'</b> — esperando el inicio…';}
     return;
   }
   if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); return; }
-  if(d.t==='start'){ runDiff=d.diff||runDiff; startRunClient(d); return; }
+  if(d.t==='start'){ runDiff=d.diff||runDiff; if(d.skin)net.remoteSkin[0]=d.skin; startRunClient(d); return; }
   if(d.t==='snap'){ applySnap(d); return; }
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }
   if(d.t==='fxr'){ rings.push({x:d.x,y:d.y,r:10,R:d.R,t:0,life:.45,color:d.c}); return; }
@@ -388,6 +408,9 @@ function clientEvent(d){
     save.bestMode.coop=Math.max(save.bestMode.coop||0,d.level);
     /* v4.15: el cliente también deja su récord en MULTI */
     addModeRecord('mp','MP',d.level,d.ship);
+    /* v4.25: y EMPUJA su ranking actualizado al anfitrión (antes solo viajaba
+       al conectar: el rival no veía tus récords MULTI de esta sesión) */
+    sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});
     /* v4.21: las MEJORAS ARMADAS mueren con la incursión (como en solo) */
     const hadArmed=(save.armed||[]).length>0;
     if(hadArmed){save.armed=[];}

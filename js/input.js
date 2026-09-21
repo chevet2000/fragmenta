@@ -15,7 +15,11 @@ function slotFromPointer(clientX){
 cv.addEventListener('pointerdown',e=>{
   audio();
   if(state!=='play')return;
-  const slot=amClient()?localSlot:slotFromPointer(e.clientX);
+  /* v4.25: en ONLINE cada piloto mueve SOLO su nave (antes el anfitrión
+     arrastraba la del rival al tocar la otra mitad de la pantalla — y era la
+     ÚNICA forma de moverla, porque los mensajes del cliente nunca salían).
+     En co-op LOCAL (un dispositivo) se mantiene la pantalla dividida. */
+  const slot=net.mode?localSlot:slotFromPointer(e.clientX);
   const pl=players[slot];
   if(!pl||pl.hp<=0)return;
   activeTouches[e.pointerId]={slot,ax:e.clientX,ay:e.clientY,sx:pl.x,sy:pl.y,px:e.clientX,py:e.clientY,lastMs:performance.now()};

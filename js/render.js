@@ -443,8 +443,19 @@ function drawShip(pl,isLocal){
      En co-op cada dispositivo pinta el suyo; el rival conserva su color.
      'prisma' cicla todos los colores con el tiempo. */
   const mine=pl.slot===localSlot;
-  const sk=mine?getSkin():null;
-  const skOn=sk&&sk.color!=='menta';
+  let sk=mine?getSkin():null;
+  /* v4.25: en ONLINE el rival luce SU aspecto equipado (viaja por la conexión
+     en welcome/start/stats) — ambas pantallas pintan la misma pareja de colores */
+  if(!mine&&net.mode&&net.remoteSkin&&net.remoteSkin[pl.slot]){
+    const rc=net.remoteSkin[pl.slot];
+    const mc=getSkin()?getSkin().color:null;
+    if(rc&&rc!==mc)sk={color:rc};
+  }
+  /* v4.25: FIX — antes comparaba sk.color!=='menta' (color es un HEX): con el
+     aspecto MENTA por defecto cada dispositivo pintaba SU nave menta y en el
+     P2 ambas naves quedaban IGUAL. Ahora se compara el id (y el hex de menta
+     para el aspecto remoto, que viaja como color). */
+  const skOn=sk&&(sk.id?sk.id!=='menta':sk.color!=='#7FD1B9');
   const skc=skOn?(sk.color==='prisma'?'hsl('+Math.floor((time*40)%360)+',85%,66%)':sk.color):null;
   const skHex=skOn&&sk.color!=='prisma'?sk.color:null;
   /* v4.15: color por slot — P1 menta, P2 rosa, P3 cielo */
