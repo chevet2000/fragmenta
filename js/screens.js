@@ -6,7 +6,9 @@ const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#sc
   /* v4.15: ajustes (engranaje) */
   settings:$('#scrSettings'),
   /* v4.21: LA BÓVEDA — cofres sellados pendientes por abrir */
-  vault:$('#scrVault')};
+  vault:$('#scrVault'),
+  /* v4.23: EL MERCADER PIRATA — tienda de mercado negro */
+  merc:$('#scrMerc')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
 function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
 function setChoiceNote(txt){
@@ -60,6 +62,8 @@ function refreshMenu(){
   const na2=(save.armed||[]).length;
   const bb=$('#btnBoveda');
   if(bb)bb.innerHTML=`COFRES (${vc})`+(na2?` · ✦${na2}`:'')+(vc?' ◈':'');
+  /* v4.23: el MERCADER PIRATA saluda (línea del día + oferta) */
+  if(typeof refreshMerc==='function')refreshMerc();
   /* v4.15: tira de piloto con avatar (tu nave con el aspecto equipado) */
   $('#menuPilotName').textContent=getPilot();
   drawPilotAvatar($('#pilotCv'),34);
@@ -347,6 +351,12 @@ function openStats(){
     ['COFRES SELLADOS EN LA BÓVEDA',vaultCount()+' / '+VCAP],
     ['COFRES SELLADOS ABIERTOS',save.totVaultOpen||0],
     ['MEJORAS ARMADAS',(save.armed||[]).length],
+    /* v4.23: escala viva, récords por modo y Mercader Pirata */
+    ['ESCALA VIVA · VIDA ENEMIGA','×'+hpUpMul().toFixed(2)+' · XP ×'+xpUpMul().toFixed(2)],
+    ['RÉCORD NORMAL',save.bestMode?(save.bestMode.normal||0):0],
+    ['RÉCORD DIFÍCIL',save.bestMode?(save.bestMode.dificil||0):0],
+    ['RÉCORD HARDCORE (Y FRENÉTICO)',save.bestMode?(save.bestMode.hardcore||0):0],
+    ['COFRES DEL PIRATA COMPRADOS',save.totMerc||0],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -594,6 +604,7 @@ function nextWave(){
   if(net.mode!=='client'){
     if(L>save.best.lvl)save.best.lvl=L;
     if(L>save.bestAll)save.bestAll=L;
+    bumpModeRecord(L); /* v4.23: récord de oleada por MODO (gates del arsenal) */
     /* v4.8: el récord del desafío semanal se guarda EN CADA OLEADA —
        aunque el jugador se retire por lag, su ranking ya está a salvo */
     if(weeklyMode){
@@ -748,7 +759,10 @@ function showPostBoss(){
     showScr('post');
     return;
   }
-  const n=TREE.filter(nd=>!has(nd.id)&&(nd.wave<=1||save.best.lvl>=nd.wave)&&save.bestShip>=(nd.ship||1)).length;
+  /* v4.23: contador REAL de mejoras comprables YA (comprueba padres y gates
+     de modo/nave con nodeState) — antes contaba nodos con la oleada abierta
+     aunque su rama estuviera cerrada y engañaba (“faltaban 9”) */
+  const n=TREE.filter(nd=>!has(nd.id)&&nodeState(nd).dispo).length;
   pu.textContent=n>0?`► ${n} MEJORA${n>1?'S':''} DESBLOQUEABLE${n>1?'S':''} EN EL ARSENAL`:'';
   curRelics=shuffle(RELICS.filter(r=>!run.relics.includes(r.id))).slice(0,3);
   showRelicCards(curRelics,r=>{
@@ -774,6 +788,7 @@ function gameOver(){
   save.best.kills=Math.max(save.best.kills,run.kills);
   save.bestAll=Math.max(save.bestAll,run.level);
   save.bestShip=Math.max(save.bestShip,run.shipLv);
+  bumpModeRecord(run.level); /* v4.23: récord de oleada por MODO */
   if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,run.level);
   let weeklyRec=false;
   lastWeeklyRec=null;

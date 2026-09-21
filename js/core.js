@@ -88,13 +88,22 @@ function burst(x,y,color,n,sp){
 function redFlash(){const f=$('#flash');f.classList.add('on');setTimeout(()=>f.classList.remove('on'),70);}
 
 /* ============ EXPERIENCIA ============ */
-/* v4.9: XP por OLEADA actual (no por nivel de enemigo, que ahora empieza en
-   ~100) y ganancia global reducida x0.6 — subir de nivel cuesta mucho más.
-   Curva de nave intacta: 100, 150, 200, 250… cada nivel empieza en 0. */
-const shipNeed=lv=>100+(lv-1)*50;
+/* v4.9: XP por OLEADA actual y ganancia global reducida x0.6.
+   v4.23: CURVA POR MODO — en SOLO/NORMAL/DIFÍCIL sigue igual (100, 150,
+   200…), pero en HARDCORE y FRENÉTICO subir la nave es un logro MAYOR:
+   el primer nivel pide 5.000 XP y cada nivel siguiente DOBLA el precio
+   (5.000 → 10.000 → 20.000 → 40.000…). Se acabó la nave de nivel 500:
+   allí cada carta de nave se gana con sudor, y el nivel de nave para los
+   gates del arsenal se consigue jugando los modos tranquilos.
+   Además la XP por baja escala con la ESCALA VIVA (xpUpMul). */
+const HC_XP_BASE=5000;
+function shipNeed(lv){
+  if(runDiff==='hardcore')return Math.round(HC_XP_BASE*Math.pow(2,lv-1));
+  return 100+(lv-1)*50;
+}
 const XP_MUL=.6;
 let expFrac=0;
-const waveXp=()=>clamp(1+Math.floor(run.level/9),1,5);
+const waveXp=()=>clamp(1+Math.floor(run.level/9),1,5)*xpUpMul(); /* v4.23: escala viva */
 function gainExp(n){
   expFrac+=n*XP_MUL*curseExpMul(); /* v4.17: LETARGO reduce la exp a la mitad */
   const whole=Math.floor(expFrac);

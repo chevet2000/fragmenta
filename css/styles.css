@@ -473,3 +473,25 @@ button{font-family:inherit}
 #vgMsg.bad{color:var(--coral)}
 #vgMsg b{color:var(--mint);display:inline-block;margin-top:2px}
 .vnote{margin-top:7px;font-size:7.5px;letter-spacing:.16em;color:var(--dim)}
+
+/* ============ v4.23: MERCADER PIRATA ============ */
+.npcmerc{display:flex;align-items:center;gap:10px;width:min(290px,84vw);margin:10px auto 0;padding:7px 10px;
+  background:linear-gradient(135deg,rgba(255,209,102,.08),rgba(179,136,255,.07));
+  border:1px dashed rgba(255,209,102,.5);color:var(--ink);cursor:pointer;text-align:left}
+.npcmerc:active{border-style:solid;border-color:var(--amber);background:rgba(255,209,102,.12)}
+.npcmerc canvas{width:40px;height:40px;flex:none;border:1px solid var(--line);background:rgba(7,9,13,.65)}
+.npc-talk{display:flex;flex-direction:column;gap:2px;min-width:0}
+.npc-talk small{font-size:7.5px;letter-spacing:.24em;color:var(--amber);text-align:left}
+.npc-talk b{font-size:9.5px;letter-spacing:.03em;color:var(--dim);font-weight:500;line-height:1.5;text-align:left}
+.npc-talk b span{color:var(--amber)}
+.mtier{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;margin-bottom:8px;
+  background:rgba(7,9,13,.5);border:1px solid var(--line);color:var(--ink);text-align:left;cursor:pointer}
+.mtier:disabled{opacity:.45;cursor:default}
+.mtier:not(:disabled):active{background:rgba(255,209,102,.08)}
+.mt-skull{font-size:20px;width:26px;text-align:center;flex:none}
+.mt-info{flex:1;min-width:0}
+.mt-info b{display:block;font-size:11px;letter-spacing:.1em}
+.mt-info small{display:block;font-size:8px;letter-spacing:.1em;color:var(--dim);margin-top:2px;line-height:1.5}
+.mt-pay{text-align:right;flex:none;font-size:10px;letter-spacing:.08em;color:var(--ink)}
+.mt-pay em{display:block;font-style:normal;font-size:8px;letter-spacing:.2em;color:var(--mint);margin-top:4px}
+.mtier.no .mt-pay em{color:var(--coral)}

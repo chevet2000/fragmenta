@@ -383,6 +383,9 @@ function clientEvent(d){
     save.bestAll=Math.max(save.bestAll,d.level);
     save.bestShip=Math.max(save.bestShip,d.ship);
     if(d.hard)save.bestHard=Math.max(save.bestHard||0,d.level);
+    /* v4.23: el cliente también registra su récord CO-OP (gates del arsenal) */
+    if(!save.bestMode)save.bestMode={solo:0,normal:0,dificil:0,hardcore:0,coop:0};
+    save.bestMode.coop=Math.max(save.bestMode.coop||0,d.level);
     /* v4.15: el cliente también deja su récord en MULTI */
     addModeRecord('mp','MP',d.level,d.ship);
     /* v4.21: las MEJORAS ARMADAS mueren con la incursión (como en solo) */

@@ -222,6 +222,7 @@ function updWaveSpawns(dt){
       run.level=nl;
       save.best.lvl=Math.max(save.best.lvl,nl);save.bestAll=Math.max(save.bestAll,nl);
       if(runDiff==='hardcore')save.bestHard=Math.max(save.bestHard||0,nl);
+      bumpModeRecord(nl); /* v4.23: el frenético alimenta el récord HARDCORE */
       floater(P.x,P.y-40,'NIVEL '+nl+' · MÁS FUERTES','#FF9F43',14);
       if(R()<.42){makeElite(nl,1.5);wave.total++;} /* v4.13: élite al azar, no siempre */
     }

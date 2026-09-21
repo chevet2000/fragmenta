@@ -64,6 +64,11 @@ const ACHS=[
 {id:'bv5', name:'COLECCIONISTA',      desc:'Guarda 5 cofres sellados en la BÓVEDA', rw:4, ck:()=>(save.totVault||0)>=5},
 {id:'bva', name:'ALMA DE LA BÓVEDA',  desc:'Abre 10 cofres sellados con la cerradura', rw:5, ck:()=>(save.totVaultOpen||0)>=10},
 {id:'bvl', name:'SUERTE SELLADA',     desc:'Abre un cofre sellado LEGENDARIO',      rw:6, ck:()=>(save.totVaultL||0)>=1},
+/* v4.23: el Mercader Pirata y la escala viva */
+{id:'merc1',name:'CLIENTE DEL PIRATA', desc:'Compra un cofre al MERCADER PIRATA',    rw:3, ck:()=>(save.totMerc||0)>=1},
+{id:'merc5',name:'SOCIO DEL MERCADO NEGRO',desc:'Compra 5 cofres al MERCADER PIRATA',rw:6, ck:()=>(save.totMerc||0)>=5},
+{id:'nor10',name:'CARTA DE NORMAL',   desc:'Llega a la oleada 10 en modo NORMAL',   rw:4, ck:()=>save.bestMode&&(save.bestMode.normal||0)>=10},
+{id:'dif12',name:'MARCA DIFÍCIL',     desc:'Llega a la oleada 12 en modo DIFÍCIL',  rw:6, ck:()=>save.bestMode&&(save.bestMode.dificil||0)>=12},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

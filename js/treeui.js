@@ -1,5 +1,19 @@
 'use strict';
 /* ============ árbol UI ============ */
+/* v4.23: GATES POR MODO — los nodos con md exigen el récord de oleada
+   en ESE modo (save.bestMode); sin md vale el récord global. */
+const MD_NAME={solo:'SOLO',normal:'NORMAL',dificil:'DIFÍCIL',hardcore:'HARDCORE',coop:'CO-OP'};
+const MD_SHORT={solo:'SOLO',normal:'NOR',dificil:'DIF',hardcore:'HDC',coop:'COOP'};
+function bestWaveFor(nd){
+  if(!nd.md)return save.best.lvl||0;
+  if(!save.bestMode)save.bestMode={solo:0,normal:0,dificil:0,hardcore:0,coop:0};
+  return save.bestMode[nd.md]||0;
+}
+function waveOkText(nd){
+  if(!nd.wave||nd.wave<=1)return '';
+  if(nd.md)return 'oleada '+nd.wave+' en '+MD_NAME[nd.md]+' (récord '+bestWaveFor(nd)+')';
+  return 'oleada '+nd.wave+' (récord '+(save.best.lvl||0)+')';
+}
 function reqListOk(nd){
   if(nd.req){const ok=Array.isArray(nd.req)?nd.req.every(has):has(nd.req);if(!ok)return false;}
   if(nd.any&&!nd.any.some(has))return false;
@@ -15,7 +29,7 @@ function reqText(nd){
 function nodeState(nd){
   const own=has(nd.id);
   const prevOk=reqListOk(nd);
-  const waveOk=nd.wave<=1||save.best.lvl>=nd.wave;
+  const waveOk=!nd.wave||nd.wave<=1||bestWaveFor(nd)>=nd.wave;
   const shipOk=save.bestShip>=(nd.ship||1);
   return{own,prevOk,waveOk,shipOk,dispo:!own&&prevOk&&waveOk&&shipOk};
 }
@@ -52,7 +66,7 @@ function renderTree(){
     s+=`<circle cx="${nd.x}" cy="${nd.y}" r="19"/>`;
     s+=`<text x="${nd.x}" y="${nd.y+4}" font-size="9">${nd.tag}</text>`;
     if(!st.own&&(!st.waveOk||!st.shipOk))
-      s+=`<text class="reqtxt" x="${nd.x}" y="${nd.y+31}">OL ${nd.wave}${nd.ship?' · NV '+nd.ship:''}</text>`;
+      s+=`<text class="reqtxt" x="${nd.x}" y="${nd.y+31}">OL ${nd.wave}${nd.md?' '+MD_SHORT[nd.md]:''}${nd.ship?' · NV '+nd.ship:''}</text>`;
     s+=`</g>`;
   }
   svg.innerHTML=s;
@@ -66,18 +80,21 @@ function selectNode(id){
   if(!selNode){
     nm.textContent='ÁRBOL DE HABILIDADES';
     mt.textContent=`${TREE.length} MEJORAS · ${Object.keys(BX).length} RAMAS · ${ownedCount()} ADQUIRIDAS`;
-    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Nuevas ramas IMÁN, PROSPERIDAD, AZAR, ENLACE, ALIADO y DEFINITIVA (el CAÑÓN ANIQUILADOR). Los nodos de FUSIÓN (línea punteada) se alcanzan por cualquiera de sus dos ramas. Pellizca o usa +/− para hacer zoom. Perfil LOCAL y ONLINE independientes.';
+    ds.textContent='Toca un nodo y pulsa DESBLOQUEAR. Los nodos medios y altos piden llegar a una OLEADA en un MODO concreto (NOR=normal · DIF=difícil · HDC=hardcore): para completar el arsenal hay que jugarlos todos. Los nodos de FUSIÓN (línea punteada) se alcanzan por cualquiera de sus dos ramas. Pellizca o usa +/− para hacer zoom. Perfil LOCAL y ONLINE independientes.';
     cs.innerHTML='';bb.disabled=true;return;
   }
   nm.textContent=selNode.name;
-  mt.textContent=BR[selNode.b]+(selNode.s?' · SUB-RAMA '+selNode.s:'')+' · OLEADA '+selNode.wave+(selNode.ship?' · NAVE NV '+selNode.ship:'');
+  mt.textContent=BR[selNode.b]+(selNode.s?' · SUB-RAMA '+selNode.s:'')+' · OLEADA '+selNode.wave+(selNode.md?' EN '+MD_NAME[selNode.md]:'')+(selNode.ship?' · NAVE NV '+selNode.ship:'');
   ds.textContent=selNode.desc;
   const st=nodeState(selNode);
   if(st.own){cs.innerHTML='<span class="cs">ADQUIRIDO</span>';bb.disabled=true;}
   else if(!st.prevOk){
     cs.innerHTML=`<span class="cs">Requiere: ${reqText(selNode)}</span>`;bb.disabled=true;
   }else if(!st.waveOk||!st.shipOk){
-    cs.innerHTML=`<span class="cs nok">Falta: oleada ${selNode.wave} (récord ${save.best.lvl})${selNode.ship?` · nave nv ${selNode.ship} (récord ${save.bestShip})`:''}</span>`;
+    const partsF=[];
+    if(!st.waveOk)partsF.push(waveOkText(selNode));
+    if(!st.shipOk)partsF.push(`nave nv ${selNode.ship} (récord ${save.bestShip})`);
+    cs.innerHTML=`<span class="cs nok">Falta: ${partsF.join(' · ')}</span>`;
     bb.disabled=true;
   }else{
     cs.innerHTML=`<span class="cs ${canPay(selNode.cost)?'':'nok'}">${costHTML(selNode.cost)}</span>`;

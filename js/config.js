@@ -4,6 +4,36 @@ const DIFFS={solo:1,normal:2.2,dificil:3,hardcore:5};
 const DIFF_LABEL={solo:'SOLO ×1',normal:'NORMAL ×2.2',dificil:'DIFÍCIL ×3',hardcore:'HARDCORE ×5'};
 let runDiff='solo';
 const multHP=()=>DIFFS[runDiff]||1;
+
+/* ============ v4.23: ESCALA VIVA ============
+   El juego se adapta a tu PODER REAL: cuantas más mejoras tengas
+   desbloqueadas en el ARSENAL, más vida (y más experiencia) tienen
+   los enemigos. La normal de un piloto con el árbol completo NO se
+   parece en nada a la de uno recién llegado: misma oleada, otro mundo.
+   · VIDA: hasta ×3.2 con el arsenal completo (jefes, élites, campistas
+     y los escudos de cofres/cubos escalan con ella, son parte del reto).
+   · EXPERIENCIA: hasta ×2.2 — cada baja pide más esfuerzo pero paga
+     más XP, así que subir de nivel sigue siendo posible.
+   La proporción P va de 0 (nada comprado) a 1 (167/167). */
+function upgPower(){return clamp(Object.keys(save.tree||{}).length/(TREE.length||1),0,1);}
+function hpUpMul(){return 1+upgPower()*2.2;}
+function xpUpMul(){return 1+upgPower()*1.2;}
+
+/* ============ v4.23: RÉCORD DE OLEADA POR MODO ============
+   Los gates del ARSENAL ahora exigen llegar a una oleada en un MODO
+   concreto: el récord global ya no basta. weekly/daily cuentan como
+   NORMAL · frenético como HARDCORE · co-op como CO-OP. */
+function runModeKey(){
+  if(net.mode==='host'&&players.length>1)return 'coop';
+  if(frenzyMode)return 'hardcore';
+  if(weeklyMode||dailyMode)return 'normal';
+  return runDiff;
+}
+function bumpModeRecord(L){
+  if(!save.bestMode)save.bestMode={solo:0,normal:0,dificil:0,hardcore:0,coop:0};
+  const k=runModeKey();
+  if(L>(save.bestMode[k]||0))save.bestMode[k]=L;
+}
 /* v4.15: color de cada slot en co-op de 2–3 (P1 menta · P2 rosa · P3 cielo) */
 const SLOT_COL=['#7FD1B9','#FF7EB6','#64C7FF'];
 
@@ -97,7 +127,8 @@ const BESTIARY={
    El crecimiento por oleada se mantiene igual en todos los modos, así que
    el juego largo no cambia: la normal alcanza los niveles antiguos hacia la
    oleada 50. */
-function hpForLevel(l){return Math.max(1,Math.round((0.011*l+0.17)*Math.pow(1.055,l)*multHP()));}
+/* v4.23: ESCALA VIVA — hpUpMul() multiplica según mejoras desbloqueadas */
+function hpForLevel(l){return Math.max(1,Math.round((0.011*l+0.17)*Math.pow(1.055,l)*multHP()*hpUpMul()));}
 function lvlBase(){return runDiff==='dificil'?{mn:70,mx:89}:runDiff==='hardcore'?{mn:96,mx:99}:{mn:40,mx:49};}
 function maxLvlOf(L){return lvlBase().mx+L;}
 function minLvlOf(L){return lvlBase().mn+Math.max(0,Math.floor((L-1)/5))*2;}
@@ -159,23 +190,56 @@ function addVault(rar){
 /* Rareza que suelta cada fuente. Las OLEADAS 1–10 son MÁS GENEROSAS
    (petición del piloto): más probabilidad y mejores rarezas.
    A partir de la 10 mandan las tablas estándar. */
+/* v4.23: BÓVEDA MÁS GENEROSA — el piloto la ganó a pulso:
+   · élite: 52% en oleadas 1–10 (antes 40%) · 36% después (antes 25%)
+   · baja normal: 3.2% / 1.4% (antes 2.2% / 0.8%)
+   · rarezas mejores: más épicas y legendarias en todas las fuentes
+   · el Guardián sigue soltando SIEMPRE el suyo */
 function rollSealed(kind){
   const early=run.level<=10,r=Math.random();
   if(kind==='boss'){
-    if(early)return r<.40?'r':r<.78?'e':'l';
-    return r<.60?'r':r<.90?'e':'l';
+    if(early)return r<.38?'r':r<.74?'e':'l';
+    return r<.55?'r':r<.87?'e':'l';
   }
   if(kind==='elite'){
-    if(!(early?r<.40:r<.25))return null; /* élite: 40% / 25% de soltar */
+    if(!(early?r<.52:r<.36))return null; /* élite: 52% / 36% de soltar */
     const r2=Math.random();
-    if(early)return r2<.55?'r':r2<.88?'e':'l';
-    return r2<.65?'r':r2<.93?'e':'l';
+    if(early)return r2<.50?'r':r2<.86?'e':'l';
+    return r2<.60?'r':r2<.91?'e':'l';
   }
-  /* baja normal: 2.2% en las 10 primeras oleadas · 0.8% después */
-  if(!(early?r<.022:r<.008))return null;
+  /* baja normal: 3.2% en las 10 primeras oleadas · 1.4% después */
+  if(!(early?r<.032:r<.014))return null;
   const r2=Math.random();
-  if(early)return r2<.40?'c':r2<.72?'r':r2<.92?'e':'l';
-  return r2<.58?'c':r2<.83?'r':r2<.95?'e':'l';
+  if(early)return r2<.36?'c':r2<.70?'r':r2<.91?'e':'l';
+  return r2<.52?'c':r2<.80?'r':r2<.94?'e':'l';
+}
+
+/* ============ v4.23: EL MERCADER PIRATA GALÁCTICO ============
+   NPC del menú (no un botón más): cofres del MERCADO NEGRO que se
+   pagan con ORO Y GEMAS y van a la Bóveda para abrirse con la
+   cerradura de pulsos. Siempre contienen botín: el riesgo del mercado
+   negro es el precio… y la cerradura (cada 4 fallos baja la calidad).
+   · OFERTA DEL DÍA: un cofre distinto cada día paga −40% (igual para
+     todos, determinista por fecha).
+   · PRECIO DINÁMICO: cada compra del MISMO cofre en el día +10%.
+     Al día siguiente vuelve a su precio base. */
+const MERC_TIERS=[
+ {id:'r',rar:'r',gold:2500, gems:5, name:'COFRE DE CONTRABANDO',sub:'Cerradura simple · 1 mejora armada'},
+ {id:'e',rar:'e',gold:6000, gems:12,name:'COFRE DEL CAPITÁN',   sub:'2 cerraduras · 2 mejoras armadas'},
+ {id:'l',rar:'l',gold:12000,gems:30,name:'COFRE DEL KRAKEN',    sub:'3 cerraduras · 3 mejoras · zona trampa'},
+];
+const MERC_STEP=1.10;
+function mercDealId(){return MERC_TIERS[Math.abs(hashStr('FRGMERC-'+daySeed()))%MERC_TIERS.length].id;}
+function mercPrice(t){
+  const buys=(save.merc&&save.merc.d===daySeed()&&save.merc.buys)?(save.merc.buys[t.id]||0):0;
+  let gold=Math.round(t.gold*Math.pow(MERC_STEP,buys));
+  let gems=t.gems?Math.round(t.gems*Math.pow(MERC_STEP,buys)):0;
+  const deal=mercDealId()===t.id;
+  if(deal){gold=Math.round(gold*.6);if(gems)gems=Math.round(gems*.6);}
+  return{gold,gems,deal};
+}
+function mercBuyCount(id){
+  return(save.merc&&save.merc.d===daySeed()&&save.merc.buys)?(save.merc.buys[id]||0):0;
 }
 /* ---- MEJORAS ARMADAS: grupo de recompensas temporales ----
    Se aplican en recompute() y se borran al MORIR (gameOver). */

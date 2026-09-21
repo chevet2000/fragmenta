@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.22">
+<html lang="es" data-v="4.23">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.22 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.23 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.22">
+<link rel="stylesheet" href="css/styles.css?v=4.23">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -96,8 +96,8 @@
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.22</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.22</b> trae el <b>CONTROL DE PULSO</b>: la vibración ahora tiene <b>gobernador</b> — mínimo 110 ms entre pulsos — para que una masacre de explosiones no convierta el teléfono en un zumbido continuo ni pese en el hilo principal. El daño recibido, tu muerte, el Guardián y el rescate <b>SIEMPRE se sienten</b>. Además el <b>HIT-STOP</b> ahora tiene presupuesto: solo las <b>4 primeras bajas</b> de cada cadena frenan el tiempo a cámara lenta — a partir de la 5.ª la acción sigue fluida (élites y figuras grandes siempre golpean) y el temblor de pantalla se suaviza en los colapsos grandes. Se acabó el "lag" de las oleadas llenas. Y sigue abierta <b>LA BÓVEDA</b> (v4.21): cofres sellados con cerradura de pulsos y mejoras armadas que duran hasta que mueres.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.23</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.23</b> trae la <b>ESCALA VIVA</b>: el juego se adapta a tu poder real — cuantas más mejoras tengas en el ARSENAL, más vida (hasta <b>×3.2</b>) y más experiencia (hasta <b>×2.2</b>) tienen los enemigos: tu normal con el árbol completo ya no se parece a la de un novato. En <b>HARDCORE y FRENÉTICO</b> subir la nave cuesta oro puro: el primer nivel pide <b>5.000 XP</b> y cada nivel <b>duplica</b> el precio — se acabó la nave de nivel 500 sin esfuerzo. El <b>ARSENAL se reformula</b>: los nodos medios y altos exigen llegar a una OLEADA en un MODO concreto (<b>NOR</b>·normal / <b>DIF</b>·difícil / <b>HDC</b>·hardcore) — para completar el árbol habrá que jugarlos todos, y el contador del Guardián ya dice la verdad. Además desembarca el <b>MERCADER PIRATA GALÁCTICO</b>: un NPC en el menú que vende cofres del mercado negro por <b>oro y gemas</b> con oferta del día −40% y precio que sube +10% por compra. Y <b>LA BÓVEDA</b> es más generosa: más cofres sellados, cerraduras más justas (4 fallos antes de bajar de calidad) y el común sale vacío solo 1 de cada 4 veces.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -106,6 +106,10 @@
     <button data-d="hardcore">HARDCORE ×5</button>
   </div>
   <div id="menuPilot"><canvas id="pilotCv" width="44" height="44"></canvas><div><small>TU PILOTO · AVATAR</small><b id="menuPilotName">----</b></div></div>
+  <button id="npcMerc" class="npcmerc" aria-label="Mercader Pirata Galáctico">
+    <canvas id="mercCv" width="56" height="56"></canvas>
+    <span class="npc-talk"><small>MERCADER PIRATA GALÁCTICO · MERCADO NEGRO</small><b id="mercLine">“Psst, piloto… cofres sin aduana.”</b></span>
+  </button>
   <div class="menu-btns">
     <button class="btn primary" id="btnPlay">JUGAR · 1 JUGADOR</button>
     <button class="btn week" id="btnWeekly">DESAFÍO SEMANAL</button>
@@ -134,7 +138,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.22 · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.23 · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -279,6 +283,18 @@
   </div>
 </div>
 
+<div class="scr" id="scrMerc">
+  <div class="achbox">
+    <h2>☠ MERCADER PIRATA</h2>
+    <div class="vsub" id="mercRes"></div>
+    <div style="font-size:9px;letter-spacing:.2em;color:var(--dim);text-align:center;margin:4px 0 8px">MERCADO NEGRO · PAGAS ORO Y GEMAS · EL BOTÍN VA A LA BÓVEDA<br>OFERTA DEL DÍA −40% · CADA COMPRA DEL MISMO COFRE HOY +10%</div>
+    <div id="mercList"></div>
+    <div style="font-size:9px;letter-spacing:.08em;color:var(--dim);text-align:center;margin:6px 0">RIESGO DEL MERCADO NEGRO: SI LA CERRADURA CEDA (4 FALLOS) EL COFRE BAJA DE CALIDAD.<br>EL BOTÍN SON MEJORAS ARMADAS · DURAN HASTA QUE MUERAS</div>
+    <button class="btn" id="btnMercBoveda">IR A LA BÓVEDA</button>
+    <button class="btn" id="btnMercBack" style="margin-top:6px">VOLVER</button>
+  </div>
+</div>
+
 <div class="scr" id="scrChest">
   <div class="panel">
     <div class="p-kicker" style="color:var(--amber)">◈ COFRE DEL GUARDIÁN ◈</div>
@@ -399,32 +415,33 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.22"></script>
-<script src="js/profile.js?v=4.22"></script>
-<script src="js/achievements.js?v=4.22"></script>
-<script src="js/audio.js?v=4.22"></script>
-<script src="js/config.js?v=4.22"></script>
-<script src="js/tree.js?v=4.22"></script>
-<script src="js/relics.js?v=4.22"></script>
-<script src="js/state.js?v=4.22"></script>
-<script src="js/net.js?v=4.22"></script>
-<script src="js/core.js?v=4.22"></script>
-<script src="js/enemies.js?v=4.22"></script>
-<script src="js/waves.js?v=4.22"></script>
-<script src="js/boss.js?v=4.22"></script>
-<script src="js/loot.js?v=4.22"></script>
-<script src="js/player.js?v=4.22"></script>
-<script src="js/azar.js?v=4.22"></script>
-<script src="js/curses.js?v=4.22"></script>
-<script src="js/chests.js?v=4.22"></script>
-<script src="js/netsync.js?v=4.22"></script>
-<script src="js/render.js?v=4.22"></script>
-<script src="js/screens.js?v=4.22"></script>
-<script src="js/treeui.js?v=4.22"></script>
-<script src="js/hud.js?v=4.22"></script>
-<script src="js/vault.js?v=4.22"></script>
-<script src="js/input.js?v=4.22"></script>
-<script src="js/game.js?v=4.22"></script>
-<script src="js/update.js?v=4.22"></script>
+<script src="js/utils.js?v=4.23"></script>
+<script src="js/profile.js?v=4.23"></script>
+<script src="js/achievements.js?v=4.23"></script>
+<script src="js/audio.js?v=4.23"></script>
+<script src="js/config.js?v=4.23"></script>
+<script src="js/tree.js?v=4.23"></script>
+<script src="js/relics.js?v=4.23"></script>
+<script src="js/state.js?v=4.23"></script>
+<script src="js/net.js?v=4.23"></script>
+<script src="js/core.js?v=4.23"></script>
+<script src="js/enemies.js?v=4.23"></script>
+<script src="js/waves.js?v=4.23"></script>
+<script src="js/boss.js?v=4.23"></script>
+<script src="js/loot.js?v=4.23"></script>
+<script src="js/player.js?v=4.23"></script>
+<script src="js/azar.js?v=4.23"></script>
+<script src="js/curses.js?v=4.23"></script>
+<script src="js/chests.js?v=4.23"></script>
+<script src="js/netsync.js?v=4.23"></script>
+<script src="js/render.js?v=4.23"></script>
+<script src="js/screens.js?v=4.23"></script>
+<script src="js/treeui.js?v=4.23"></script>
+<script src="js/hud.js?v=4.23"></script>
+<script src="js/vault.js?v=4.23"></script>
+<script src="js/merc.js?v=4.23"></script>
+<script src="js/input.js?v=4.23"></script>
+<script src="js/game.js?v=4.23"></script>
+<script src="js/update.js?v=4.23"></script>
 </body>
 </html>

@@ -40,7 +40,7 @@ function renderVault(){
       el.className='vchest';
       el.style.borderColor=RAR_COL[r];
       el.innerHTML='<b style="color:'+RAR_COL[r]+'">🔒 COFRE '+RAR_NAME[r]+'</b>'+
-        '<small>'+(r==='c'?'Se abre directo · puede estar vacío':r==='r'?'1 cerradura':r==='e'?'2 cerraduras':'3 cerraduras · zona trampa')+'</small>'+
+        '<small>'+(r==='c'?'Se abre directo · 1 de cada 4 sale vacío':r==='r'?'1 cerradura':r==='e'?'2 cerraduras':'3 cerraduras · zona trampa')+'</small>'+
         '<em>ABRIR</em>';
       el.addEventListener('click',()=>{audio();tryOpen(r);});
       box.appendChild(el);
@@ -55,12 +55,14 @@ function tryOpen(rar){
 }
 /* ---- CERRADURA DE PULSOS ----
    raro: 1 cerradura ancha y lenta · épico: 2 más estrechas y rápidas ·
-   legendario: 3 estrechas, rápidas y con ZONA TRAMPA roja */
+   legendario: 3 estrechas, rápidas y con ZONA TRAMPA.
+   v4.23: más justas — zonas más anchas, giro algo más lento y la
+   cerradura aguanta 4 fallos antes de bajar de calidad (antes 3). */
 const VG_C=2*Math.PI*46; /* circunferencia del anillo (r=46 en el SVG) */
 function vgSpec(rar){
-  if(rar==='r')return{locks:1,spd:130,zw:78,decoy:0};
-  if(rar==='e')return{locks:2,spd:190,zw:52,decoy:0};
-  return{locks:3,spd:252,zw:36,decoy:46};
+  if(rar==='r')return{locks:1,spd:130,zw:84,decoy:0};
+  if(rar==='e')return{locks:2,spd:172,zw:58,decoy:0};
+  return{locks:3,spd:226,zw:42,decoy:40};
 }
 /* orig = la rareza del cofre REAL guardado en la bóveda (no cambia al
    degradarse); rar = la calidad ACTUAL de la cerradura y del premio */
@@ -108,7 +110,7 @@ function vgDraw(){
 }
 function vgHearts(){
   const h=$('#vgHearts');if(!h||!vg)return;
-  const left=3-vg.fails;
+  const left=4-vg.fails; /* v4.23: la cerradura aguanta 4 fallos */
   h.innerHTML='<small>RESISTENCIA DE LA CERRADURA</small><b>'+'◆'.repeat(left)+'◇'.repeat(vg.fails)+'</b>';
 }
 function vgStop(){
@@ -130,7 +132,7 @@ function vgTap(ev){
   }else{
     SFX.lockFail();vib(70);
     vg.fails++;vgHearts();
-    if(vg.fails>=3){
+    if(vg.fails>=4){ /* v4.23: degradación a los 4 fallos (antes 3) */
       const order=['l','e','r','c'];
       const nr=order[Math.min(order.length-1,order.indexOf(vg.rar)+1)];
       const orig=vg.orig;
@@ -147,7 +149,7 @@ function vgTap(ev){
       return;
     }
     $('#vgMsg').className='bad';
-    $('#vgMsg').textContent='FALLO · te quedan '+(3-vg.fails)+' antes de bajar de calidad';
+    $('#vgMsg').textContent='FALLO · te quedan '+(4-vg.fails)+' antes de bajar de calidad';
   }
 }
 function resolveVault(tier,orig){
@@ -158,7 +160,7 @@ function resolveVault(tier,orig){
   save.vault[orig]=Math.max(0,(save.vault[orig]||0)-1);
   save.totVaultOpen=(save.totVaultOpen||0)+1;
   if(tier==='l')save.totVaultL=(save.totVaultL||0)+1;
-  const n=tier==='l'?3:tier==='e'?2:tier==='r'?1:(Math.random()<.6?1:0);
+  const n=tier==='l'?3:tier==='e'?2:tier==='r'?1:(Math.random()<.75?1:0); /* v4.23: común 75% con botín (antes 60%) */
   const ids=n?rollPerks(n,tier):[];
   for(const id of ids)save.armed.push(id);
   persist();checkAch();
