@@ -53,7 +53,7 @@ function hitPlayer(pl,d){
   run.comboN=0; /* v4.12: recibir daño corta el combo de bajas */
   run.stTaken+=d;
   if(pl.venge)pl.vengeT=4;
-  SFX.hurt();vib(70,true);shake=Math.min(16,shake+8);redFlash();
+  SFX.hurt();vib(70,true);if(!noHurtShake)shake=Math.min(16,shake+8);redFlash(); /* v4.28: CABINA GIMBAL apaga el temblor del daño (la vibración se queda) */
   if(pl.neb)shockNova(pl,150,pl.dmg+4,'#FF7EB6',slot);
   if(pl.hp<=0){
     pl.hp=0;burst(pl.x,pl.y,'#F2EFE6',20,180);
@@ -101,7 +101,7 @@ function fireNovaSlot(slot){
       bullets.push({x:q.x,y:q.y,vx:Math.cos(a)*420,vy:Math.sin(a)*420,
         dmg:q.dmg,r:4,crit:false,pierce:0,hits:[],bounce:0,slot:q.slot,dead:false});}
   }
-  shake=Math.min(14,shake+6);SFX.nova();vib(40);
+  selfQuake(6,14);SFX.nova();vib(40); /* v4.28: detonación propia → CONTRAPESADO */
 }
 function fireNovaLocal(){
   if(amClient()){ sendMsg({t:'nova'}); return; }
@@ -283,7 +283,7 @@ function fireUltimate(pl,t){
     for(const eb of ebullets)eb.dead=true;
     ebullets=ebullets.filter(b=>!b.dead);
   }
-  shake=Math.min(16,shake+10);
+  selfQuake(10,16);
   SFX.ult();vib(60);
   floater(pl.x,pl.y-42,'¡ANIQ!','#B388FF',14);
 }
@@ -364,7 +364,7 @@ function updHoles(dt){
         hostRing(h.x,h.y,h.rad+60,'#B388FF');
         for(const e of enemies){if(!e.dead&&Math.hypot(e.x-h.x,e.y-h.y)<h.rad+20)damageEnemy(e,dmg,false,h.slot);}
         if(boss&&Math.hypot(boss.x-h.x,boss.y-h.y)<h.rad+boss.r+20)damageBoss(dmg,false,h.slot);
-        shake=Math.min(18,shake+10);SFX.nova();vib(60);
+        selfQuake(10,18);SFX.nova();vib(60);
         floater(h.x,h.y-52,'¡COLAPSO!','#B388FF',16);
       }
       h.dead=true;

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.27">
+<html lang="es" data-v="4.28">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.27 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.28 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.27">
+<link rel="stylesheet" href="css/styles.css?v=4.28">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -107,7 +107,7 @@
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
   <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.26</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.26</b> afina la sala y la Bóveda: <b>1 · RANKING AL CONECTAR</b> — el ranking se sincroniza en cuanto os conectáis en el lobby, ANTES de iniciar la partida; el stat muestra la sincronía de cada piloto y el botón COMENZAR no se libera hasta que los datos están sincronizados (con margen de seguridad de 12 s). <b>2 · QR DE SALA</b> — el anfitrión muestra un QR con el código de 5 caracteres y el compañero entra desde «ONLINE · UNIRSE» → ESCANEAR QR: la cámara lee el código y os une sin teclear nada (BarcodeDetector o jsQR; sin cámara, el código manual sigue igual). <b>3 · CERRADURA DE ECO</b> — el puzzle de pulsos (reflejos + latencia táctil) se jubila: las cerraduras son ahora de MEMORIA — 6 runas iluminan una secuencia con su tono y la repites a tu ritmo; fallar consume 1 resistencia (de 4) y la misma secuencia vuelve a sonar. Raro: 1 eco · épico: eco + llaves · legendario: eco doble + llaves. Se mantienen: co-op reparado, colores sincronizados, ranking multi en vivo, legendario ganable, récord por oleada, compra masiva y gemas escasas.</p>
+  <p class="tagline hidden" id="tagBody">La <b>v4.28</b> te da el mando: <b>1 · DESPLIEGUE</b> — antes de la oleada 1 aparece «¿QUÉ LLEVAS A LA INCURSIÓN?»: toca las MEJORAS ARMADAS que quieras usar ESTA vez (se pierden al caer) y deja marcado el resto; lo que NO marques se queda guardado en la Bóveda para la próxima incursión — se acabó perder lo bueno sin elegir. En co-op cada piloto elige lo suyo y la incursión espera a todos. <b>2 · REVANCHA EN CO-OP</b> — al morir todos, la sala NO se cierra: botón ¡REVANCHA! con 30 s de votación; si vota el 100% del equipo, cuenta atrás de 3 y la incursión se rearma NUEVA en la misma sala, sin reconectar. <b>3 · RAMA ESTABILIDAD</b> — 6 nodos nuevos en el arsenal (ahora 16 ramas): ESTABILIZADORES bajan el temblor de cámara por bajas y explosiones, SUSPENSIÓN MAGNÉTICA lo apaga del todo, CONTRAPESADO calla tus propias detonaciones y los críticos, GIROSCOPIO DOBLE estabiliza al doble y la CABINA GIMBAL (carísima) deja la cámara quietísima incluso con daño recibido — la vibración de peligro siempre se queda. Se mantienen: ranking única con reintentos, QR de sala, cerraduras de eco y llaves.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -148,7 +148,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.27 · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.28 · DESPLIEGUE (ELIGE TUS MEJORAS ARMADAS) · REVANCHA EN CO-OP · RAMA ESTABILIDAD · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -351,6 +351,19 @@
   <div id="cards"></div>
 </div>
 
+<div class="scr" id="scrDeploy">
+  <div class="panel">
+    <div class="p-kicker" style="color:var(--mint)">✦ DESPLIEGUE</div>
+    <h2>¿QUÉ LLEVAS A LA INCURSIÓN?</h2>
+    <p class="dep-sub">Toca lo que quieras USAR ESTA VEZ · se pierde al caer.
+    Lo que NO marques se queda guardado para la próxima incursión.</p>
+    <div id="depList"></div>
+    <div id="depNote"></div>
+    <button class="btn primary pulse" id="btnDeployGo">DESPEGAR</button>
+    <button class="btn" id="btnDeploySkip">GUARDAR TODO PARA LUEGO</button>
+  </div>
+</div>
+
 <div class="scr" id="scrPost">
   <div class="panel">
     <div class="p-kicker" style="color:var(--mint)">GUARDIÁN PURGADO</div>
@@ -420,41 +433,43 @@
     <div id="ovMast"></div>
     <div id="ovKeep"></div>
     <button class="btn primary pulse" id="btnRetry">REINTENTAR</button>
+    <button class="btn primary pulse hidden" id="btnRevancha">⚔ ¡REVANCHA!</button>
+    <div class="dep-note hidden" id="rvStat"></div>
     <button class="btn" id="btnOShop">ARSENAL</button>
     <button class="btn" id="btnMenu">MENÚ</button>
   </div>
 </div>
 
-<script src="js/utils.js?v=4.27"></script>
-<script src="js/profile.js?v=4.27"></script>
-<script src="js/achievements.js?v=4.27"></script>
-<script src="js/audio.js?v=4.27"></script>
-<script src="js/config.js?v=4.27"></script>
-<script src="js/tree.js?v=4.27"></script>
-<script src="js/relics.js?v=4.27"></script>
-<script src="js/state.js?v=4.27"></script>
-<script src="js/net.js?v=4.27"></script>
-<script src="js/vendor/qrcode.js?v=4.27"></script>
-<script src="js/vendor/jsQR.js?v=4.27"></script>
-<script src="js/qr.js?v=4.27"></script>
-<script src="js/core.js?v=4.27"></script>
-<script src="js/enemies.js?v=4.27"></script>
-<script src="js/waves.js?v=4.27"></script>
-<script src="js/boss.js?v=4.27"></script>
-<script src="js/loot.js?v=4.27"></script>
-<script src="js/player.js?v=4.27"></script>
-<script src="js/azar.js?v=4.27"></script>
-<script src="js/curses.js?v=4.27"></script>
-<script src="js/chests.js?v=4.27"></script>
-<script src="js/netsync.js?v=4.27"></script>
-<script src="js/render.js?v=4.27"></script>
-<script src="js/screens.js?v=4.27"></script>
-<script src="js/treeui.js?v=4.27"></script>
-<script src="js/hud.js?v=4.27"></script>
-<script src="js/vault.js?v=4.27"></script>
-<script src="js/merc.js?v=4.27"></script>
-<script src="js/input.js?v=4.27"></script>
-<script src="js/game.js?v=4.27"></script>
-<script src="js/update.js?v=4.27"></script>
+<script src="js/utils.js?v=4.28"></script>
+<script src="js/profile.js?v=4.28"></script>
+<script src="js/achievements.js?v=4.28"></script>
+<script src="js/audio.js?v=4.28"></script>
+<script src="js/config.js?v=4.28"></script>
+<script src="js/tree.js?v=4.28"></script>
+<script src="js/relics.js?v=4.28"></script>
+<script src="js/state.js?v=4.28"></script>
+<script src="js/net.js?v=4.28"></script>
+<script src="js/vendor/qrcode.js?v=4.28"></script>
+<script src="js/vendor/jsQR.js?v=4.28"></script>
+<script src="js/qr.js?v=4.28"></script>
+<script src="js/core.js?v=4.28"></script>
+<script src="js/enemies.js?v=4.28"></script>
+<script src="js/waves.js?v=4.28"></script>
+<script src="js/boss.js?v=4.28"></script>
+<script src="js/loot.js?v=4.28"></script>
+<script src="js/player.js?v=4.28"></script>
+<script src="js/azar.js?v=4.28"></script>
+<script src="js/curses.js?v=4.28"></script>
+<script src="js/chests.js?v=4.28"></script>
+<script src="js/netsync.js?v=4.28"></script>
+<script src="js/render.js?v=4.28"></script>
+<script src="js/screens.js?v=4.28"></script>
+<script src="js/treeui.js?v=4.28"></script>
+<script src="js/hud.js?v=4.28"></script>
+<script src="js/vault.js?v=4.28"></script>
+<script src="js/merc.js?v=4.28"></script>
+<script src="js/input.js?v=4.28"></script>
+<script src="js/game.js?v=4.28"></script>
+<script src="js/update.js?v=4.28"></script>
 </body>
 </html>

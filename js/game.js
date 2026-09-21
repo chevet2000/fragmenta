@@ -59,6 +59,18 @@ function loop(now){
       }
     }else shipwaitT=0;
   }
+  /* v4.28: DESPLIEGUE — timeout de seguridad para que un piloto mudo
+     (app en segundo plano, conexión a medio morir) no congele la sala:
+     el anfitrión auto-confirma a los 8 s; el cliente a los 20 s guarda todo */
+  if(state==='deploy'){
+    deployT+=dt;
+    if(net.mode==='host'){
+      if(!net.connected||deployT>8){
+        for(const c of net.conns)if(c.open&&!net.depOk[c.slot])net.depOk[c.slot]=true;
+        checkDeployReady();
+      }
+    }else if(amClient()&&deployT>20)confirmDeploy(true);
+  }
   if(state==='chestwait'){
     chestwaitT+=dt;
     if(!net.connected||chestwaitT>10){

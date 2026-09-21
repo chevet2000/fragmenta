@@ -8,7 +8,9 @@ const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#sc
   /* v4.21: LA BÓVEDA — cofres sellados pendientes por abrir */
   vault:$('#scrVault'),
   /* v4.23: EL MERCADER PIRATA — tienda de mercado negro */
-  merc:$('#scrMerc')};
+  merc:$('#scrMerc'),
+  /* v4.28: DESPLIEGUE — elegir mejoras armadas antes de la oleada 1 */
+  deploy:$('#scrDeploy')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
 function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
 function setChoiceNote(txt){
@@ -451,6 +453,87 @@ function primePlayers(){
     pl.touch=null;
   }
 }
+/* ===== v4.28: DESPLIEGUE — ¿qué mejoras armadas llevas a la incursión? =====
+   Lo que marcas se aplica ESTA incursión y muere con tu nave (run.armedTaken,
+   sale de save.armed al confirmar). Lo que NO marcas se queda guardado en
+   save.armed y sobrevive: así puedes ahorrar lo bueno para el intento
+   hardcore. En co-op cada piloto elige lo suyo y la incursión espera a
+   todos (con timeout de seguridad de 8 s por piloto mudo). */
+let deployThen=null,deployCoop=false,deployT=0,depSel=new Set();
+function deployGate(then,coop){
+  deployThen=then;deployCoop=!!coop;deployT=0;run.armedTaken=null;
+  const armed=(save.armed||[]).length>0;
+  if(coop&&net.mode==='client'){
+    if(!armed){run.armedTaken=[];sendMsg({t:'depOk'});deployLaunch();return;}
+    state='deploy';openDeploy();return;
+  }
+  if(armed){state='deploy';openDeploy();return;}
+  run.armedTaken=[];
+  if(coop&&net.mode==='host'){net.depOk[0]=true;state='deploy';showScr(null);checkDeployReady();return;}
+  deployLaunch();
+}
+function deployLaunch(){
+  const f=deployThen;deployThen=null;
+  $('#depList').innerHTML='';
+  if(f)f();
+}
+function openDeploy(){
+  const groups=[];
+  for(const pid of (save.armed||[])){
+    const pk=perkById(pid);if(!pk)continue;
+    let g=groups.find(q=>q.id===pid);
+    if(!g){g={id:pid,pk,n:0};groups.push(g);}
+    g.n++;
+  }
+  depSel=new Set(groups.map(g=>g.id));
+  const box=$('#depList');box.innerHTML='';
+  for(const g of groups){
+    const el=document.createElement('button');
+    el.className='dep-item on';el.type='button';
+    el.innerHTML='<span class="dt-mark">✓</span><span class="dt-info"><b>✦ '+g.pk.name+'</b><small>'+g.pk.desc+'</small></span>'+(g.n>1?'<span class="dt-n">×'+g.n+'</span>':'');
+    el.addEventListener('click',()=>{
+      audio();
+      if(depSel.has(g.id)){depSel.delete(g.id);el.classList.remove('on');}
+      else{depSel.add(g.id);el.classList.add('on');}
+      SFX.buy();vib(20);
+    });
+    box.appendChild(el);
+  }
+  $('#depNote').textContent=deployCoop?'CADA PILOTO ELIGE LO SUYO · LA INCURSIÓN ESPERA A TODOS':'';
+  $('#btnDeployGo').disabled=false;$('#btnDeploySkip').disabled=false;
+  showScr('deploy');
+}
+function confirmDeploy(skip){
+  if(!deployThen)return;
+  const taken=[],kept=[];
+  for(const pid of (save.armed||[])){
+    if(!skip&&depSel.has(pid))taken.push(pid);else kept.push(pid);
+  }
+  save.armed=kept;
+  run.armedTaken=taken;
+  persist();recompute();primePlayers();
+  SFX.buy();vib(40);
+  if(deployCoop&&net.mode==='host'){
+    net.depOk[0]=true;
+    $('#btnDeployGo').disabled=true;$('#btnDeploySkip').disabled=true;
+    $('#depNote').textContent='LISTO · ESPERANDO A LOS DEMÁS PILOTOS…';
+    checkDeployReady();
+    return;
+  }
+  if(deployCoop&&net.mode==='client'){
+    sendMsg({t:'depOk'});
+    deployLaunch();
+    return;
+  }
+  deployLaunch();
+}
+function checkDeployReady(){ /* solo anfitrión: ¿confirmaron todos los conectados? */
+  if(!deployThen||!deployCoop||net.mode!=='host')return;
+  if(!net.depOk[0])return;
+  for(const c of net.conns)if(c.open&&!net.depOk[c.slot])return;
+  sendMsg({t:'ev',k:'depGo'}); /* informativo */
+  deployLaunch();
+}
 function startRun(){
   audio();goFullscreen();
   useProfile('local');
@@ -463,13 +546,14 @@ function startRun(){
   recompute();
   primePlayers();
   players[0].x=W/2;players[0].y=H-130;
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.add('hidden');
-  refreshHUD();
-  musStart();
-  nextWave();
+  runActive=true;
+  /* v4.28: DESPLIEGUE — antes de la oleada 1 eliges qué mejoras armadas llevas */
+  deployGate(()=>{
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.add('hidden');
+    refreshHUD();musStart();nextWave();
+  });
 }
 function startWeekly(){
   audio();goFullscreen();
@@ -487,14 +571,15 @@ function startWeekly(){
   recompute();
   primePlayers();
   players[0].x=W/2;players[0].y=H-130;
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.add('hidden');
-  refreshHUD();
-  musStart();
-  banner('DESAFÍO SEMANAL','Semilla '+ws+' · NORMAL ×2.2 · igual para todos');
-  nextWave();
+  runActive=true;
+  deployGate(()=>{ /* v4.28: despliegue también en semanal */
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.add('hidden');
+    refreshHUD();musStart();
+    banner('DESAFÍO SEMANAL','Semilla '+ws+' · NORMAL ×2.2 · igual para todos');
+    nextWave();
+  });
 }
 /* v4.12: RETO DIARIO — como el semanal pero con semilla de UN DÍA:
    todos los jugadores del mundo juegan exactamente lo mismo cada día. */
@@ -514,14 +599,15 @@ function startDaily(){
   recompute();
   primePlayers();
   players[0].x=W/2;players[0].y=H-130;
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.add('hidden');
-  refreshHUD();
-  musStart();
-  banner('RETO DIARIO','Semilla '+ds+' · NORMAL ×2.2 · igual para todos');
-  nextWave();
+  runActive=true;
+  deployGate(()=>{ /* v4.28: despliegue también en diario */
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.add('hidden');
+    refreshHUD();musStart();
+    banner('RETO DIARIO','Semilla '+ds+' · NORMAL ×2.2 · igual para todos');
+    nextWave();
+  });
 }
 /* v4.9: MODO FRENÉTICO — oleada única infinita, nivel creciente y jefes
    periódicos; dificultad HARDCORE fija y récord local progresivo */
@@ -541,14 +627,15 @@ function startFrenzy(){
   recompute();
   primePlayers();
   players[0].x=W/2;players[0].y=H-130;
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.add('hidden');
-  refreshHUD();
-  musStart();
-  banner('MODO FRENÉTICO','HARDCORE ×5 · oleada infinita · sobrevive');
-  nextWave();
+  runActive=true;
+  deployGate(()=>{ /* v4.28: despliegue también en frenético */
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.add('hidden');
+    refreshHUD();musStart();
+    banner('MODO FRENÉTICO','HARDCORE ×5 · oleada infinita · sobrevive');
+    nextWave();
+  });
 }
 function startCoop(){
   runDiff=net.lobbyDiff||'normal';
@@ -564,15 +651,20 @@ function startCoop(){
   players[0].x=W*.42;players[0].y=H-130;
   players[1].x=W*.58;players[1].y=H-130;
   if(players[2]){players[2].x=W*.5;players[2].y=H-92;}
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.remove('hidden');
-  refreshHUD();
+  runActive=true;
   sendMsg({t:'start',diff:runDiff,np,skin:skinColorOf()}); /* v4.25: +aspecto */
-  musStart();
-  banner('CO-OP · '+np+' JUGADORES','Dificultad: '+DIFF_LABEL[runDiff]);
-  nextWave();
+  rvToken++;rvCleanup(); /* v4.28: si esto nace de una REVANCHA, cerrar su votación */
+  /* v4.28: DESPLIEGUE CO-OP — cada piloto elige lo suyo; la incursión
+     (nextWave) NO arranca hasta que todos confirman o hay timeout */
+  deployGate(()=>{
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.remove('hidden');
+    refreshHUD();
+    musStart();
+    banner('CO-OP · '+np+' JUGADORES','Dificultad: '+DIFF_LABEL[runDiff]);
+    nextWave();
+  },true);
 }
 function startRunClient(d){
   run.level=1;run.kills=0;run.goldRun=0;run.gemsRun=0;
@@ -598,12 +690,17 @@ function startRunClient(d){
   players[0].x=W*.42;players[0].y=H-130;
   if(players[1]){players[1].x=W*.58;players[1].y=H-130;}
   if(players[2]){players[2].x=W*.5;players[2].y=H-92;}
-  runActive=true;state='play';
-  showScr(null);
-  $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
-  $('#netTag').classList.remove('hidden');
-  banner('CO-OP CONECTADO','Dificultad: '+DIFF_LABEL[runDiff]);
-  musStart();
+  runActive=true;
+  rvToken++;rvCleanup(); /* v4.28: cierre la votación de revancha si seguía abierta */
+  /* v4.28: DESPLIEGUE del cliente — sin mejoras guardadas confirma solo y
+     espera en el campo vacío; con mejoras, elige antes de entrar */
+  deployGate(()=>{
+    state='play';showScr(null);
+    $('#hud').classList.remove('hidden');$('#hudBot').classList.remove('hidden');
+    $('#netTag').classList.remove('hidden');
+    banner('CO-OP CONECTADO','Dificultad: '+DIFF_LABEL[runDiff]);
+    musStart();
+  },true);
 }
 function nextWave(){
   ebullets=[];bullets=[];beams=[];ultBeams=[];holes=[];
@@ -657,15 +754,8 @@ function nextWave(){
   if(net.mode!=='client')updTempBuffs();
   if(net.mode!=='client')curseTickWave(); /* v4.17: las de varias oleadas cuentan atrás */
   buildWave(L);
-  /* v4.21: al empezar la incursión se anuncian las MEJORAS ARMADAS de la
-     Bóveda (después del banner de la oleada, para que no lo tape nadie) */
-  if(L===1&&net.mode!=='client'&&!run.armedShown&&(save.armed||[]).length){
-    run.armedShown=true;
-    const names={};
-    for(const pid of save.armed){const pk=perkById(pid);if(pk)names[pk.name]=(names[pk.name]||0)+1;}
-    banner('✦ MEJORAS ARMADAS · '+(save.armed||[]).length,
-      Object.keys(names).map(k=>names[k]>1?k+' ×'+names[k]:k).join(' · ')+' · hasta que caigas');
-  }
+  /* v4.28: el aviso de MEJORAS ARMADAS lo sustituye la pantalla de DESPLIEGUE,
+     que aparece antes de la primera oleada (deployGate en cada inicio) */
   waveState='play';clearTimer=0;
 }
 function showShipCards(picks,onPick,waitNote){
@@ -882,9 +972,10 @@ function gameOver(){
   else if(gap>=1&&gap<=2)
     hook+=`<span class="k1">⚡ A ${gap} oleada${gap>1?'s':''} de tu récord (${prevBest}) · ¿LA REVANCHA?</span><br>`;
   $('#ovHook').innerHTML=hook;
-  /* v4.21: las MEJORAS ARMADAS de la Bóveda mueren contigo (duran hasta que caigas) */
-  const hadArmed=(save.armed||[]).length>0;
-  if(hadArmed){save.armed=[];persist();}
+  /* v4.28: las DESPLEGADAS murieron contigo (salieron de save.armed en el
+     despliegue); las que guardaste SOBREVIVEN para la próxima incursión */
+  const nTaken=(run.armedTaken||[]).length;
+  const nKept=(save.armed||[]).length;
   const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
     (ghostLine||'')+
@@ -892,13 +983,17 @@ function gameOver(){
     (dailyRec?`<span class="k1">★ ¡NUEVO RÉCORD DEL RETO DIARIO · OLEADA ${save.daily.best}!</span><br>`:'')+
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
     `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
-    (hadArmed?`<span class="k2">✦ LAS MEJORAS ARMADAS SE HAN PERDIDO CON TU NAVE</span><br>`:'')+
+    (nTaken?`<span class="k2">✦ LAS ${nTaken} MEJORA${nTaken>1?'S':''} DESPLEGADA${nTaken>1?'S':''} SE HAN PERDIDO CON TU NAVE</span><br>`:'')+
+    (nKept?`<span class="k1">✦ ${nKept} MEJORA${nKept>1?'S':''} GUARDADA${nKept>1?'S':''} EN LA BÓVEDA · elige en el DESPLIEGUE de tu próxima incursión</span><br>`:'')+
     `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
   /* v4.8: eliminado el botón de copiar registro semanal por código */
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');
   $('#bossBar').classList.add('hidden');
   closeEmoPanel();
   showScr('over');
+  /* v4.28: REVANCHA — en co-op la sala sigue viva: botón de votación */
+  if(net.mode==='host'&&connsOpen()>0)hostRevanchaUI();
+  else{const r=$('#btnRetry');if(r)r.classList.remove('hidden');rvHideUI();}
 }
 function pauseGame(){
   if(state!=='play')return;

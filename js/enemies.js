@@ -57,7 +57,7 @@ function kamiExplode(e,damaging){
   burst(e.x,e.y,'#FF4757',16,170);
   rings.push({x:e.x,y:e.y,r:6,R:70,t:0,life:.35,color:'#FF4757'});
   hostRing(e.x,e.y,70,'#FF4757');
-  shake=Math.min(14,shake+4);
+  addQuake(4,14); /* v4.28: kamikaze pasa por ESTABILIDAD */
   tone(500,80,.25,'sawtooth',.07);
   if(damaging){
     for(const pl of players){

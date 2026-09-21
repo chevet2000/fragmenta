@@ -55,8 +55,9 @@ function killEnemy(e,bySlot){
   burst(e.x,e.y,e.camp?'#FFD166':e.T.color,e.r>18?20:12,e.r>18?180:120);
   /* v4.18: tono en escalera por racha (la racha se cuenta ANTES para decidir shake y hit-stop) */
   if(time-kcLast<1.1)kcN++;else kcN=1;kcLast=time;
-  /* v4.22: shake encadenado más suave — un colapso de 20 bajas ya no vibra sin parar */
-  shake=Math.min(14,shake+(e.r>18?5:(kcN>6?.6:1.5)));
+  /* v4.22: shake encadenado más suave — un colapso de 20 bajas ya no vibra sin parar
+     v4.28: pasa por addQuake (la rama ESTABILIDAD lo apaga) */
+  addQuake(e.r>18?5:(kcN>6?.6:1.5),14);
   SFX.kill(1+Math.min(14,kcN-1)*.055);
   /* v4.18: JUICE — micro cámara lenta al matar · v4.22: CON PRESUPUESTO — solo las
      4 primeras bajas de cada cadena re-ensamblan el hit-stop; a partir de la 5.ª la
@@ -104,7 +105,7 @@ function killEnemy(e,bySlot){
       pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60)});
     gainExp(Math.round(waveXp()*4*pl.expMul)); /* v4.9: élite x4 (antes x6) */
     floater(e.x,e.y-34,'¡ÉLITE CAÍDO!','#B388FF',14);
-    shake=Math.min(16,shake+6);
+    addQuake(6,16);
   }
   if(e.camp){
     save.totCamp=(save.totCamp||0)+1;
@@ -114,7 +115,7 @@ function killEnemy(e,bySlot){
         val:Math.max(2,Math.round((.8+run.level*.22)*pl.goldMul))});
     gainExp(Math.round(waveXp()*4*pl.expMul));
     floater(e.x,e.y-40,'¡CAMPISTA CAÍDO!','#FFD166',13);
-    shake=Math.min(16,shake+6);
+    addQuake(6,16);
     checkAch();
   }
   if(e.T.mage){
@@ -195,7 +196,7 @@ function damageEnemy(e,dmg,crit,bySlot){
   /* v4.10: los críticos se notan — número grande y sonido agudo */
   if(crit){
     floater(e.x+rand(-8,8),e.y-e.r-8,'¡'+Math.round(dmg)+'!','#FFD166',16);
-    shake=Math.min(14,shake+1.1); /* v4.18: el crítico también se siente */
+    shake=Math.min(14,shake+(!noCritShake?1.1:0)); /* v4.18: el crítico también se siente · v4.28: CONTRAPESADO lo apaga */
     critPing();
   }else floater(e.x+rand(-8,8),e.y-e.r-6,'-'+dmg,'#F2EFE6',11);
   /* v4.10: ORO POR PARTES — cada 20% de vida perdida suelta ~12,5% de su oro
@@ -349,7 +350,7 @@ function popMeteor(m){
     hostRing(m.x,m.y,140,'#B388FF');
     floater(m.x,m.y-26,'¡METEORITO PÚRPURA!','#B388FF',15);
     SFX.legend();tone(140,50,.4,'sawtooth',.09);
-    shake=Math.min(16,shake+6);hitStopT=Math.max(hitStopT,.06);vib(80);
+    addQuake(6,16);hitStopT=Math.max(hitStopT,.06);vib(80);
     banner('◈ ¡ANOMALÍA CAPTURADA!','Oro · gemas · '+relicMsg);
     checkAch();persist();
     return;
@@ -365,7 +366,7 @@ function popMeteor(m){
   hostRing(m.x,m.y,120,'#FFD166');
   floater(m.x,m.y-26,'¡METEORITO!','#FFD166',15);
   SFX.chest();tone(170,55,.32,'sawtooth',.09);
-  shake=Math.min(16,shake+4);hitStopT=Math.max(hitStopT,.05);vib(60);
+  addQuake(4,16);hitStopT=Math.max(hitStopT,.05);vib(60);
   banner('★ ¡METEORITO REVENTADO!','Lluvia de oro · recógela antes de que caiga');
   checkAch();persist();
 }
@@ -392,7 +393,7 @@ function resolveCube(p){
   rings.push({x:p.x,y:p.y,r:10,R:130,t:0,life:.55,color:'#FF7EB6'});
   hostRing(p.x,p.y,130,'#FF7EB6');
   burst(p.x,p.y,'#FF7EB6',22,200);burst(p.x,p.y,'#FFE9B0',12,140);
-  SFX.cube();shake=Math.min(16,shake+5);hitStopT=Math.max(hitStopT,.06);vib(60);
+  SFX.cube();addQuake(5,16);hitStopT=Math.max(hitStopT,.06);vib(60);
   if(Math.random()<.45){ /* 45%: NAVE AMIGA · 60 s con el doble de tu daño */
     const pl=players[0]||P;
     allies.push({x:pl?pl.x:W/2,y:pl?pl.y-60:H*.7,cd:.5,life:60,ph:rand(0,TAU)});
@@ -450,7 +451,7 @@ function openPortal(p){
   hostRing(p.x,p.y,170,'#B388FF');
   floater(p.x,p.y-30,'¡PORTAL ABIERTO!','#B388FF',15);
   SFX.portal();SFX.legend();
-  shake=Math.min(18,shake+8);hitStopT=Math.max(hitStopT,.09);vib(90);
+  addQuake(8,18);hitStopT=Math.max(hitStopT,.09);vib(90);
   banner('◈ PORTAL MISTERIOSO ABIERTO','La OLEADA ANÓMALA llega: botín ×2 · reliquia garantizada');
   checkAch();persist();
 }

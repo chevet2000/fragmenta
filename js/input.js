@@ -106,6 +106,22 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
   else if(weeklyMode)startWeekly();
   else startRun();
 });
+ /* v4.28: DESPLIEGUE — confirmar o guardar todo para luego */
+ bindEl('#btnDeployGo', 'click',()=>{ if(state==='deploy')confirmDeploy(false); });
+ bindEl('#btnDeploySkip', 'click',()=>{ if(state==='deploy')confirmDeploy(true); });
+ /* v4.28: REVANCHA — votar (el anfitrión cuenta los votos en hostRevanchaUI) */
+ bindEl('#btnRevancha', 'click',()=>{
+  audio();SFX.buy();vib(40);
+  const btn=$('#btnRevancha');
+  if(net.mode==='client'){
+    if(net.rvMe)return;
+    net.rvMe=true;
+    sendMsg({t:'rvY'});
+    if(btn){btn.disabled=true;btn.textContent='VOTASTE ✓ · ESPERANDO…';}
+    return;
+  }
+  if(net.mode==='host')net.rvMe=true; /* el temporizador de hostRevanchaUI lo cuenta */
+ });
  bindEl('#btnResume', 'click',()=>{state='play';showScr(null);});
  bindEl('#btnQuit', 'click',()=>{
   if(net.mode==='host'&&net.connected)sendMsg({t:'ev',k:'end'});

@@ -4,8 +4,8 @@
    global: cada gate lleva MODO. wave<=8 → cualquier modo · 9-14 → en
    NORMAL · 15-21 → en DIFÍCIL · 22+ → en HARDCORE (récord de oleada por
    modo, save.bestMode). Para completar el arsenal hay que jugarlos todos. */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',mrg:'FUSIÓN'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290};
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',est:'ESTABILIDAD',mrg:'FUSIÓN'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290,est:1385};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -183,6 +183,16 @@ const TREE=[
  {id:'df7',b:'dfn',i:7,req:'df6',cost:{gems:45},wave:20,md:'hardcore',tag:'MAR',name:'MAREA GRAVITATORIA',desc:'El agujero dura 6 s en vez de 4 y su succión es un 60% más fuerte.',fx:b=>{b.bhDur=6;b.bhPull=1.6}},
  {id:'df8',b:'dfn',i:8,req:'df7',cost:{gems:60},wave:22,md:'hardcore',tag:'COL',name:'COLAPSO FINAL',desc:'Al cerrarse, el agujero ESTALLA (x8 de daño en todo el radio) y cada enemigo devorado paga +2 de oro.',fx:b=>{b.bhBoom=true;b.bhGold=true}},
  {id:'df9',b:'dfn',i:9,req:'df8',cost:{gems:85},wave:24,md:'hardcore',tag:'EVT',name:'EVENTO HORIZONTE',desc:'TOPE · Recarga 20 → 13 s, daño x2 y cada enemigo devorado cura 1 PS a tu nave.',fx:b=>{b.bhCd=13;b.bhDmgMul=2;b.bhHeal=true}},
+ /* ===== v4.28: rama ESTABILIDAD — la cámara al servicio del piloto =====
+    Solo temblor VISUAL: la vibración de daño, muerte y Guardián (regla
+    sagrada de v4.22) siempre se siente. El temblor ambiental (bajas,
+    explosiones, meteoritos, eventos) es lo que la rama apaga. */
+ {id:'e1',b:'est',i:0,cost:{gold:500},wave:3,tag:'EST',name:'ESTABILIZADORES I',desc:'El temblor de cámara por bajas y explosiones baja un 35%.',fx:b=>b.quakeMul*=.65},
+ {id:'e2',b:'est',i:1,req:'e1',cost:{gold:1200},wave:6,tag:'EST2',name:'ESTABILIZADORES II',desc:'Otro -35% de temblor por bajas y explosiones (acumulado -58%).',fx:b=>b.quakeMul*=.65},
+ {id:'e3',b:'est',i:2,req:'e2',cost:{gems:8},wave:8,md:'normal',tag:'SUS',name:'SUSPENSIÓN MAGNÉTICA',desc:'Las explosiones de bajas, élites, campistas y meteoritos ya NO sacuden la cámara.',fx:b=>b.noQuake=true},
+ {id:'e4',b:'est',i:3,req:'e3',cost:{gems:12},wave:10,md:'normal',tag:'CON',name:'CONTRAPESADO',desc:'Tus propias detonaciones (nova, Aniquilador, agujero negro) y los críticos tampoco mueven la mira.',fx:b=>{b.noSelfQuake=true;b.noCritShake=true}},
+ {id:'e5',b:'est',i:4,req:'e4',cost:{gems:18},wave:9,md:'dificil',tag:'GIR',name:'GIROSCOPIO DOBLE',desc:'La cámara se estabiliza al DOBLE de velocidad tras cualquier sacudida.',fx:b=>b.quakeDecay=2},
+ {id:'e6',b:'est',i:5,req:'e5',cost:{gold:4000,gems:40},wave:12,md:'hardcore',ship:14,tag:'GIM',name:'CABINA GIMBAL',desc:'TOPE · ni siquiera el daño recibido sacude la cámara (solo tu muerte). La vibración sigue: es tu aviso de peligro.',fx:b=>b.noHurtShake=true},
 ];
 TREE.forEach(nd=>{
   if(nd.b==='mrg')return;

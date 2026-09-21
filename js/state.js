@@ -11,7 +11,11 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   /* v4.17: LAS MALDICIONES del HECHICERO — cada una afecta solo una cosa */
   curses:[],
   /* v4.18: ¿se batió el récord de combo en esta incursión? */
-  newComboRec:false};
+  newComboRec:false,
+  /* v4.28: DESPLIEGUE — las mejoras armadas que el piloto marcó para ESTA
+     incursión (salieron de save.armed al confirmar el despliegue; mueren
+     con la nave). Las NO marcadas se quedan en save.armed y sobreviven. */
+  armedTaken:null};
 /* v4.18: DOPAMINA — hit-stop (micro cámara lenta al matar) y OLEADA DORADA */
 let hitStopT=0;
 let goldenWave=false,lastGolden=-9;
@@ -34,6 +38,13 @@ let frenzyMode=false; /* v4.9: modo frenético */
 let dronePos={'0':[],'1':[]},droneCd={'0':[],'1':[]};
 let boss=null,bossName='';
 let formY=0,formT=0,time=0,shake=0,eid=1,fxId=1;
+/* v4.28: ESTABILIDAD — todo temblor AMBIENTAL (bajas, explosiones, meteoritos,
+   eventos y detonaciones propias) pasa por addQuake/selfQuake, así la rama
+   ESTABILIDAD del arsenal lo apaga de forma centralizada. El daño recibido,
+   tu muerte y el Guardián sacuden por fuera: feedback sagrado de v4.22. */
+let quakeMul=1,quakeDecay=1,noQuake=false,noSelfQuake=false,noCritShake=false,noHurtShake=false;
+function addQuake(v,cap){ if(!noQuake)shake=Math.min(cap||14,shake+v*quakeMul); }
+function selfQuake(v,cap){ if(!noSelfQuake)shake=Math.min(cap||14,shake+v*quakeMul); }
 let waveState='idle',clearTimer=0;
 let wave={type:'form',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:0,side:1,pool:[]};
 let bannerT=0,bannerTxt='',bannerSub='';const BANNER_LIFE=1.9;

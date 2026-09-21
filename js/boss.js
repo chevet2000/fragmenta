@@ -926,7 +926,7 @@ function updFx(dt){
   if(amClient()){for(const h of holes)h.t+=dt;holes=holes.filter(h=>h.t<h.life);}
   for(const em of emosFx){em.t+=dt;em.y-=24*dt;}
   emosFx=emosFx.filter(em=>em.t<em.life);
-  shake=Math.max(0,shake-dt*34);
+  shake=Math.max(0,shake-dt*34*quakeDecay); /* v4.28: GIROSCOPIO DOBLE estabiliza al doble */
   bannerT=Math.max(0,bannerT-dt);
   frenzyT=Math.max(0,frenzyT-dt);
   if(frenzyT<=0)run.combo=0;

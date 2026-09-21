@@ -48,6 +48,7 @@ function destroyNet(){
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
   net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;net.rankGot=false;
   net.remotePilots=[];net.mySlot=1;
+  net.depOk={};net.rvMe=false;net.rvSlots={}; /* v4.28: despliegue + revancha */
   net.chosen={};net.cards={};net.relicOk={};net.relicId={};
   net.remoteSkin={};
 }
@@ -73,7 +74,10 @@ function blankStats(){
     /* v4.13: DEFINITIVA · Cañón Aniquilador */
     ult:false,ultCd:14,ultDmg:10,ultAim:false,ultBurn:false,ultShock:false,
     /* v4.14: 2ª DEFINITIVA · Agujero Negro */
-    bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false};
+    bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false,
+    /* v4.28: ESTABILIDAD — control de temblor de cámara (no viaja: cada
+       pantalla calcula los suyos en recompute con su árbol local) */
+    quakeMul:1,quakeDecay:1,noQuake:false,noSelfQuake:false,noCritShake:false,noHurtShake:false};
 }
 /* v4.15: lobby del anfitrión con lista de pilotos conectados (1–2 pueden entrar) */
 /* v4.26: estado REAL de sincronía en el lobby — el ranking de cada piloto
@@ -173,6 +177,8 @@ function hostLostClient(wrap){
   net.connected=connsOpen()>0;
   if(!net.conn)net.conn=net.conns.length?net.conns[0].c:null;
   if(!runActive){
+    /* v4.28: si estabamos votando revancha y se fue el último cliente, se cancela */
+    if(state==='over'&&connsOpen()===0){rvToken++;rvCleanup();}
     lobbyStatus();
     return;
   }
@@ -248,6 +254,10 @@ function hostOnData(d,wrap){
   if(d.t==='chestPick'&&state==='chestwait'){
     chestSlot=slot; chestReward(d.id,d.kind); return;
   }
+  /* v4.28: confirmación de DESPLIEGUE del cliente */
+  if(d.t==='depOk'){ net.depOk[slot]=true; checkDeployReady(); return; }
+  /* v4.28: voto de REVANCHA del cliente */
+  if(d.t==='rvY'){ net.rvSlots[slot]=true; return; }
   if(d.t==='bye'){ if(runActive)runActive=false; destroyNet(); goMenu(); }
 }
 function checkShipChoice(){
@@ -454,6 +464,8 @@ function clientEvent(d){
   if(k==='curs'){ applyCurses(d.l); return; } /* v4.17: maldiciones del HECHICERO */
   if(k==='chestw'){ banner('COFRE','El anfitrión está abriendo…'); return; }
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
+  if(k==='depGo'){ /* v4.28: el anfitrión lanzó la incursión — informativo, el cliente ya está en play */ return; }
+  if(k==='rvGo'){ clientRevanchaGo(); return; } /* v4.28: todos votaron revancha */
   if(k==='over'){
     save.best.lvl=Math.max(save.best.lvl,d.level);
     save.bestAll=Math.max(save.bestAll,d.level);
@@ -467,9 +479,9 @@ function clientEvent(d){
     /* v4.25: y EMPUJA su ranking actualizado al anfitrión (antes solo viajaba
        al conectar: el rival no veía tus récords MULTI de esta sesión) */
     sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});
-    /* v4.21: las MEJORAS ARMADAS mueren con la incursión (como en solo) */
-    const hadArmed=(save.armed||[]).length>0;
-    if(hadArmed){save.armed=[];}
+    /* v4.28: las DESPLEGADAS murieron con la incursión; las GUARDADAS sobreviven */
+    const nTaken=(run.armedTaken||[]).length;
+    const nKept=(save.armed||[]).length;
     persist();
     runActive=false;state='over';
     musStop();
@@ -477,10 +489,13 @@ function clientEvent(d){
     const st=(kk,v)=>`<div><small>${kk}</small><b>${v}</b></div>`;
     $('#ovStats').innerHTML=st('OLEADA',d.level)+st('NAVE NIVEL',d.ship)+st('ORO DE LA INCURSIÓN',d.yg);
     $('#ovKeep').innerHTML='<span class="k1">SE CONSERVA · árbol · oro · gemas · récords · logros (perfil online)</span><br>'+
-      (hadArmed?'<span class="k2">✦ LAS MEJORAS ARMADAS SE HAN PERDIDO CON LA INCURSIÓN</span><br>':'')+
+      (nTaken?`<span class="k2">✦ LAS ${nTaken} MEJORA${nTaken>1?'S':''} DESPLEGADA${nTaken>1?'S':''} SE HAN PERDIDO CON LA INCURSIÓN</span><br>`:'')+
+      (nKept?`<span class="k1">✦ ${nKept} MEJORA${nKept>1?'S':''} GUARDADA${nKept>1?'S':''} · elige en el DESPLIEGUE</span><br>`:'')+
       '<span class="k2">SE PIERDE · cartas y reliquias de la incursión</span>';
     $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
-    showScr('over'); return;
+    showScr('over');
+    clientRevanchaUI(); /* v4.28: la sala sigue viva — ¿revancha? */
+    return;
   }
   if(k==='end'){ netEndLocal('El anfitrión cerró la sala.'); return; }
 }
@@ -533,3 +548,99 @@ function applySnap(d){
   cNovaCd=d.nc;
 }
 
+
+/* ===== v4.28: REVANCHA EN CO-OP =====
+   Al morir TODOS, la sala NO se cierra: la pantalla final ofrece
+   ¡REVANCHA! con 30 s de votación. Si el 100% del equipo vota, cuenta
+   atrás y la incursión se rearma NUEVA (oleada 1) en la MISMA sala,
+   sin reconectar — lo más frágil del co-op. Lo ganado en la incursión
+   que terminó ya quedó guardado (récords, oro, ranking). Si no hay
+   unanimidad o expira el tiempo, el final de siempre. */
+let rvTimer=null,rvLeft=0,rvToken=0;
+function rvHideUI(){
+  const b=$('#btnRevancha');if(b)b.classList.add('hidden');
+  const s=$('#rvStat');if(s){s.classList.add('hidden');s.textContent='';}
+  const r=$('#btnRetry');if(r)r.classList.remove('hidden');
+}
+function rvCleanup(){
+  if(rvTimer){clearInterval(rvTimer);rvTimer=null;}
+  rvHideUI();
+}
+/* anfitrión: pantalla de votación tras el 'over' co-op */
+function hostRevanchaUI(){
+  net.rvMe=false;net.rvSlots={};
+  $('#btnRetry').classList.add('hidden'); /* en co-op no hay "reintentar" en solitario */
+  const btn=$('#btnRevancha');btn.classList.remove('hidden');btn.disabled=false;
+  btn.textContent='⚔ ¡REVANCHA!';
+  const st=$('#rvStat');st.classList.remove('hidden');
+  st.textContent='VOTAD TODOS: 0/'+players.length+' · si falta uno, no hay revancha · 30 s';
+  rvLeft=30;const tok=++rvToken;
+  if(rvTimer)clearInterval(rvTimer);
+  rvTimer=setInterval(()=>{
+    if(tok!==rvToken){clearInterval(rvTimer);rvTimer=null;return;}
+    rvLeft--;
+    if(rvLeft<=0){
+      clearInterval(rvTimer);rvTimer=null;
+      st.textContent='LA REVANCHA EXPIRÓ · podéis salir por MENÚ';
+      btn.classList.add('hidden');
+      return;
+    }
+    const votes=(net.rvMe?1:0)+Object.keys(net.rvSlots).length;
+    if(votes>=players.length){clearInterval(rvTimer);rvTimer=null;launchRevancha(tok);return;}
+    st.textContent=(net.rvMe?'TU VOTO ESTÁ DENTRO · ':'')+'VOTAD TODOS: '+votes+'/'+players.length+' · '+rvLeft+' s';
+    if(net.rvMe){btn.disabled=true;btn.textContent='VOTASTE ✓ · ESPERANDO…';}
+  },1000);
+}
+/* anfitrión: unanimidad → cuenta atrás y incursión nueva en la misma sala */
+function launchRevancha(tok){
+  const st=$('#rvStat');
+  sendMsg({t:'ev',k:'rvGo'});
+  SFX.relic();vib(60,true);
+  let n=3;
+  st.textContent='¡TODOS VOTARON! · INCURSIÓN NUEVA EN 3…';
+  const iv=setInterval(()=>{
+    if(tok!==rvToken){clearInterval(iv);return;}
+    n--;
+    if(n>0){st.textContent='¡TODOS VOTARON! · INCURSIÓN NUEVA EN '+n+'…';return;}
+    clearInterval(iv);rvCleanup();
+    startCoop(); /* rearma la incursión: players nuevos, oleada 1, MISMA sala */
+  },900);
+}
+/* cliente: pantalla de votación al recibir 'over' */
+function clientRevanchaUI(){
+  net.rvMe=false;
+  $('#btnRetry').classList.add('hidden');
+  const btn=$('#btnRevancha');btn.classList.remove('hidden');btn.disabled=false;
+  btn.textContent='⚔ ¡REVANCHA!';
+  const st=$('#rvStat');st.classList.remove('hidden');
+  st.textContent='Si votáis TODOS, arranca una incursión nueva sin salir de la sala · 30 s';
+  rvLeft=30;const tok=++rvToken;
+  if(rvTimer)clearInterval(rvTimer);
+  rvTimer=setInterval(()=>{
+    if(tok!==rvToken){clearInterval(rvTimer);rvTimer=null;return;}
+    rvLeft--;
+    if(rvLeft<=0){
+      clearInterval(rvTimer);rvTimer=null;
+      st.textContent='LA REVANCHA EXPIRÓ · podéis salir por MENÚ';
+      btn.classList.add('hidden');
+      return;
+    }
+    if(!net.rvMe)st.textContent='Si votáis TODOS, arranca una incursión nueva sin salir de la sala · '+rvLeft+' s';
+  },1000);
+}
+/* cliente: el anfitrión confirmó unanimidad → cuenta atrás visual;
+   el 'start' que llega después rearma la incursión (startRunClient) */
+function clientRevanchaGo(){
+  rvToken++; /* cancela el temporizador de votación */
+  if(rvTimer){clearInterval(rvTimer);rvTimer=null;}
+  net.rvMe=false;net.rvSlots={};
+  const st=$('#rvStat');
+  let n=3;
+  if(st){st.classList.remove('hidden');st.textContent='¡TODOS VOTARON! · INCURSIÓN NUEVA EN 3…';}
+  SFX.relic();vib(60,true);
+  const iv=setInterval(()=>{
+    n--;
+    if(n>0){if(st)st.textContent='¡TODOS VOTARON! · INCURSIÓN NUEVA EN '+n+'…';return;}
+    clearInterval(iv);rvHideUI();
+  },900);
+}

@@ -26,8 +26,10 @@ function recompute(){
     if(RR('mente'))b.expMul*=1.3;
     if(RR('crudas'))b.gemLuck=true;
     /* v4.21: MEJORAS ARMADAS de la Bóveda — cada perfil aplica las suyas
-       (en co-op el statblock del cliente ya las lleva incorporadas) */
-    for(const pid of (save.armed||[])){const pk=perkById(pid);if(pk)pk.fx(b);}
+       (en co-op el statblock del cliente ya las lleva incorporadas).
+       v4.28: desde el DESPLIEGUE solo se aplican las que el piloto marcó
+       (run.armedTaken); las que guardó siguen en save.armed sin aplicarse. */
+    for(const pid of (run.armedTaken!=null?run.armedTaken:(save.armed||[]))){const pk=perkById(pid);if(pk)pk.fx(b);}
     return b;
   };
   players.forEach((pl,i)=>{
@@ -63,6 +65,14 @@ function recompute(){
     if(pl.maxHp>oldMax)pl.hp=Math.min(pl.maxHp,pl.hp+(pl.maxHp-oldMax));
     pl.hp=Math.min(pl.hp,pl.maxHp);
   });
+  /* v4.28: ESTABILIDAD — los globals de cámara salen del árbol del PERFIL
+     LOCAL (el temblor es cosa de cada pantalla, no viaja por la red). */
+  {
+    const q=blankStats();
+    for(const nd of TREE)if(has(nd.id))nd.fx(q);
+    quakeMul=q.quakeMul;quakeDecay=q.quakeDecay;noQuake=q.noQuake;
+    noSelfQuake=q.noSelfQuake;noCritShake=q.noCritShake;noHurtShake=q.noHurtShake;
+  }
 }
 
 /* ============ efectos ============ */

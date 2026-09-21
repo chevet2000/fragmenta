@@ -65,7 +65,7 @@ function openLucky(slot,rar,remote){
   burst(pl.x,pl.y,LUCK_COL[rar],rar==='l'?28:14,rar==='l'?210:130);
   floater(pl.x,pl.y-42,'COFRE '+LUCK_NAME[rar],LUCK_COL[rar],rar==='l'?16:13);
   if(rar==='l'){
-    SFX.legend();shake=Math.min(16,shake+7);hitStopT=Math.max(hitStopT,.09);vib(90);
+    SFX.legend();addQuake(7,16);hitStopT=Math.max(hitStopT,.09);vib(90);
     rings.push({x:pl.x,y:pl.y,r:10,R:150,t:0,life:.55,color:'#FFD166'});
     if(net.mode==='host')hostRing(pl.x,pl.y,150,'#FFD166');
   }else if(rar==='e'){SFX.chest();vib(45);}

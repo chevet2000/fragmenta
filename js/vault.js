@@ -16,7 +16,7 @@ function vaultArmedHTML(){
   if(!list.length)return '';
   const cnt={};list.forEach(p=>cnt[p.name]=(cnt[p.name]||0)+1);
   return '<div class="varmed"><b>✦ MEJORAS ARMADAS ('+list.length+')</b>'+
-    '<small>Se aplican al empezar tu PRÓXIMA partida · duran HASTA QUE MUERAS</small>'+
+    '<small>En el DESPLIEGUE eliges cuáles llevar · las desplegadas mueren contigo, las guardadas sobreviven</small>'+
     '<div>'+Object.keys(cnt).map(k=>'<span>'+(cnt[k]>1?k+' ×'+cnt[k]:k)+'</span>').join('')+'</div></div>';
 }
 function openVault(){
@@ -325,7 +325,7 @@ function resolveVault(tier,orig){
   }else{
     SFX.vaultOpen();vib(50);
     msg.innerHTML=got.map(p=>'<b style="color:#7FD1B9">✦ '+p.name+'</b> — '+p.desc).join('<br>')+
-      '<div class="vnote">ARMADAS · se aplican al empezar tu próxima partida y duran HASTA QUE MUERAS</div>';
+      '<div class="vnote">ARMADAS · en el DESPLIEGUE eliges si llevarlas a la incursión; si las GUARDAS, sobreviven aunque caigas</div>';
   }
   $('#btnVgCancel').textContent='VOLVER A LA BÓVEDA';
   refreshMenu();
