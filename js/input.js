@@ -262,7 +262,13 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
 });
  bindEl('#btnLobbyArsenal', 'click',()=>openShop('lobby'));
  bindEl('#btnLobbyCancel', 'click',()=>{destroyNet();goMenu();});
- bindEl('#btnStartCoop', 'click',()=>{if(net.connected)startCoop();});
+ bindEl('#btnStartCoop', 'click',()=>{
+  if(!net.connected)return;
+  /* v4.26: doble comprobación de sincronía — sin el ranking de todos los
+     pilotos la partida no arranca (el botón ya viene disabled desde lobbyStatus) */
+  if(!canStartCoop()){banner('SINCRONIZANDO…','El ranking de los pilotos aún viaja · espera un momento');return;}
+  startCoop();
+});
  bindEl('#btnJoin', 'click',()=>{
   audio();
   $('#joinInput').value='';
@@ -276,6 +282,9 @@ document.querySelectorAll('#diffRow button').forEach(b=>{
   joinRoom(c);
 });
  bindEl('#btnJoinCancel', 'click',()=>{destroyNet();goMenu();});
+ /* v4.26: escáner de QR de sala — la cámara lee el código del anfitrión */
+ bindEl('#btnScan', 'click',()=>{openScanner();});
+ bindEl('#btnScanClose', 'click',()=>{closeScanner();});
  bindEl('#btnNwSolo', 'click',()=>{
   if(net.mode==='host'&&runActive){
     sendMsg({t:'ev',k:'end'});

@@ -459,12 +459,23 @@ button{font-family:inherit}
 #vaultGame{text-align:center;user-select:none;-webkit-user-select:none;touch-action:none}
 #vgTitle{font-size:12px;letter-spacing:.2em;margin-bottom:8px}
 #vgTitle span{color:var(--amber)}
-#vgSvg{width:170px;height:170px;display:block;margin:2px auto 6px}
-#vgSvg .vgring{fill:none;stroke:#2A3440;stroke-width:11}
-#vgSvg .vgzone{fill:none;stroke:#7FD1B9;stroke-width:11}
-#vgSvg .vgdecoy{fill:none;stroke:#FF4757;stroke-width:11}
-#vgSvg .vgdecoy.hidden{display:none}
-#vgMark{stroke:#F2EFE6;stroke-width:3;stroke-linecap:round}
+/* v4.26: CERRADURA DE ECO — 6 runas (memoria, sin reflejos);
+   el anillo de pulsos y su franja roja se jubilan junto con su SVG */
+#vgEcho{display:grid;grid-template-columns:repeat(3,64px);gap:8px;justify-content:center;margin:6px auto 4px}
+#vgEcho.hidden{display:none}
+.vgruna{width:64px;height:64px;border:1.5px solid var(--line);border-radius:12px;
+  background:rgba(7,9,13,.55);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:6px 0 5px;touch-action:manipulation;transition:background .12s,box-shadow .12s}
+.vgruna i{font-style:normal;font-size:7px;letter-spacing:.16em;color:var(--dim)}
+.vgruna:active{background:rgba(242,239,230,.08)}
+.vgruna.lit{border-color:var(--rc,#7FD1B9);background:rgba(127,209,185,.25);
+  box-shadow:0 0 16px rgba(127,209,185,.45)}
+.vgruna.lit{background:color-mix(in srgb,var(--rc,#7FD1B9) 26%,rgba(7,9,13,.4));
+  box-shadow:0 0 16px color-mix(in srgb,var(--rc,#7FD1B9) 60%,transparent)}
+.vgruna.lit i{color:var(--ink)}
+.vgruna.bad{border-color:var(--coral);background:rgba(255,107,107,.22);
+  box-shadow:0 0 16px rgba(255,107,107,.55)}
 #vgHearts{margin:4px 0 6px}
 #vgHearts small{display:block;font-size:7.5px;letter-spacing:.22em;color:var(--dim);margin-bottom:2px}
 #vgHearts b{font-size:13px;letter-spacing:.35em;color:var(--amber)}
@@ -507,3 +518,18 @@ button{font-family:inherit}
 .mt-pay{text-align:right;flex:none;font-size:10px;letter-spacing:.08em;color:var(--ink)}
 .mt-pay em{display:block;font-style:normal;font-size:8px;letter-spacing:.2em;color:var(--mint);margin-top:4px}
 .mtier.no .mt-pay em{color:var(--coral)}
+
+/* ============ v4.26: QR DE SALA + ESCÁNER ============ */
+#lobbyQr{display:block;margin:2px auto 4px;width:150px;height:150px;
+  border:6px solid #fff;border-radius:10px;background:#fff;image-rendering:pixelated}
+.qrhint{font-size:7.5px;letter-spacing:.18em;color:var(--dim);margin:0 0 8px;line-height:1.7}
+#btnStartCoop:disabled{opacity:.5}
+#scanBox{position:fixed;inset:0;z-index:20;background:rgba(7,9,13,.97);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px}
+.scanframe{position:relative;width:min(76vw,320px);height:min(76vw,320px);
+  border:1.5px solid var(--mint);border-radius:14px;overflow:hidden;background:#000}
+#scanVid{width:100%;height:100%;object-fit:cover;opacity:.92}
+.scanline{position:absolute;left:8%;right:8%;top:12%;height:2px;background:var(--mint);
+  box-shadow:0 0 12px var(--mint);animation:scanmove 1.6s ease-in-out infinite alternate}
+@keyframes scanmove{from{top:12%}to{top:86%}}
+#scanStat{min-height:30px;text-align:center}

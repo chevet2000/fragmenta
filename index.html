@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.25">
+<html lang="es" data-v="4.26">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.25 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.26 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.25">
+<link rel="stylesheet" href="css/styles.css?v=4.26">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -91,13 +91,23 @@
   <button class="btn" style="width:220px;margin-top:8px" id="btnNwCancel">SALIR</button>
 </div>
 
+<div id="scanBox" class="hidden">
+  <div class="p-kicker" style="color:var(--mint)">ESCANEAR QR DE SALA</div>
+  <div class="scanframe">
+    <video id="scanVid" playsinline muted autoplay></video>
+    <div class="scanline"></div>
+  </div>
+  <div class="netstat" id="scanStat">APUNTA AL QR DE LA SALA</div>
+  <button class="btn" id="btnScanClose" style="width:220px;margin-top:8px">CANCELAR</button>
+</div>
+
 <div class="scr show" id="scrMenu">
   <div id="hero">
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.25</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.25</b> compone cuatro averías: <b>1 · CO-OP ONLINE ARREGLADO DE RAÍZ</b> — desde la v4.15 los mensajes del cliente NUNCA salían de su dispositivo (posición, cartas, cofres, ranking): por eso la nave del P2 solo se movía cuando el anfitrión la arrastraba. Ahora cada piloto mueve SOLO su nave y la del compañero viaja por la red. <b>2 · COLORES HONESTOS</b> — el aspecto del hangar de cada piloto viaja por la conexión: ambas pantallas pintan la misma pareja de colores (y el aspecto MENTA por defecto ya no pinta ambas naves iguales en el P2). <b>3 · RANKING MULTI EN VIVO</b> — los récords MULTI ya no viajan solo al conectar: el anfitrión los reenvía en cada oleada récord y el cliente empuja los suyos al terminar. <b>4 · BÓVEDA: LEGENDARIO GANABLE + PUZZLE DE LLAVES</b> — la cerradura del legendario ya no nace pegada al marcador (mínimo 110° de reacción), la franja roja queda lejos de la zona (solo el legendario la tiene, validado) y el épico/legendario estrenan ELIGE LA LLAVE: 5 llaves, 1 correcta, 3 intentos. Además: récord por oleada (v4.24), compra masiva, gemas escasas y cerradura honesta se mantienen.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.26</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.26</b> afina la sala y la Bóveda: <b>1 · RANKING AL CONECTAR</b> — el ranking se sincroniza en cuanto os conectáis en el lobby, ANTES de iniciar la partida; el stat muestra la sincronía de cada piloto y el botón COMENZAR no se libera hasta que los datos están sincronizados (con margen de seguridad de 12 s). <b>2 · QR DE SALA</b> — el anfitrión muestra un QR con el código de 5 caracteres y el compañero entra desde «ONLINE · UNIRSE» → ESCANEAR QR: la cámara lee el código y os une sin teclear nada (BarcodeDetector o jsQR; sin cámara, el código manual sigue igual). <b>3 · CERRADURA DE ECO</b> — el puzzle de pulsos (reflejos + latencia táctil) se jubila: las cerraduras son ahora de MEMORIA — 6 runas iluminan una secuencia con su tono y la repites a tu ritmo; fallar consume 1 resistencia (de 4) y la misma secuencia vuelve a sonar. Raro: 1 eco · épico: eco + llaves · legendario: eco doble + llaves. Se mantienen: co-op reparado, colores sincronizados, ranking multi en vivo, legendario ganable, récord por oleada, compra masiva y gemas escasas.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -138,7 +148,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.25 · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.26 · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -269,12 +279,7 @@
     </div>
     <div id="vaultGame" class="hidden">
       <div id="vgTitle"></div>
-      <svg id="vgSvg" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" r="46" class="vgring"/>
-        <circle cx="60" cy="60" r="46" id="vgDecoy" class="vgdecoy hidden"/>
-        <circle cx="60" cy="60" r="46" id="vgZone" class="vgzone"/>
-        <line id="vgMark" x1="60" y1="60" x2="60" y2="11"/>
-      </svg>
+      <div id="vgEcho" class="hidden"></div>
       <div id="vgKeys" class="hidden"></div>
       <div id="vgHearts"></div>
       <div id="vgMsg"></div>
@@ -309,7 +314,9 @@
     <div class="p-kicker" style="color:var(--mint)">SALA CREADA</div>
     <h2>ESPERANDO PILOTOS · 2–3</h2>
     <div class="code" id="lobbyCode">-----</div>
-    <button class="btn" id="btnCopy" style="margin-bottom:12px">COPIAR CÓDIGO</button>
+    <button class="btn" id="btnCopy" style="margin-bottom:6px">COPIAR CÓDIGO</button>
+    <canvas id="lobbyQr" class="hidden" aria-label="QR del código de sala"></canvas>
+    <div class="qrhint hidden" id="qrHint">TU COMPAÑERO PUEDE ESCANEAR ESTE QR<br>DESDE «ONLINE · UNIRSE» → ESCANEAR QR</div>
     <div style="font-size:9px;letter-spacing:.3em;color:var(--dim)">DIFICULTAD DE LA PARTIDA</div>
     <div class="diffrow" id="lobbyDiffRow">
       <button data-d="normal" class="on">NORMAL ×2.2</button>
@@ -328,7 +335,8 @@
     <div class="p-kicker" style="color:var(--sky)">UNIRSE A SALA</div>
     <h2>CÓDIGO DE SALA</h2>
     <input id="joinInput" maxlength="5" placeholder="·····" autocomplete="off" autocapitalize="characters">
-    <div class="netstat" id="joinStat">Pide el código de 5 letras a tu compañero.<br><span class="prof">USARÁS TU PERFIL ONLINE (separado del local)</span></div>
+    <button class="btn" id="btnScan" style="margin-top:8px">📷 ESCANEAR QR DE SALA</button>
+    <div class="netstat" id="joinStat">Pide el código de 5 letras a tu compañero<br>o escanea el QR de su pantalla.<br><span class="prof">USARÁS TU PERFIL ONLINE (separado del local)</span></div>
     <button class="btn primary" id="btnJoinGo" style="margin-top:12px">CONECTAR</button>
     <button class="btn" id="btnJoinCancel" style="margin-top:10px">CANCELAR</button>
   </div>
@@ -417,33 +425,36 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.25"></script>
-<script src="js/profile.js?v=4.25"></script>
-<script src="js/achievements.js?v=4.25"></script>
-<script src="js/audio.js?v=4.25"></script>
-<script src="js/config.js?v=4.25"></script>
-<script src="js/tree.js?v=4.25"></script>
-<script src="js/relics.js?v=4.25"></script>
-<script src="js/state.js?v=4.25"></script>
-<script src="js/net.js?v=4.25"></script>
-<script src="js/core.js?v=4.25"></script>
-<script src="js/enemies.js?v=4.25"></script>
-<script src="js/waves.js?v=4.25"></script>
-<script src="js/boss.js?v=4.25"></script>
-<script src="js/loot.js?v=4.25"></script>
-<script src="js/player.js?v=4.25"></script>
-<script src="js/azar.js?v=4.25"></script>
-<script src="js/curses.js?v=4.25"></script>
-<script src="js/chests.js?v=4.25"></script>
-<script src="js/netsync.js?v=4.25"></script>
-<script src="js/render.js?v=4.25"></script>
-<script src="js/screens.js?v=4.25"></script>
-<script src="js/treeui.js?v=4.25"></script>
-<script src="js/hud.js?v=4.25"></script>
-<script src="js/vault.js?v=4.25"></script>
-<script src="js/merc.js?v=4.25"></script>
-<script src="js/input.js?v=4.25"></script>
-<script src="js/game.js?v=4.25"></script>
-<script src="js/update.js?v=4.25"></script>
+<script src="js/utils.js?v=4.26"></script>
+<script src="js/profile.js?v=4.26"></script>
+<script src="js/achievements.js?v=4.26"></script>
+<script src="js/audio.js?v=4.26"></script>
+<script src="js/config.js?v=4.26"></script>
+<script src="js/tree.js?v=4.26"></script>
+<script src="js/relics.js?v=4.26"></script>
+<script src="js/state.js?v=4.26"></script>
+<script src="js/net.js?v=4.26"></script>
+<script src="js/vendor/qrcode.js?v=4.26"></script>
+<script src="js/vendor/jsQR.js?v=4.26"></script>
+<script src="js/qr.js?v=4.26"></script>
+<script src="js/core.js?v=4.26"></script>
+<script src="js/enemies.js?v=4.26"></script>
+<script src="js/waves.js?v=4.26"></script>
+<script src="js/boss.js?v=4.26"></script>
+<script src="js/loot.js?v=4.26"></script>
+<script src="js/player.js?v=4.26"></script>
+<script src="js/azar.js?v=4.26"></script>
+<script src="js/curses.js?v=4.26"></script>
+<script src="js/chests.js?v=4.26"></script>
+<script src="js/netsync.js?v=4.26"></script>
+<script src="js/render.js?v=4.26"></script>
+<script src="js/screens.js?v=4.26"></script>
+<script src="js/treeui.js?v=4.26"></script>
+<script src="js/hud.js?v=4.26"></script>
+<script src="js/vault.js?v=4.26"></script>
+<script src="js/merc.js?v=4.26"></script>
+<script src="js/input.js?v=4.26"></script>
+<script src="js/game.js?v=4.26"></script>
+<script src="js/update.js?v=4.26"></script>
 </body>
 </html>

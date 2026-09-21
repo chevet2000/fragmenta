@@ -232,17 +232,18 @@ function rollSealed(kind){
 
 /* ============ v4.23: EL MERCADER PIRATA GALÁCTICO ============
    NPC del menú (no un botón más): cofres del MERCADO NEGRO que se
-   pagan con ORO Y GEMAS y van a la Bóveda para abrirse con la
-   cerradura de pulsos. Siempre contienen botín: el riesgo del mercado
+   pagan con ORO Y GEMAS y van a la Bóveda para abrirse con sus
+   cerraduras (v4.26: ECO DE RUNAS y LLAVES — memoria, sin reflejos).
+   Siempre contienen botín: el riesgo del mercado
    negro es el precio… y la cerradura (cada 4 fallos baja la calidad).
    · OFERTA DEL DÍA: un cofre distinto cada día paga −40% (igual para
      todos, determinista por fecha).
    · PRECIO DINÁMICO: cada compra del MISMO cofre en el día +10%.
      Al día siguiente vuelve a su precio base. */
 const MERC_TIERS=[
- {id:'r',rar:'r',gold:2500, gems:5, name:'COFRE DE CONTRABANDO',sub:'Cerradura simple · 1 mejora armada'},
- {id:'e',rar:'e',gold:6000, gems:12,name:'COFRE DEL CAPITÁN',   sub:'2 cerraduras · 2 mejoras armadas'},
- {id:'l',rar:'l',gold:12000,gems:30,name:'COFRE DEL KRAKEN',    sub:'3 cerraduras · 3 mejoras · zona trampa'},
+ {id:'r',rar:'r',gold:2500, gems:5, name:'COFRE DE CONTRABANDO',sub:'Cerradura de ECO · 1 mejora armada'},
+ {id:'e',rar:'e',gold:6000, gems:12,name:'COFRE DEL CAPITÁN',   sub:'ECO + LLAVES · 2 mejoras armadas'},
+ {id:'l',rar:'l',gold:12000,gems:30,name:'COFRE DEL KRAKEN',    sub:'ECO doble + LLAVES · 3 mejoras'},
 ];
 const MERC_STEP=1.10;
 function mercDealId(){return MERC_TIERS[Math.abs(hashStr('FRGMERC-'+daySeed()))%MERC_TIERS.length].id;}

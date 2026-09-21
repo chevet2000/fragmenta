@@ -8,8 +8,8 @@ let pingTimer=null;
 const net={mode:null,peer:null,conn:null,conns:[],code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
   hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal',
-  remotePilot:null,remotePilots:[],mySlot:1,remoteSkin:{},
-  chosen:{},cards:{},relicOk:{},relicId:{}}; /* v4.15: elecciones por slot + lista de pilotos */
+  remotePilot:null,remotePilots:[],mySlot:1,remoteSkin:{},rankGot:false,
+  chosen:{},cards:{},relicOk:{},relicId:{}}; /* v4.15: elecciones por slot + lista de pilotos · v4.26: rankGot (cliente) */
 const amClient=()=>net.mode==='client';
 const connsOpen=()=>net.conns.filter(c=>c.open).length;
 /* v4.25: BUG HISTÓRICO (desde v4.15) — en modo CLIENTE net.conns está vacía,
@@ -40,7 +40,7 @@ function destroyNet(){
   net.walletG=0;net.walletM=0;net.retries=0;net.ping=0;
   net.hostChosen=false;net.clientChosen=false;net.hostCard=null;net.clientCard=null;
   net.hostRelic=false;net.clientRelic=false;net.hostRelicId=null;net.clientRelicId=null;
-  net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;
+  net.remoteStats={};net.lobbyDiff='normal';net.rankSent=false;net.remotePilot=null;net.rankGot=false;
   net.remotePilots=[];net.mySlot=1;
   net.chosen={};net.cards={};net.relicOk={};net.relicId={};
   net.remoteSkin={};
@@ -70,13 +70,32 @@ function blankStats(){
     bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false};
 }
 /* v4.15: lobby del anfitrión con lista de pilotos conectados (1–2 pueden entrar) */
+/* v4.26: estado REAL de sincronía en el lobby — el ranking de cada piloto
+   viaja por su conexión al entrar; el botón COMENZAR queda bloqueado
+   (disabled) hasta que TODOS los conectados han intercambiado su ranking
+   con el anfitrión. Antes el stat decía «Ranking sincronizado» siempre y
+   el botón se liberaba con solo abrir la conexión. */
 function lobbyStatus(){
-  const n=connsOpen();
-  const names=net.remotePilots.length?net.remotePilots.map(p=>'● PILOTO '+p).join('<br>'):'Esperando pilotos…';
-  $('#lobbyStat').innerHTML='<span class="ok">PILOTOS CONECTADOS: '+n+'/2</span><br><span class="prof">'+names+'</span><br><span class="prof">Ranking sincronizado</span>';
+  const open=net.conns.filter(c=>c.open);
+  const n=open.length;
+  let rows='';
+  for(const c of open){
+    const nm=c.gotName||net.remotePilot||('PILOTO '+(c.slot||1));
+    rows+='<span class="prof">● '+nm+' · '+(c.rankGot?'<span class="ok">RANKING ✓</span>':'<span style="color:var(--amber)">SINCRONIZANDO…</span>')+'</span><br>';
+  }
+  const allSync=n>0&&open.every(c=>c.rankGot);
   const bt=$('#btnStartCoop');
   bt.classList.toggle('hidden',n<1);
-  if(n>=1)bt.textContent='COMENZAR · '+(n+1)+' JUGADORES';
+  bt.disabled=!allSync;
+  if(n>=1)bt.textContent=allSync?'COMENZAR · '+(n+1)+' JUGADORES':'SINCRONIZANDO RANKING…';
+  $('#lobbyStat').innerHTML='<span class="ok">PILOTOS CONECTADOS: '+n+'/2</span><br>'+rows+
+    (allSync?'<span class="ok">DATOS SINCRONIZADOS ✓ · LISTO PARA INICIAR</span>'
+            :'<span class="prof">El ranking se sincroniza al conectar · COMENZAR se libera al terminar</span>');
+}
+/* v4.26: el inicio exige sincronía completa (doble comprobación del click) */
+function canStartCoop(){
+  const open=net.conns.filter(c=>c.open);
+  return open.length>=1&&open.every(c=>c.rankGot);
 }
 function hostLobby(){
   if(!peerReady()){
@@ -91,6 +110,7 @@ function hostLobby(){
   const peer=new Peer(mkPeerId(net.code));
   net.peer=peer;
   $('#lobbyCode').textContent=net.code;
+  drawLobbyQR(); /* v4.26: QR del código de sala para que el compañero lo escanee */
   $('#lobbyStat').innerHTML='<span class="prof">PERFIL ONLINE · '+ownedCount()+'/'+TREE.length+' mejoras · '+save.gold+' oro</span><br>Conectando al servicio de salas…';
   $('#btnStartCoop').classList.add('hidden');
   showScr('lobby');state='lobby';
@@ -107,7 +127,7 @@ function hostLobby(){
     /* v4.15: slot libre (1 o 2) para el recién llegado */
     const used=net.conns.map(x=>x.slot);
     const slot=used.includes(1)?2:1;
-    const wrap={c:conn,slot,open:false,wg:0,wm:0,rankSeen:false};
+    const wrap={c:conn,slot,open:false,wg:0,wm:0,rankSeen:false,rankGot:false,gotName:null};
     net.conns.push(wrap);
     if(!net.conn)net.conn=conn;
     conn.on('open',()=>{
@@ -116,6 +136,13 @@ function hostLobby(){
       conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.8: el anfitrión también envía el suyo al conectar · v4.11: + nombre */
       lobbyStatus();
       SFX.gem();vib(40);
+      /* v4.26: cinturón de seguridad — si en 12 s no llegó el ranking del
+         cliente (mismo VERSION exigido, así que debería llegar), se libera
+         el inicio igualmente para no dejar la sala eternamente bloqueada */
+      setTimeout(()=>{
+        if(net.mode!=='host'||!net.conns.includes(wrap)||!wrap.open)return;
+        if(!wrap.rankGot){wrap.rankGot=true;lobbyStatus();}
+      },12000);
     });
     conn.on('data',d=>hostOnData(d,wrap));
     conn.on('close',()=>hostLostClient(wrap));
@@ -169,7 +196,9 @@ function hostOnData(d,wrap){
   if(d.t==='rank'){
     /* v4.11: el mensaje de ranking trae el nombre del rival para el lobby */
     const nm=normalizeName(d.name);
-    if(nm){net.remotePilot=nm;if(!net.remotePilots.includes(nm))net.remotePilots.push(nm);}
+    if(nm){net.remotePilot=nm;if(!net.remotePilots.includes(nm))net.remotePilots.push(nm);wrap.gotName=nm;}
+    /* v4.26: marca de sincronía por conexión — sin ella, COMENZAR sigue cerrado */
+    wrap.rankGot=true;
     const n=mergeRanking(d.list);
     if(n)banner('RANKING','+'+n+' récords nuevos de tus pilotos');
     if(!wrap.rankSeen){wrap.rankSeen=true;try{wrap.c.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});}catch(e){}}
@@ -328,6 +357,14 @@ function startPing(){
   if(pingTimer)clearInterval(pingTimer);
   pingTimer=setInterval(()=>{ if(net.connected)sendMsg({t:'ping',ts:performance.now()}); },2000);
 }
+/* v4.26: estado combinado de conexión + sincronía en la espera del cliente
+   (welcome y rank actualizan el mismo panel, en el orden que lleguen) */
+function clientWaitStat(){
+  if(state!=='clientwait'||!net.connected)return;
+  const nm=net.remotePilot?'Anfitrión: <b style="color:var(--sky)">'+net.remotePilot+'</b>':'Esperando al anfitrión…';
+  const sync=net.rankGot?'<span class="ok">DATOS SINCRONIZADOS ✓</span>':'<span class="prof">Sincronizando ranking…</span>';
+  $('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>'+nm+' — esperando el inicio…<br>'+sync;
+}
 function clientOnData(d){
   if(!d||typeof d!=='object')return;
   if(d.t==='pong'){ net.ping=Math.round(performance.now()-d.ts); return; }
@@ -338,11 +375,11 @@ function clientOnData(d){
     net.mySlot=clamp(d.slot||1,1,2);
     if(d.skin)net.remoteSkin[0]=d.skin; /* v4.25: aspecto del anfitrión */
     const nm=normalizeName(d.name);
-    if(nm){net.remotePilot=nm;
-      if(state==='clientwait')$('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Anfitrión: <b style="color:var(--sky)">'+nm+'</b> — esperando el inicio…';}
+    if(nm)net.remotePilot=nm;
+    clientWaitStat();
     return;
   }
-  if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); return; }
+  if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); net.rankGot=true; clientWaitStat(); return; }
   if(d.t==='start'){ runDiff=d.diff||runDiff; if(d.skin)net.remoteSkin[0]=d.skin; startRunClient(d); return; }
   if(d.t==='snap'){ applySnap(d); return; }
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }

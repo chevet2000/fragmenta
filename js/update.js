@@ -49,7 +49,7 @@ async function checkUpdate(manual){
    saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
 function integrityCheck(){
   try{
-    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList','btnBuyAll','vgKeys']; /* v4.25: +llaves de la bóveda */
+    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList','btnBuyAll','vgKeys','vgEcho','lobbyQr','btnScan','scanBox']; /* v4.26: +eco de runas, QR de sala y escáner */
     const dv=document.documentElement.getAttribute('data-v');
     const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
     if(ok)return true;

@@ -58,6 +58,9 @@ const SFX={
   vault(){tone(620,930,.12,'triangle',.05);tone(930,1240,.14,'triangle',.045,.09)},
   lockHit(){tone(1500,1900,.06,'square',.05)},
   lockFail(){tone(320,110,.28,'sawtooth',.06)},
+  /* v4.26: CERRADURA DE ECO — cada runa suena en su nota (memoria con el oído) */
+  echo(i){const F=[392,466.2,523.3,622.3,698.5,784];const f=F[((i%6)+6)%6];
+    tone(f,f*.995,.17,'triangle',.07);tone(f*2,f*2,.1,'sine',.02)},
   vaultOpen(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,f,.16,'sine',.05,i*.07))},
   vaultEmpty(){tone(220,140,.3,'triangle',.045)},
 };

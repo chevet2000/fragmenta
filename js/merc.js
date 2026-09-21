@@ -114,7 +114,7 @@ function buyMerc(t){
   save.merc.buys[t.id]=(save.merc.buys[t.id]||0)+1;
   checkAch();persist();
   SFX.buy();vib(40);
-  banner('MERCADER PIRATA',t.name+' en la BÓVEDA · ábrelo con la cerradura de pulsos');
+  banner('MERCADER PIRATA',t.name+' en la BÓVEDA · ábrelo con sus cerraduras');
   openMerc();refreshMenu();
 }
 /* ---- enlaces de la interfaz ---- */
