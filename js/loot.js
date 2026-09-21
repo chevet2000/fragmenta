@@ -6,6 +6,13 @@ let kcN=0,kcLast=-9;
    suelta trozos cada vez que le bajas un 20% de vida y el resto (la última
    mitad) al matarlo. El total que acaba dando es el mismo de siempre.
    El presupuesto se fija al aparecer (spawnEnemy) en e.goldTotal. */
+/* v4.21: aviso con freno de Bóveda llena (máx 1 cada 20 s) */
+let vaultWarnT=-99;
+function vaultFullWarn(x,y){
+  if(run.time-vaultWarnT<20)return;
+  vaultWarnT=run.time;
+  floater(x,y-40,'BÓVEDA LLENA ('+VCAP+'/'+VCAP+') · ÁBRELA EN EL MENÚ','#FFD166',13);
+}
 function dropLoot(e){
   /* v4.10: al morir suelta el RESTO de su oro (≈50% si soltó los 4 tramos) */
   const rem=Math.max(0,(e.goldTotal||0)-(e.goldDropped||0));
@@ -18,6 +25,16 @@ function dropLoot(e){
     const r=Math.random(),rar=r<.58?'c':r<.83?'r':r<.95?'e':'l';
     pickups.push({t:'lchest',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-140,-50),rar});
     if(rar==='l')floater(e.x,e.y-30,'¿¡COFRE LEGENDARIO!?','#FFD166',14);
+  }
+  /* v4.21: COFRE SELLADO — se GUARDA en la Bóveda y se abre desde el menú
+     con la cerradura de pulsos. Generoso en las oleadas 1–10. El campista
+     no suelta (él ya tiene su minicofre) y la Bóveda tiene tope. */
+  if(!e.camp&&pickups.length<240&&vaultCount()<VCAP){
+    const sr=rollSealed(e.elite?'elite':'kill');
+    if(sr){
+      pickups.push({t:'vchest',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-140,-50),rar:sr});
+      if(sr==='l')floater(e.x,e.y-30,'¿¡COFRE SELLADO LEGENDARIO!?','#FFD166',14);
+    }
   }
   /* v4.9: gemas y corazones más raros */
   let gr=.02+run.level*.0012;
@@ -221,6 +238,17 @@ function killBoss(){
   if(run.level%10===0){
     pickups.push({t:'chest',x:b.x,y:b.y,vx:rand(-20,20),vy:-80});
     floater(b.x,b.y-60,'¡COFRE! ATRÁPALO','#FFD166',15);
+  }
+  /* v4.21: el GUARDIÁN siempre suelta un COFRE SELLADO para la Bóveda
+     (raro/épico/legendario según la oleada; si la Bóveda está llena, aviso) */
+  if(vaultCount()>=VCAP){
+    vaultFullWarn(b.x,b.y);
+  }else{
+    const brar=rollSealed('boss');
+    if(brar){
+      pickups.push({t:'vchest',x:b.x,y:b.y-14,vx:rand(-26,26),vy:-115,rar:brar});
+      floater(b.x,b.y-44,'🔒 COFRE '+RAR_NAME[brar]+' · A LA BÓVEDA',RAR_COL[brar],14);
+    }
   }
   gainExp(Math.round(waveXp()*8*players[0].expMul)); /* v4.9: jefe x8 (antes x12) */
   missionTick('boss',1); /* v4.12: misiones diarias de Guardianes */

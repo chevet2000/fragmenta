@@ -4,7 +4,9 @@ const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#sc
   /* v4.12: hangar de naves, misiones diarias, perfil y bestiario */
   hangar:$('#scrHangar'),missions:$('#scrMissions'),stats:$('#scrStats'),best:$('#scrBest'),
   /* v4.15: ajustes (engranaje) */
-  settings:$('#scrSettings')};
+  settings:$('#scrSettings'),
+  /* v4.21: LA BÓVEDA — cofres sellados pendientes por abrir */
+  vault:$('#scrVault')};
 function showScr(k){for(const s in scr)scr[s].classList.toggle('show',s===k);}
 function closeEmoPanel(){ $('#emoPanel').classList.remove('open'); }
 function setChoiceNote(txt){
@@ -53,6 +55,11 @@ function refreshMenu(){
   const asc=$('#btnAscend');
   asc.classList.toggle('hidden',save.bestAll<50);
   asc.textContent=ascConfirm?'¿SEGURO? TOCA DE NUEVO':`ASCENDER ×${save.prest+1} (+25% ORO)`;
+  /* v4.21: botón de LA BÓVEDA con contador de pendientes y mejoras armadas */
+  const vc=vaultCount();
+  const na2=(save.armed||[]).length;
+  const bb=$('#btnBoveda');
+  if(bb)bb.innerHTML=`COFRES (${vc})`+(na2?` · ✦${na2}`:'')+(vc?' ◈':'');
   /* v4.15: tira de piloto con avatar (tu nave con el aspecto equipado) */
   $('#menuPilotName').textContent=getPilot();
   drawPilotAvatar($('#pilotCv'),34);
@@ -336,6 +343,10 @@ function openStats(){
     ['NAVES AMIGAS',save.totAlly||0],
     ['PORTALES ABIERTOS',save.totPortal||0],
     ['CAMBIOS DE GEMAS',save.gemxBuys||0],
+    /* v4.21: LA BÓVEDA */
+    ['COFRES SELLADOS EN LA BÓVEDA',vaultCount()+' / '+VCAP],
+    ['COFRES SELLADOS ABIERTOS',save.totVaultOpen||0],
+    ['MEJORAS ARMADAS',(save.armed||[]).length],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -400,12 +411,14 @@ function resetRunCommon(){
   run.ghostTrail=[];run.ghostAcc=0;run.ghostPassed=false;run.ghostRef=null;run.ghostLead=0;
   run.curses=[]; /* v4.17: sin maldiciones al empezar */
   run.newComboRec=false; /* v4.18: sin récord de combo todavía */
+  run.armedShown=false; /* v4.21: aviso de mejoras armadas pendiente */
   hitStopT=0;goldenWave=false;lastGolden=-9;kcN=0;kcLast=-9; /* v4.18: dopamina a cero */
   meteors=[];meteorT=rand(16,30);meteorWarned=false; /* v4.19: meteoritos a cero */
   /* v4.20: eventos nuevos a cero — cubos, portal, naves amigas y anomalía */
   cubeT=rand(8,13);portals=[];portalT=rand(40,75);portalWarned=false;
   allies=[];updAllies.warn=false;anomalyWave=false;run.portalNext=false;
   bots=[]; /* v4.9: sin aliados al empezar */
+  vaultWarnT=-99; /* v4.21: freno del aviso de bóveda llena, a cero */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
   dronePos={'0':[],'1':[]};droneCd={'0':[],'1':[]};boss=null;lastWaveType='';
@@ -626,6 +639,15 @@ function nextWave(){
   if(net.mode!=='client')updTempBuffs();
   if(net.mode!=='client')curseTickWave(); /* v4.17: las de varias oleadas cuentan atrás */
   buildWave(L);
+  /* v4.21: al empezar la incursión se anuncian las MEJORAS ARMADAS de la
+     Bóveda (después del banner de la oleada, para que no lo tape nadie) */
+  if(L===1&&net.mode!=='client'&&!run.armedShown&&(save.armed||[]).length){
+    run.armedShown=true;
+    const names={};
+    for(const pid of save.armed){const pk=perkById(pid);if(pk)names[pk.name]=(names[pk.name]||0)+1;}
+    banner('✦ MEJORAS ARMADAS · '+(save.armed||[]).length,
+      Object.keys(names).map(k=>names[k]>1?k+' ×'+names[k]:k).join(' · ')+' · hasta que caigas');
+  }
   waveState='play';clearTimer=0;
 }
 function showShipCards(picks,onPick,waitNote){
@@ -837,6 +859,9 @@ function gameOver(){
   else if(gap>=1&&gap<=2)
     hook+=`<span class="k1">⚡ A ${gap} oleada${gap>1?'s':''} de tu récord (${prevBest}) · ¿LA REVANCHA?</span><br>`;
   $('#ovHook').innerHTML=hook;
+  /* v4.21: las MEJORAS ARMADAS de la Bóveda mueren contigo (duran hasta que caigas) */
+  const hadArmed=(save.armed||[]).length>0;
+  if(hadArmed){save.armed=[];persist();}
   const prof=saveProfile==='net'?'perfil ONLINE':'perfil LOCAL';
   $('#ovKeep').innerHTML=
     (ghostLine||'')+
@@ -844,6 +869,7 @@ function gameOver(){
     (dailyRec?`<span class="k1">★ ¡NUEVO RÉCORD DEL RETO DIARIO · OLEADA ${save.daily.best}!</span><br>`:'')+
     (weeklyRec?`<span class="k1">★ ¡NUEVO RÉCORD SEMANAL · OLEADA ${save.weekly.best}!</span><br>`:'')+
     `<span class="k1">SE CONSERVA · ${ownedCount()}/${TREE.length} permanentes · oro · gemas · logros (${prof})</span><br>`+
+    (hadArmed?`<span class="k2">✦ LAS MEJORAS ARMADAS SE HAN PERDIDO CON TU NAVE</span><br>`:'')+
     `<span class="k2">SE PIERDE · ${(run.buffs[localSlot]||[]).length} carta(s) temporal(es) · reliquias · nivel de nave</span>`;
   /* v4.8: eliminado el botón de copiar registro semanal por código */
   $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');

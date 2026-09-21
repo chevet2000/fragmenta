@@ -180,6 +180,8 @@ let wipeArm=false,wipeT=null;
   save.streak=0;save.streakBest=0;save.streakLast='';save.totMeteor=0;
   /* v4.20: escalera de gemas, hitos de racha, cubos, naves amigas, púrpura y portales */
   save.gemxBuys=0;save.streakClaimed={};save.totCube=0;save.totAlly=0;save.totMeteorP=0;save.totPortal=0;save.seenCube=0;
+  /* v4.21: LA BÓVEDA — cofres sellados, mejoras armadas y contadores */
+  save.vault={c:0,r:0,e:0,l:0};save.armed=[];save.totVault=0;save.totVaultOpen=0;save.totVaultL=0;
   save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}
@@ -222,6 +224,8 @@ let wipeArm=false,wipeT=null;
   if(!ascConfirm){ascConfirm=true;refreshMenu();setTimeout(()=>{ascConfirm=false;refreshMenu();},2500);return;}
   ascConfirm=false;
   save.prest++;save.tree={};save.gold=0;save.gems=0;save.best.lvl=0;save.bestShip=1;
+  /* v4.21: el ascenso también vacía la Bóveda (empiezas de cero) */
+  save.vault={c:0,r:0,e:0,l:0};save.armed=[];
   persist();SFX.relic();vib(60);
   refreshMenu();
 });

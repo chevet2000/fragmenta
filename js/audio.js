@@ -54,6 +54,12 @@ const SFX={
   cube(){tone(180,560,.22,'square',.06);tone(560,1120,.18,'square',.05,.1);tone(1120,840,.14,'triangle',.04,.2)},
   ally(){[660,880,1100].forEach((f,i)=>tone(f,f,.12,'triangle',.05,i*.07));tone(1760,1760,.16,'sine',.03,.24)},
   portal(){tone(120,900,.5,'sine',.06);tone(900,180,.4,'sine',.05,.3);tone(60,45,.55,'sawtooth',.05)},
+  /* v4.21: LA BÓVEDA — cofre guardado, cerradura y apertura */
+  vault(){tone(620,930,.12,'triangle',.05);tone(930,1240,.14,'triangle',.045,.09)},
+  lockHit(){tone(1500,1900,.06,'square',.05)},
+  lockFail(){tone(320,110,.28,'sawtooth',.06)},
+  vaultOpen(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,f,.16,'sine',.05,i*.07))},
+  vaultEmpty(){tone(220,140,.3,'triangle',.045)},
 };
 /* v4.10: campanita aguda de CRÍTICO (con tope anti-spam de 70 ms) */
 function critPing(){

@@ -60,6 +60,10 @@ const ACHS=[
 {id:'metp',name:'CAZADOR DE ANOMALÍAS',desc:'Revienta un METEORITO PÚRPURA (raro)',rw:4, ck:()=>(save.totMeteorP||0)>=1},
 {id:'por1',name:'VIAJERO ANÓMALO',    desc:'Abre un PORTAL MISTERIOSO',            rw:5, ck:()=>(save.totPortal||0)>=1},
 {id:'rac7',name:'SEMANA PERFECTA',    desc:'Mantén la racha de misiones 7 días (aspecto ESTELAR)',rw:10,ck:()=>(save.streakBest||0)>=7},
+/* v4.21: LA BÓVEDA — cofres sellados guardados y abiertos */
+{id:'bv5', name:'COLECCIONISTA',      desc:'Guarda 5 cofres sellados en la BÓVEDA', rw:4, ck:()=>(save.totVault||0)>=5},
+{id:'bva', name:'ALMA DE LA BÓVEDA',  desc:'Abre 10 cofres sellados con la cerradura', rw:5, ck:()=>(save.totVaultOpen||0)>=10},
+{id:'bvl', name:'SUERTE SELLADA',     desc:'Abre un cofre sellado LEGENDARIO',      rw:6, ck:()=>(save.totVaultL||0)>=1},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

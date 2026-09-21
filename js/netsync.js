@@ -22,7 +22,7 @@ function sendSnap(){
     let kind=b.missile?4:b.dr?3:b.heavy?2:b.crit?1:0;
     return [Math.round(b.x),Math.round(b.y),Math.round(Math.atan2(b.vy,b.vx)*100),kind];
   });
-  const sorted=[...pickups].sort((a,b)=>((b.t==='chest'||b.t==='minichest'||b.t==='schest'||b.t==='cube')?1:0)-((a.t==='chest'||a.t==='minichest'||a.t==='schest'||a.t==='cube')?1:0));
+  const sorted=[...pickups].sort((a,b)=>((b.t==='chest'||b.t==='minichest'||b.t==='schest'||b.t==='cube'||b.t==='vchest')?1:0)-((a.t==='chest'||a.t==='minichest'||a.t==='schest'||a.t==='cube'||a.t==='vchest')?1:0));
   const pk=sorted.slice(0,60).map(p=>
     p.t==='gold'?[0,Math.round(p.x),Math.round(p.y)]:
     p.t==='gem'?[1,Math.round(p.x),Math.round(p.y)]:
@@ -31,6 +31,8 @@ function sendSnap(){
     p.t==='schest'?[5,Math.round(p.x),Math.round(p.y),Math.max(0,Math.ceil(p.shield)),p.shieldMax]:
     /* v4.20: el CUBO SORPRESA viaja como tipo 6 (con su escudo) */
     p.t==='cube'?[6,Math.round(p.x),Math.round(p.y),Math.max(0,Math.ceil(p.shield)),p.shieldMax]:
+    /* v4.21: el COFRE SELLADO viaja como tipo 7 (con su rareza c/r/e/l → 0-3) */
+    p.t==='vchest'?[7,Math.round(p.x),Math.round(p.y),RARS.indexOf(p.rar)]:
     [2,Math.round(p.x),Math.round(p.y)]);
   const wk=wrecks.map(w=>[w.slot,Math.round(w.x),Math.round(w.y),Math.round(w.prog*100)]);
   const cN=players[1]&&players[1].nova;

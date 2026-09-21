@@ -385,13 +385,18 @@ function clientEvent(d){
     if(d.hard)save.bestHard=Math.max(save.bestHard||0,d.level);
     /* v4.15: el cliente también deja su récord en MULTI */
     addModeRecord('mp','MP',d.level,d.ship);
+    /* v4.21: las MEJORAS ARMADAS mueren con la incursión (como en solo) */
+    const hadArmed=(save.armed||[]).length>0;
+    if(hadArmed){save.armed=[];}
     persist();
     runActive=false;state='over';
     musStop();
     $('#netWait').classList.add('hidden');
     const st=(kk,v)=>`<div><small>${kk}</small><b>${v}</b></div>`;
     $('#ovStats').innerHTML=st('OLEADA',d.level)+st('NAVE NIVEL',d.ship)+st('ORO DE LA INCURSIÓN',d.yg);
-    $('#ovKeep').innerHTML='<span class="k1">SE CONSERVA · árbol · oro · gemas · récords · logros (perfil online)</span><br><span class="k2">SE PIERDE · cartas y reliquias de la incursión</span>';
+    $('#ovKeep').innerHTML='<span class="k1">SE CONSERVA · árbol · oro · gemas · récords · logros (perfil online)</span><br>'+
+      (hadArmed?'<span class="k2">✦ LAS MEJORAS ARMADAS SE HAN PERDIDO CON LA INCURSIÓN</span><br>':'')+
+      '<span class="k2">SE PIERDE · cartas y reliquias de la incursión</span>';
     $('#hud').classList.add('hidden');$('#hudBot').classList.add('hidden');$('#bossBar').classList.add('hidden');
     showScr('over'); return;
   }
@@ -439,7 +444,9 @@ function applySnap(d){
   cBossPct=d.bp||0;
   cEB=d.eb.map(b=>({x:b[0],y:b[1],r:b[2],color:ECOLORS[b[3]]||'#F2EFE6'}));
   cBL=d.bl.map(b=>({x:b[0],y:b[1],ang:b[2]/100,kind:b[3]}));
-  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest','cube'][p[0]]||'gold',x:p[1],y:p[2],shield:p[3]||0,shieldMax:p[4]||0}));
+  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest','cube','vchest'][p[0]]||'gold',x:p[1],y:p[2],
+    shield:(p[0]===5||p[0]===6)?(p[3]||0):0,shieldMax:(p[0]===5||p[0]===6)?(p[4]||0):0,
+    rar:p[0]===7?(RARS[p[3]]||'c'):undefined}));
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));
   cNovaCd=d.nc;
 }

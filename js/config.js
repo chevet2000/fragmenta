@@ -121,6 +121,7 @@ const TYPES={
 const TKLIST=['orb','dart','block','dash','sentry','medic','hive','reflect','magnet','kami','mago'];
 const ECOLORS=['#FF6B6B','#F2EFE6','#7FD1B9','#FFD166','#FF7EB6','#64C7FF','#7DFF9E','#C8CFD8'];
 function colorIdx(c){return Math.max(0,ECOLORS.indexOf(c));}
+
 /* ============ v4.16: EL MAGO ============ */
 /* Cuántos aliados puede curar un mago de nivel elvl con un pulso.
    Los niveles de enemigo empiezan en ~96 (v4.9), así que la escala es:
@@ -137,5 +138,76 @@ function typeForLevel(l){
   if(l>=5) return r<.28?'block':r<.5?'sentry':r<.72?'dash':r<.86?'medic':'orb';
   if(l>=3) return r<.3?'dart':r<.55?'block':r<.8?'dash':'orb';
   return r<.6?'orb':'dart';
+}
+
+/* ============ v4.21: LA BÓVEDA ============
+   Cofres SELLADOS que caen en partida y se abren desde el MENÚ con la
+   CERRADURA DE PULSOS. Cada 3 fallos la calidad baja un nivel (l→e→r→c);
+   el común se abre directo y puede salir vacío. Recompensa: MEJORAS
+   ARMADAS al azar que se aplican en la siguiente partida y duran
+   HASTA QUE MUERAS. Tope de la bóveda: 15 cofres guardados. */
+const VCAP=15;
+const RARS=['c','r','e','l'];
+const RAR_COL={c:'#F2EFE6',r:'#64C7FF',e:'#B388FF',l:'#FFD166'};
+const RAR_NAME={c:'COMÚN',r:'RARO',e:'ÉPICO',l:'LEGENDARIO'};
+function vaultCount(){const v=save.vault||{};return (v.c||0)+(v.r||0)+(v.e||0)+(v.l||0);}
+function addVault(rar){
+  if(!save.vault)save.vault={c:0,r:0,e:0,l:0};
+  save.vault[rar]=(save.vault[rar]||0)+1;
+  save.totVault=(save.totVault||0)+1;
+}
+/* Rareza que suelta cada fuente. Las OLEADAS 1–10 son MÁS GENEROSAS
+   (petición del piloto): más probabilidad y mejores rarezas.
+   A partir de la 10 mandan las tablas estándar. */
+function rollSealed(kind){
+  const early=run.level<=10,r=Math.random();
+  if(kind==='boss'){
+    if(early)return r<.40?'r':r<.78?'e':'l';
+    return r<.60?'r':r<.90?'e':'l';
+  }
+  if(kind==='elite'){
+    if(!(early?r<.40:r<.25))return null; /* élite: 40% / 25% de soltar */
+    const r2=Math.random();
+    if(early)return r2<.55?'r':r2<.88?'e':'l';
+    return r2<.65?'r':r2<.93?'e':'l';
+  }
+  /* baja normal: 2.2% en las 10 primeras oleadas · 0.8% después */
+  if(!(early?r<.022:r<.008))return null;
+  const r2=Math.random();
+  if(early)return r2<.40?'c':r2<.72?'r':r2<.92?'e':'l';
+  return r2<.58?'c':r2<.83?'r':r2<.95?'e':'l';
+}
+/* ---- MEJORAS ARMADAS: grupo de recompensas temporales ----
+   Se aplican en recompute() y se borran al MORIR (gameOver). */
+const PERKS=[
+ {id:'pdk',name:'MUNICIÓN PESADA', desc:'+2 de daño',                    fx:b=>b.dmg+=2},
+ {id:'pvd',name:'BLINDAJE DE PRISA',desc:'+2 de vida máxima',            fx:b=>b.maxHp+=2},
+ {id:'prt',name:'GATILLO ÁGIL',    desc:'+8% de cadencia',               fx:b=>b.rate*=1.08},
+ {id:'pcr',name:'MIRA FINA',       desc:'+5% de crítico',                fx:b=>b.crit+=.05},
+ {id:'psp',name:'PROPULSORES',     desc:'+10% de velocidad de nave',     fx:b=>b.spd*=1.10},
+ {id:'prg',name:'NANORREPARACIÓN', desc:'+1 PS/s de regeneración',       fx:b=>b.regenRate+=1/100},
+ {id:'pim',name:'IMÁN EXTRA',      desc:'+50% de radio de recogida',     fx:b=>b.magnet+=.5},
+ {id:'pgo',name:'FORTUNA',         desc:'+20% de oro',                   fx:b=>b.goldMul*=1.2},
+ {id:'pex',name:'SABIDURÍA',       desc:'+20% de experiencia',           fx:b=>b.expMul*=1.2},
+ {id:'pdr',name:'DRON TEMPORAL',   desc:'+1 dron orbital',               fx:b=>b.drones+=1},
+ {id:'pcl',name:'CHASIS LIGERO',   desc:'Balas enemigas 10% más lentas', fx:b=>b.slow*=.9},
+ {id:'pco',name:'CORAZONEROS',     desc:'Más del doble de corazones',    fx:b=>b.heartDrop=true},
+];
+/* Solo los cofres LEGENDARIOS pueden sacar una versión GRANDE */
+const PERKS_BIG=[
+ {id:'gdk',name:'SOBRECARGA TOTAL',  desc:'+4 de daño',         fx:b=>b.dmg+=4},
+ {id:'gvd',name:'FORTALEZA',         desc:'+4 de vida máxima',  fx:b=>b.maxHp+=4},
+ {id:'grt',name:'CADENCIA EXTREMA',  desc:'+12% de cadencia',   fx:b=>b.rate*=1.12},
+];
+const PERKS_ALL=PERKS.concat(PERKS_BIG);
+function perkById(id){return PERKS_ALL.find(p=>p.id===id);}
+/* Reparte n mejoras al azar (el legendario puede sacar una GRANDE) */
+function rollPerks(n,rar){
+  const out=[];
+  for(let i=0;i<n;i++){
+    const pool=(rar==='l'&&Math.random()<.35)?PERKS_BIG:PERKS;
+    out.push(pool[irand(0,pool.length-1)].id);
+  }
+  return out;
 }
 

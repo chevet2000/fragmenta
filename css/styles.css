@@ -435,3 +435,41 @@ button{font-family:inherit}
 .streakrow small{font-size:8.5px;letter-spacing:.13em;color:var(--dim);line-height:1.55;display:block}
 .streakrow.on{border-color:var(--amber);background:rgba(255,209,102,.05)}
 .streakrow.on b{color:var(--amber)}
+
+/* ============ v4.21: LA BÓVEDA ============ */
+.vsub{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:2px 0 8px}
+.vchip{font-size:8.5px;letter-spacing:.14em;font-weight:700;padding:4px 8px;border:1px solid var(--line);
+  background:rgba(12,16,22,.55)}
+.vsub small{width:100%;text-align:center;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-top:2px}
+.varmed{border:1px dashed rgba(127,209,185,.5);padding:8px 10px;margin-bottom:9px;text-align:center;
+  background:rgba(127,209,185,.04)}
+.varmed b{display:block;font-size:10px;letter-spacing:.18em;color:var(--mint);margin-bottom:3px}
+.varmed small{display:block;font-size:7.5px;letter-spacing:.12em;color:var(--dim);margin-bottom:5px}
+.varmed div{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.varmed span{font-size:8px;letter-spacing:.1em;padding:3px 6px;border:1px solid var(--line);color:var(--ink)}
+.vchest{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:9px 8px;margin-bottom:7px;
+  background:rgba(12,16,22,.55);border:1px solid var(--line);cursor:pointer;text-align:center}
+.vchest b{font-size:11px;letter-spacing:.14em}
+.vchest small{font-size:8px;letter-spacing:.14em;color:var(--dim)}
+.vchest em{font-style:normal;font-size:9px;letter-spacing:.22em;color:var(--amber);margin-top:2px}
+.vchest:active{background:rgba(255,209,102,.08)}
+.vnone{border:1px dashed var(--line);padding:14px 10px;text-align:center;font-size:9.5px;
+  letter-spacing:.16em;color:var(--dim);line-height:1.7}
+.vnone small{font-size:8px;letter-spacing:.1em}
+#vaultGame{text-align:center;user-select:none;-webkit-user-select:none;touch-action:none}
+#vgTitle{font-size:12px;letter-spacing:.2em;margin-bottom:8px}
+#vgTitle span{color:var(--amber)}
+#vgSvg{width:170px;height:170px;display:block;margin:2px auto 6px}
+#vgSvg .vgring{fill:none;stroke:#2A3440;stroke-width:11}
+#vgSvg .vgzone{fill:none;stroke:#7FD1B9;stroke-width:11}
+#vgSvg .vgdecoy{fill:none;stroke:#FF4757;stroke-width:11}
+#vgSvg .vgdecoy.hidden{display:none}
+#vgMark{stroke:#F2EFE6;stroke-width:3;stroke-linecap:round}
+#vgHearts{margin:4px 0 6px}
+#vgHearts small{display:block;font-size:7.5px;letter-spacing:.22em;color:var(--dim);margin-bottom:2px}
+#vgHearts b{font-size:13px;letter-spacing:.35em;color:var(--amber)}
+#vgMsg{min-height:34px;font-size:9.5px;letter-spacing:.14em;line-height:1.65;color:var(--ink);margin-bottom:6px}
+#vgMsg small{font-size:8px;letter-spacing:.1em;color:var(--dim)}
+#vgMsg.bad{color:var(--coral)}
+#vgMsg b{color:var(--mint);display:inline-block;margin-top:2px}
+.vnote{margin-top:7px;font-size:7.5px;letter-spacing:.16em;color:var(--dim)}

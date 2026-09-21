@@ -25,6 +25,9 @@ function recompute(){
     if(RR('alquimia'))b.goldMul*=1.3;
     if(RR('mente'))b.expMul*=1.3;
     if(RR('crudas'))b.gemLuck=true;
+    /* v4.21: MEJORAS ARMADAS de la Bóveda — cada perfil aplica las suyas
+       (en co-op el statblock del cliente ya las lleva incorporadas) */
+    for(const pid of (save.armed||[])){const pk=perkById(pid);if(pk)pk.fx(b);}
     return b;
   };
   players.forEach((pl,i)=>{

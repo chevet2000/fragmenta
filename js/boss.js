@@ -880,6 +880,13 @@ function updPickups(dt){
       }else if(p.t==='lchest'){
         /* v4.18: cofre de la Fortuna — recompensa instantánea según rareza */
         openLucky(pl.slot,p.rar,remote);
+      }else if(p.t==='vchest'){
+        /* v4.21: COFRE SELLADO — NO se abre aquí: se guarda en la Bóveda
+           del perfil local y se abre desde el menú con la cerradura */
+        addVault(p.rar);
+        persist();SFX.vault();checkAch();
+        floater(pl.x,pl.y-30,'🔒 '+RAR_NAME[p.rar]+' · BÓVEDA '+vaultCount()+'/'+VCAP,RAR_COL[p.rar],13);
+        if(p.rar==='l'){banner('COFRE SELLADO LEGENDARIO','Guárdalo: se abre desde el menú');vib(45);}
       }else if(p.t==='minichest'){
         SFX.chest();
         if(R()<.6){

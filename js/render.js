@@ -753,6 +753,26 @@ function renderGame(dt){
       }
       ctx.globalAlpha=1;
     }
+    else if(p.t==='vchest'){ /* v4.21: COFRE SELLADO — candado + aura de rareza */
+      const col=p.rar==='c'?'#F2EFE6':p.rar==='r'?'#64C7FF':p.rar==='e'?'#B388FF':'#FFD166';
+      const leg=p.rar==='l';
+      ctx.strokeStyle=col;ctx.lineWidth=2;
+      ctx.strokeRect(-8,-6,16,12);
+      ctx.beginPath();ctx.moveTo(-8,-1.5);ctx.lineTo(8,-1.5);ctx.stroke();
+      /* el candado: arcito + cuerpo sobre la tapa */
+      ctx.beginPath();ctx.arc(0,-6,3,Math.PI,0);ctx.stroke();
+      ctx.font='700 8px "Chakra Petch",monospace';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle=col;ctx.fillText('🔒',0,3.5);
+      ctx.globalAlpha=(leg?.5:.32)+Math.sin(time*(leg?9:5))*.2;
+      ctx.strokeStyle=col;ctx.lineWidth=leg?2.5:1.5;
+      ctx.beginPath();ctx.arc(0,0,leg?21:15,0,TAU);ctx.stroke();
+      if(leg){
+        ctx.globalAlpha=.25+Math.sin(time*11)*.15;
+        ctx.beginPath();ctx.arc(0,0,28,0,TAU);ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    }
     else{ctx.fillStyle='#FF6B6B';
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();}
     ctx.restore();
