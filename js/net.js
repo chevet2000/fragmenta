@@ -5,6 +5,12 @@
    snapshot y su oro/gemas viajan por su propia conexión (wallet por conn).
    Las elecciones de cartas/reliquias esperan a TODOS los slots. */
 let pingTimer=null;
+/* v4.27: reintento del ranking — si a los 5 s de abrirse la conexión no
+   llegó el 'rank' del otro lado (se pierde por la red, llega tarde, lo que
+   sea), cada lado PIDE el del rival ('rankq') en vez de quedarse mudo:
+   antes el anfitrión liberaba el inicio a los 12 s aunque los datos
+   nunca hubieran viajado, y la sala quedaba «sincronizada» en falso. */
+let RANKQ_MS=5000;
 const net={mode:null,peer:null,conn:null,conns:[],code:'',connected:false,ping:0,
   walletG:0,walletM:0,retries:0,hostChosen:false,clientChosen:false,hostCard:null,clientCard:null,
   hostRelic:false,clientRelic:false,hostRelicId:null,clientRelicId:null,remoteStats:{},lobbyDiff:'normal',
@@ -143,6 +149,12 @@ function hostLobby(){
         if(net.mode!=='host'||!net.conns.includes(wrap)||!wrap.open)return;
         if(!wrap.rankGot){wrap.rankGot=true;lobbyStatus();}
       },12000);
+      /* v4.27: a los 5 s sin ranking del cliente se le PIDE (rankq);
+         normalmente sobra — el cliente lo envía al abrir la conexión */
+      setTimeout(()=>{
+        if(net.mode!=='host'||!net.conns.includes(wrap)||!wrap.open)return;
+        if(!wrap.rankGot){try{wrap.c.send({t:'rankq'});}catch(e){}}
+      },RANKQ_MS);
     });
     conn.on('data',d=>hostOnData(d,wrap));
     conn.on('close',()=>hostLostClient(wrap));
@@ -192,6 +204,7 @@ function hostOnData(d,wrap){
   if(!d||typeof d!=='object')return;
   const slot=wrap.slot;
   if(d.t==='ping'){ try{wrap.c.send({t:'pong',ts:d.ts});}catch(e){} return; }
+  if(d.t==='rankq'){ try{wrap.c.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()});}catch(e){} return; } /* v4.27: el cliente pide nuestro ranking */
   if(d.t==='stats'){ net.remoteStats=d.b; remoteBase[slot]=d.b; if(d.sk)net.remoteSkin[slot]=d.sk; if(runActive)recompute(); return; }
   if(d.t==='rank'){
     /* v4.11: el mensaje de ranking trae el nombre del rival para el lobby */
@@ -297,6 +310,11 @@ function connectAsClient(rejoin){
       opened=true;net.connected=true;net.retries=0;
       conn.send({t:'stats',b:computeStatblock()});
       conn.send({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); /* v4.11: + nombre */
+      /* v4.27: si en 5 s no llegó el ranking del anfitrión, se le pide */
+      setTimeout(()=>{
+        if(net.mode==='client'&&net.connected&&net.conn===conn&&!net.rankGot)
+          try{conn.send({t:'rankq'});}catch(e){}
+      },RANKQ_MS);
       startPing();
       $('#joinStat').innerHTML='<span class="ok">¡CONECTADO!</span><br>Esperando al anfitrión…';
       if(rejoin){ $('#netWait').classList.add('hidden'); if(runActive)state='play'; }
@@ -380,6 +398,7 @@ function clientOnData(d){
     return;
   }
   if(d.t==='rank'){ const n=mergeRanking(d.list); if(n)banner('RANKING','+'+n+' récords nuevos del anfitrión'); net.rankGot=true; clientWaitStat(); return; }
+  if(d.t==='rankq'){ sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); return; } /* v4.27: el anfitrión pide el nuestro */
   if(d.t==='start'){ runDiff=d.diff||runDiff; if(d.skin)net.remoteSkin[0]=d.skin; startRunClient(d); return; }
   if(d.t==='snap'){ applySnap(d); return; }
   if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }

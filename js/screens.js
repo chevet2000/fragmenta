@@ -133,8 +133,15 @@ function renderRankList(){
   });
   box.querySelectorAll('.rdel').forEach(b=>{
     b.addEventListener('click',()=>{
-      save.ranking=(save.ranking||[]).filter(r=>!(r.code===b.dataset.c&&r.seed===b.dataset.s));
-      persist();renderRankList();refreshMenu();
+      /* v4.27: el ranking vive en AMBOS perfiles — se borra de los dos
+         (si no, la unión del otro perfil lo resucitaría) */
+      const keep=r=>!(r.code===b.dataset.c&&r.seed===b.dataset.s);
+      save.ranking=(save.ranking||[]).filter(keep);
+      if(localSave!==save)localSave.ranking=(localSave.ranking||[]).filter(keep);
+      if(netSave!==save)netSave.ranking=(netSave.ranking||[]).filter(keep);
+      try{localStorage.setItem(KEY_LOCAL,JSON.stringify(localSave));}catch(e){}
+      try{localStorage.setItem(KEY_NET,JSON.stringify(netSave));}catch(e){}
+      renderRankList();refreshMenu();
     });
   });
   const ws=weekSeed();

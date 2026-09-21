@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.26';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.27';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},achClaimed:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
@@ -54,7 +54,38 @@ function useProfile(p){
   if(saveProfile===p)return;
   saveProfile=p;
   save=(p==='local')?localSave:netSave;
+  /* v4.27: IDENTIDAD ÚNICA — la primera vez que entras a online, el perfil
+     NET ADOPTA el nombre de piloto de tu perfil local. Antes generaba OTRO
+     nombre al azar: tus récords del co-op firmaban con un piloto que no
+     reconocías y en el lobby salías con un nombre distinto al de siempre. */
+  if(p==='net'&&!netSave.pilot&&localSave.pilot){netSave.pilot=localSave.pilot;persist();}
 }
+/* ============ v4.27: RANKING ÚNICA ENTRE PERFILES ============
+   EL BUG REAL del «no sincroniza»: el juego guarda DOS perfiles (LOCAL =
+   el del menú · NET = el del online). Al conectar en el lobby el ranking
+   del rival SÍ llegaba y se fusionaba… pero en el perfil NET, y la
+   pantalla RANKING (que solo se abre desde el menú) lee el LOCAL: los
+   récords quedaban guardados donde NUNCA se ven. Lo mismo con los
+   récords MULTI propios firmados durante el co-op.
+   FIX: cada entrada del ranking (propia o recibida) vive en AMBOS
+   perfiles — unionRankProfiles() fusiona lo mejor de cada uno
+   (dedup por semilla+piloto, se conserva la mayor oleada) y escribe los
+   dos. Así la sincronía del lobby es visible AL INSTANTE en la pantalla
+   RANKING del menú, con o sin partida después. */
+function unionRankProfiles(){
+  const map={};
+  const put=r=>{if(!r||!r.seed||!r.code)return;const k=r.seed+'|'+r.code;
+    const ex=map[k];if(!ex)map[k]=r;else if((r.wave||0)>(ex.wave||0))map[k]=r;};
+  for(const r of(localSave.ranking||[]))put(r);
+  for(const r of(netSave.ranking||[]))put(r);
+  const uni=Object.values(map).sort((a,b)=>(b.wave||0)-(a.wave||0)).slice(0,60);
+  localSave.ranking=uni.slice();netSave.ranking=uni.slice();
+  try{localStorage.setItem(KEY_LOCAL,JSON.stringify(localSave));}catch(e){}
+  try{localStorage.setItem(KEY_NET,JSON.stringify(netSave));}catch(e){}
+}
+/* al arrancar: si una sesión anterior dejó récords en el perfil NET
+   (versiones v4.15–v4.26), ya salen en el menú desde el primer momento */
+unionRankProfiles();
 function persist(){
   try{localStorage.setItem(saveProfile==='local'?KEY_LOCAL:KEY_NET,JSON.stringify(save));}catch(e){}
 }
@@ -122,6 +153,8 @@ function addRankingEntry(entry){
     if(entry.wave>ex.wave){ex.wave=entry.wave;ex.ship=entry.ship;ex.h=entry.h;ex.ok=entry.ok;}
   }else save.ranking.push(entry);
   if(save.ranking.length>60)save.ranking=save.ranking.slice(-60);
+  /* v4.27: la entrada vive en AMBOS perfiles (el ranking es única) */
+  unionRankProfiles();
   persist();
 }
 function sortedRanking(){
@@ -176,6 +209,11 @@ function mergeRanking(list){
     else if(e.wave>ex.wave){ex.wave=e.wave;ex.ship=e.ship;ex.h=e.h;ex.ok=true;ex.m=e.m;if(e.sub)ex.sub=e.sub;n++;}
   }
   if(save.ranking.length>60)save.ranking=save.ranking.slice(-60);
+  /* v4.27: lo recibido del rival se refleja TAMBIÉN en el otro perfil
+     (el perfil LOCAL es el que muestra la pantalla RANKING del menú —
+     antes los récords sincronizados quedaban solo en el NET y jamás
+     se veían: ese era el «no sincroniza») */
+  unionRankProfiles();
   if(n)persist();
   return n;
 }
