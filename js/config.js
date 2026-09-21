@@ -33,6 +33,19 @@ function bumpModeRecord(L){
   if(!save.bestMode)save.bestMode={solo:0,normal:0,dificil:0,hardcore:0,coop:0};
   const k=runModeKey();
   if(L>(save.bestMode[k]||0))save.bestMode[k]=L;
+  /* v4.24: el RANKING local se firma OLEADA A OLEADA (y nivel a nivel en el
+     frenético). Antes solo se registraba al MORIR: si cerrabas el juego a
+     mitad de partida, la carrera no aparecía en ningún modo. addRankingEntry
+     deduplica por semilla+piloto y conserva la mejor, así que llamarlo aquí
+     es barato y a prueba de cierres accidentales. */
+  if(net.mode==='client')return; /* el cliente co-op firma con el evento 'over' */
+  if(frenzyMode)addModeRecord('fz','FZ',Math.max(1,L),run.shipLv,String(run.kills));
+  else if(weeklyMode)addModeRecord('wk',weekSeed(),L,run.shipLv);
+  else if(dailyMode)addModeRecord('dy','DY',L,run.shipLv);
+  else if(net.mode==='host'&&players.length>1)addModeRecord('mp','MP',L,run.shipLv);
+  else if(runDiff==='dificil')addModeRecord('dc','DC',L,run.shipLv);
+  else if(runDiff==='hardcore')addModeRecord('hc','HC',L,run.shipLv);
+  else addModeRecord('nm','NM',L,run.shipLv);
 }
 /* v4.15: color de cada slot en co-op de 2–3 (P1 menta · P2 rosa · P3 cielo) */
 const SLOT_COL=['#7FD1B9','#FF7EB6','#64C7FF'];

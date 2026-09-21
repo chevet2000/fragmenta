@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.23">
+<html lang="es" data-v="4.24">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.23 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.24 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.23">
+<link rel="stylesheet" href="css/styles.css?v=4.24">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -96,8 +96,8 @@
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.23</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.23</b> trae la <b>ESCALA VIVA</b>: el juego se adapta a tu poder real — cuantas más mejoras tengas en el ARSENAL, más vida (hasta <b>×3.2</b>) y más experiencia (hasta <b>×2.2</b>) tienen los enemigos: tu normal con el árbol completo ya no se parece a la de un novato. En <b>HARDCORE y FRENÉTICO</b> subir la nave cuesta oro puro: el primer nivel pide <b>5.000 XP</b> y cada nivel <b>duplica</b> el precio — se acabó la nave de nivel 500 sin esfuerzo. El <b>ARSENAL se reformula</b>: los nodos medios y altos exigen llegar a una OLEADA en un MODO concreto (<b>NOR</b>·normal / <b>DIF</b>·difícil / <b>HDC</b>·hardcore) — para completar el árbol habrá que jugarlos todos, y el contador del Guardián ya dice la verdad. Además desembarca el <b>MERCADER PIRATA GALÁCTICO</b>: un NPC en el menú que vende cofres del mercado negro por <b>oro y gemas</b> con oferta del día −40% y precio que sube +10% por compra. Y <b>LA BÓVEDA</b> es más generosa: más cofres sellados, cerraduras más justas (4 fallos antes de bajar de calidad) y el común sale vacío solo 1 de cada 4 veces.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.24</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.24</b> pega cuatro barridos: <b>1 · RÉCORD POR OLEADA</b> — el ranking local se firma en CADA oleada (y nivel a nivel en el frenético): cerrar el juego a mitad de partida ya no borra tu marca en ningún modo. <b>2 · ⇉ COMPRAR TODO</b> — botón nuevo en el ARSENAL que desbloquea en cadena todas las mejoras disponibles que puedas pagar con oro y gemas (siempre la más barata primero, para estirar el bolsillo). <b>3 · GEMAS MÁS ESCASAS</b> — baja el drop de bajas (mitad y con tope), la gema del élite deja de ser segura (60%), el jefe suelta menos y el meteorito dorado cae del 40% al 25%. <b>4 · CERRADURA DE PULSOS HONESTA</b> — análisis del «le doy bien y falla»: freno anti doble-toque de 220 ms, gracia de +7° por latencia táctil, trampa ya no atrapa al marcador al nacer y zonas algo más anchas; además, corregido el bug que consumía el cofre equivocado de la Bóveda tras una degradación (el legendario se quedaba eterno).</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -138,7 +138,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.23 · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.24 · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · CERRADURA DE PULSOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -364,6 +364,7 @@
       <span><svg viewBox="0 0 12 12"><path d="M6 1 L11 6 L6 11 L1 6 Z" fill="none" stroke="#64C7FF" stroke-width="1.6"/><path d="M6 3.4 L8.6 6 L6 8.6 L3.4 6 Z" fill="#64C7FF"/></svg><b id="shopGems">0</b></span>
     </div>
     <button class="btn" id="btnGemX" style="margin-right:8px">CAMBIO · 1500 ORO → 10 GEMAS</button>
+    <button class="btn" id="btnBuyAll" style="margin-right:8px" title="Desbloquea de una sola vez todas las mejoras disponibles que puedas pagar (oro y gemas)">⇉ COMPRAR TODO</button>
     <button class="btn" id="btnCloseShop">VOLVER</button>
   </div>
   <div class="tree-wrap"><div id="zoomBar"><button class="zbtn" id="zOut">−</button><span class="zbtn zpct" id="zPct">100%</span><button class="zbtn" id="zIn">+</button><button class="zbtn" id="zFit">⤢</button></div><svg id="treeSvg" viewBox="0 0 1330 1420"></svg></div>
@@ -415,33 +416,33 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.23"></script>
-<script src="js/profile.js?v=4.23"></script>
-<script src="js/achievements.js?v=4.23"></script>
-<script src="js/audio.js?v=4.23"></script>
-<script src="js/config.js?v=4.23"></script>
-<script src="js/tree.js?v=4.23"></script>
-<script src="js/relics.js?v=4.23"></script>
-<script src="js/state.js?v=4.23"></script>
-<script src="js/net.js?v=4.23"></script>
-<script src="js/core.js?v=4.23"></script>
-<script src="js/enemies.js?v=4.23"></script>
-<script src="js/waves.js?v=4.23"></script>
-<script src="js/boss.js?v=4.23"></script>
-<script src="js/loot.js?v=4.23"></script>
-<script src="js/player.js?v=4.23"></script>
-<script src="js/azar.js?v=4.23"></script>
-<script src="js/curses.js?v=4.23"></script>
-<script src="js/chests.js?v=4.23"></script>
-<script src="js/netsync.js?v=4.23"></script>
-<script src="js/render.js?v=4.23"></script>
-<script src="js/screens.js?v=4.23"></script>
-<script src="js/treeui.js?v=4.23"></script>
-<script src="js/hud.js?v=4.23"></script>
-<script src="js/vault.js?v=4.23"></script>
-<script src="js/merc.js?v=4.23"></script>
-<script src="js/input.js?v=4.23"></script>
-<script src="js/game.js?v=4.23"></script>
-<script src="js/update.js?v=4.23"></script>
+<script src="js/utils.js?v=4.24"></script>
+<script src="js/profile.js?v=4.24"></script>
+<script src="js/achievements.js?v=4.24"></script>
+<script src="js/audio.js?v=4.24"></script>
+<script src="js/config.js?v=4.24"></script>
+<script src="js/tree.js?v=4.24"></script>
+<script src="js/relics.js?v=4.24"></script>
+<script src="js/state.js?v=4.24"></script>
+<script src="js/net.js?v=4.24"></script>
+<script src="js/core.js?v=4.24"></script>
+<script src="js/enemies.js?v=4.24"></script>
+<script src="js/waves.js?v=4.24"></script>
+<script src="js/boss.js?v=4.24"></script>
+<script src="js/loot.js?v=4.24"></script>
+<script src="js/player.js?v=4.24"></script>
+<script src="js/azar.js?v=4.24"></script>
+<script src="js/curses.js?v=4.24"></script>
+<script src="js/chests.js?v=4.24"></script>
+<script src="js/netsync.js?v=4.24"></script>
+<script src="js/render.js?v=4.24"></script>
+<script src="js/screens.js?v=4.24"></script>
+<script src="js/treeui.js?v=4.24"></script>
+<script src="js/hud.js?v=4.24"></script>
+<script src="js/vault.js?v=4.24"></script>
+<script src="js/merc.js?v=4.24"></script>
+<script src="js/input.js?v=4.24"></script>
+<script src="js/game.js?v=4.24"></script>
+<script src="js/update.js?v=4.24"></script>
 </body>
 </html>

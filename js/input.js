@@ -115,6 +115,8 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  bindEl('#btnPbShop', 'click',()=>openShop('post'));
  bindEl('#btnCloseShop', 'click',()=>{ showScr(shopReturn); });
  bindEl('#btnBuy', 'click',buyNode);
+ /* v4.24: COMPRA MASIVA — desbloquea en cadena todo lo disponible y pagadero */
+ bindEl('#btnBuyAll', 'click',()=>{audio();buyAll();});
  bindEl('#btnGuide', 'click',openGuide);
  bindEl('#btnGuideBack', 'click',()=>{refreshMenu();showScr('menu');});
  bindEl('#btnAch', 'click',openAch);

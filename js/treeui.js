@@ -111,8 +111,51 @@ function buyNode(){
   if(net.mode==='client')sendMsg({t:'stats',b:computeStatblock()});
   renderTree();selectNode(selNode.id);updateShopRes();
 }
+/* ============ v4.24: COMPRA MASIVA ============
+   Un botón que desbloquea EN CADENA todas las mejoras disponibles
+   (padres + oleada/modo + nave) siempre que el bolsillo aguante:
+   oro Y gemas. Va comprando siempre el nodo MÁS BARATO primero para
+   estirar el dinero y dejar el máximo de nodos propios. */
+function buyAll(){
+  let n=0,gold=0,gems=0,guard=0;
+  while(guard++<400){
+    let best=null;
+    for(const nd of TREE){
+      if(has(nd.id))continue;
+      const st=nodeState(nd);
+      if(!st.dispo||!canPay(nd.cost))continue;
+      const g=nd.cost.gold||0,j=(nd.cost.gems||0)*300; /* 1 gema ≈ 300 oro de valor */
+      const bg=best?(best.cost.gold||0)+((best.cost.gems||0)*300):1e18;
+      if(g+j<bg)best=nd;
+    }
+    if(!best)break;
+    pay(best.cost);gold+=best.cost.gold||0;gems+=best.cost.gems||0;
+    save.tree[best.id]=1;n++;
+  }
+  selectNode(null);
+  if(n){
+    SFX.buy();vib(40);
+    checkAch();recompute();persist();
+    if(net.mode==='client')sendMsg({t:'stats',b:computeStatblock()});
+    $('#ndName').textContent='⇉ COMPRA MASIVA COMPLETADA';
+    $('#ndMeta').textContent=n+' mejoras desbloqueadas de una sola vez';
+    $('#ndDesc').textContent='Gasto total: '+gold+' de oro y '+gems+' gemas. El arsenal queda al día con tu bolsillo: lo que no se pudo pagar seguirá disponible aquí en cuanto tengas fondos.';
+  }else{
+    const abiertos=TREE.filter(nd=>!has(nd.id)&&nodeState(nd).dispo).length;
+    $('#ndName').textContent='NADA COMPRABLE AHORA';
+    $('#ndMeta').textContent=abiertos?(abiertos+' nodos disponibles · sin fondos suficientes'):'sin nodos disponibles todavía';
+    $('#ndDesc').textContent=abiertos
+      ?'Hay '+abiertos+' mejora(s) desbloqueada(s) pero no alcanzan el oro o las gemas para la más barata. Gana en partida, usa el CAMBIO de oro→gemas o visita al Mercader Pirata.'
+      :'Los nodos que faltan siguen cerrados por oleada/modo o nivel de nave: primero hay que ganarse el acceso jugando esos modos.';
+  }
+  renderTree();updateShopRes();
+}
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
+  /* v4.24: el botón de COMPRA MASIVA se enciende solo si hay algo
+     disponible Y pagadero (evita toques en balde) */
+  const ba=$('#btnBuyAll');
+  if(ba)ba.disabled=!TREE.some(nd=>!has(nd.id)&&nodeState(nd).dispo&&canPay(nd.cost));
   /* v4.9: mercado de gemas — el oro sigue sirviendo al final del juego
      v4.20: ESCALERA — la primera compra 1500, luego 1750, 2000… (+250) */
   const gx=$('#btnGemX');

@@ -36,11 +36,13 @@ function dropLoot(e){
       if(sr==='l')floater(e.x,e.y-30,'¿¡COFRE SELLADO LEGENDARIO!?','#FFD166',14);
     }
   }
-  /* v4.9: gemas y corazones más raros */
-  let gr=.02+run.level*.0012;
-  if(players.some(pl=>pl.gemLuck))gr*=1.9;
-  if(players.some(pl=>pl.gemExtra))gr+=.03;
-  if(run.relics.includes('crudas'))gr+=.08;
+  /* v4.9: gemas y corazones más raros
+     v4.24: GEMAS MÁS ESCASAS — el piloto nadaba en gemas: la tasa base baja a
+     la mitad, se le pone tope (2%) y los potenciadores suman menos. */
+  let gr=Math.min(.02,.011+run.level*.0006);
+  if(players.some(pl=>pl.gemLuck))gr*=1.5;
+  if(players.some(pl=>pl.gemExtra))gr+=.018;
+  if(run.relics.includes('crudas'))gr+=.05;
   if(Math.random()<gr)pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
   if(Math.random()<.006*(players.some(pl=>pl.heartDrop)?1.8:1))
     pickups.push({t:'heart',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-120,-40)});
@@ -97,7 +99,8 @@ function killEnemy(e,bySlot){
     for(let i=0;i<n;i++)
       pickups.push({t:'gold',x:e.x,y:e.y,vx:rand(-160,160),vy:rand(-240,-60),
         val:Math.max(2,Math.round((1+run.level*.25)*gMul))});
-    for(let i=0;i<1;i++)
+    /* v4.24: la gema del élite deja de ser garantizada (60%) */
+    if(Math.random()<.6)
       pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-120,120),vy:rand(-220,-60)});
     gainExp(Math.round(waveXp()*4*pl.expMul)); /* v4.9: élite x4 (antes x6) */
     floater(e.x,e.y-34,'¡ÉLITE CAÍDO!','#B388FF',14);
@@ -236,7 +239,8 @@ function killBoss(){
   for(let i=0;i<gn;i++)
     pickups.push({t:'gold',x:b.x,y:b.y,vx:rand(-160,160),vy:rand(-260,-60),
       val:Math.max(2,Math.round((.8+run.level*.28)*gMul))});
-  const gm=1+Math.floor(run.level/10); /* v4.9: menos gemas de jefes */
+  /* v4.24: el jefe también suelta menos gemas (1 cada 16 oleadas en vez de 10) */
+  const gm=1+Math.floor(run.level/16);
   for(let i=0;i<gm;i++)
     pickups.push({t:'gem',x:b.x,y:b.y,vx:rand(-140,140),vy:rand(-240,-60)});
   pickups.push({t:'heart',x:b.x,y:b.y,vx:0,vy:-120});
@@ -354,7 +358,7 @@ function popMeteor(m){
   for(let i=0;i<n;i++)
     pickups.push({t:'gold',x:m.x,y:m.y,vx:rand(-140,140),vy:rand(-230,-60),
       val:Math.max(2,Math.round((3+run.level*.75)*gMul))});
-  if(Math.random()<.4)pickups.push({t:'gem',x:m.x,y:m.y,vx:rand(-90,90),vy:rand(-200,-60)});
+  if(Math.random()<.25)pickups.push({t:'gem',x:m.x,y:m.y,vx:rand(-90,90),vy:rand(-200,-60)}); /* v4.24: 40%→25% */
   if(Math.random()<.18)pickups.push({t:'heart',x:m.x,y:m.y,vx:rand(-60,60),vy:rand(-160,-60)});
   burst(m.x,m.y,'#FFD166',26,240);burst(m.x,m.y,'#FF9F43',14,170);
   rings.push({x:m.x,y:m.y,r:8,R:120,t:0,life:.5,color:'#FFD166'});

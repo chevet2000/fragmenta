@@ -57,12 +57,20 @@ function tryOpen(rar){
    raro: 1 cerradura ancha y lenta · épico: 2 más estrechas y rápidas ·
    legendario: 3 estrechas, rápidas y con ZONA TRAMPA.
    v4.23: más justas — zonas más anchas, giro algo más lento y la
-   cerradura aguanta 4 fallos antes de bajar de calidad (antes 3). */
+   cerradura aguanta 4 fallos antes de bajar de calidad (antes 3).
+   v4.24: ANÁLISIS DEL «LE DOY BIEN Y FALLA» — tres culpables corregidos:
+   1) cada pointerdown contaba: los dobles registros del táctil (y los
+      toques de rebote) se comían resistencia de la cerradura → ahora hay
+      un freno de 220 ms entre toques registrados;
+   2) la LATENCIA TÁCTIL: el toque llega cuando el marcador ya cruzó lo que
+      veías → gracia de +7° en el borde de salida de la zona;
+   3) zonas algo más anchas y giro algo más lento (r 88/130 · e 66/160 ·
+      l 50/205 con trampa 36) y el marcador ya no nace DENTRO de la trampa. */
 const VG_C=2*Math.PI*46; /* circunferencia del anillo (r=46 en el SVG) */
 function vgSpec(rar){
-  if(rar==='r')return{locks:1,spd:130,zw:84,decoy:0};
-  if(rar==='e')return{locks:2,spd:172,zw:58,decoy:0};
-  return{locks:3,spd:226,zw:42,decoy:40};
+  if(rar==='r')return{locks:1,spd:130,zw:88,decoy:0};
+  if(rar==='e')return{locks:2,spd:160,zw:66,decoy:0};
+  return{locks:3,spd:205,zw:50,decoy:36};
 }
 /* orig = la rareza del cofre REAL guardado en la bóveda (no cambia al
    degradarse); rar = la calidad ACTUAL de la cerradura y del premio */
@@ -71,6 +79,9 @@ function startLockGame(rar,orig){
   vg={rar,orig:orig||rar,fails:0,lock:0,locks:s.locks,spd:s.spd,zw:s.zw,decoyW:s.decoy,
       zs:rand(0,360),ds:-999,ang:rand(0,360),raf:0,last:0,dead:false};
   vgNextLock();
+  /* v4.24: el marcador no puede NACER dentro de la zona trampa */
+  if(vg.decoyW>0&&(((vg.ang-vg.ds)%360+360)%360)<=vg.decoyW)
+    vg.ang=(vg.ds+vg.decoyW+15+rand(0,120))%360;
   $('#vaultMain').classList.add('hidden');
   $('#vaultGame').classList.remove('hidden');
   $('#vgSvg').classList.remove('hidden');
@@ -118,14 +129,26 @@ function vgStop(){
 }
 function vgTap(ev){
   if(!vg||vg.dead)return;
-  ev.preventDefault();audio();
+  ev.preventDefault();
+  /* v4.24: FRENO DE TOQUE — un mismo toque físico genera a veces dos
+     pointerdown (fantasma del táctil) y los toques nerviosos se cuentan
+     como intentos; solo se registra uno cada 220 ms */
+  const now=performance.now();
+  if(vg.lastTapT&&now-vg.lastTapT<220)return;
+  vg.lastTapT=now;
+  audio();
   const rel=((vg.ang-vg.zs)%360+360)%360;
   const reld=vg.decoyW>0?(((vg.ang-vg.ds)%360+360)%360):999;
-  if(rel<=vg.zw&&!(vg.decoyW>0&&reld<=vg.decoyW)){
+  /* v4.24: gracia +7° en el borde de SALIDA — la latencia táctil registra
+     el toque con el marcador ya pasado (en legendario son ~11° por pulso) */
+  if(rel<=vg.zw+7&&!(vg.decoyW>0&&reld<=vg.decoyW)){
     SFX.lockHit();vib(20);
     vg.lock++;
     const lk=$('#vgLock');
-    if(vg.lock>=vg.locks){vgStop();resolveVault(vg.rar);return;}
+    /* v4.24: BUG DE CONTABILIDAD — al ganar se pasa vg.orig: antes se
+       consumía de la bóveda el cofre de la calidad DEGRADADA (p. ej. un
+       épico) y el legendario original se quedaba en la bóveda para siempre */
+    if(vg.lock>=vg.locks){const o=vg.orig;vgStop();resolveVault(vg.rar,o);return;}
     if(lk)lk.textContent=(vg.lock+1)+'/'+vg.locks;
     vgNextLock();vgDraw();
     $('#vgMsg').textContent='¡CLIC! SIGUIENTE CERRADURA…';

@@ -49,7 +49,7 @@ async function checkUpdate(manual){
    saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
 function integrityCheck(){
   try{
-    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList']; /* v4.23: +Mercader */
+    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList','btnBuyAll']; /* v4.24: +Compra masiva */
     const dv=document.documentElement.getAttribute('data-v');
     const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
     if(ok)return true;
