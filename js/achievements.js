@@ -54,6 +54,12 @@ const ACHS=[
 /* v4.19: racha de misiones diarias y meteoritos dorados */
 {id:'rac3',name:'RACHA DE FUEGO',     desc:'Completa las 3 misiones diarias 3 días SEGUIDOS',rw:6, ck:()=>(save.streakBest||0)>=3},
 {id:'met3',name:'CAZAMETEOROS',       desc:'Revienta 3 METEORITOS DORADOS',        rw:4, ck:()=>(save.totMeteor||0)>=3},
+/* v4.20: cubos sorpresa, nave amiga, meteorito púrpura, portal y racha de 7 */
+{id:'cub5',name:'CAJA FUERTE',        desc:'Rompe 5 CUBOS SORPRESA',               rw:4, ck:()=>(save.totCube||0)>=5},
+{id:'aly1',name:'ESCOLTA ESTELAR',    desc:'Consigue una NAVE AMIGA de un cubo',   rw:3, ck:()=>(save.totAlly||0)>=1},
+{id:'metp',name:'CAZADOR DE ANOMALÍAS',desc:'Revienta un METEORITO PÚRPURA (raro)',rw:4, ck:()=>(save.totMeteorP||0)>=1},
+{id:'por1',name:'VIAJERO ANÓMALO',    desc:'Abre un PORTAL MISTERIOSO',            rw:5, ck:()=>(save.totPortal||0)>=1},
+{id:'rac7',name:'SEMANA PERFECTA',    desc:'Mantén la racha de misiones 7 días (aspecto ESTELAR)',rw:10,ck:()=>(save.streakBest||0)>=7},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

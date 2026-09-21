@@ -50,6 +50,10 @@ const SFX={
     tone(2093,1400,.42,'sine',.04,.38);tone(65,50,.5,'sawtooth',.06)},
   /* v4.19: silbido descendente del METEORITO DORADO al entrar */
   meteor(){tone(1500,240,.55,'sawtooth',.028);tone(320,920,.4,'sine',.02,.12)},
+  /* v4.20: rotura del CUBO SORPRESA · llamada de la NAVE AMIGA · apertura del PORTAL */
+  cube(){tone(180,560,.22,'square',.06);tone(560,1120,.18,'square',.05,.1);tone(1120,840,.14,'triangle',.04,.2)},
+  ally(){[660,880,1100].forEach((f,i)=>tone(f,f,.12,'triangle',.05,i*.07));tone(1760,1760,.16,'sine',.03,.24)},
+  portal(){tone(120,900,.5,'sine',.06);tone(900,180,.4,'sine',.05,.3);tone(60,45,.55,'sawtooth',.05)},
 };
 /* v4.10: campanita aguda de CRÍTICO (con tope anti-spam de 70 ms) */
 function critPing(){

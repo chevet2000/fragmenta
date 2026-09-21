@@ -49,7 +49,7 @@ async function checkUpdate(manual){
    saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
 function integrityCheck(){
   try{
-    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook']; /* v4.18: +comboGlow/ovHook */
+    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag']; /* v4.20: +allyTag */
     const dv=document.documentElement.getAttribute('data-v');
     const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
     if(ok)return true;

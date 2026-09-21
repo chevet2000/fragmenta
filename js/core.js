@@ -190,7 +190,8 @@ function effStreak(){
 function dailyStreakCheck(){
   if(dailyMDone()<3)return;               /* aún no están las 3 de hoy */
   if(save.streakLast===daySeed())return;  /* hoy ya contó */
-  save.streak=(save.streakLast===daySeedOffset(1))?(save.streak||0)+1:1;
+  if(save.streakLast===daySeedOffset(1))save.streak=(save.streak||0)+1;
+  else{save.streak=1;save.streakClaimed={};} /* v4.20: racha nueva → hitos cobrables otra vez */
   save.streakLast=daySeed();
   save.streakBest=Math.max(save.streakBest||0,save.streak);
   const bonus=Math.min(7,save.streak);
@@ -198,6 +199,28 @@ function dailyStreakCheck(){
   banner('★ RACHA DE MISIONES · DÍA '+save.streak,
     '+'+bonus+' gema'+(bonus>1?'s':'')+' de bono · vuelve mañana para seguirla');
   SFX.relic();vib(70);
+  /* v4.20: RECOMPENSAS VISIBLES POR HITOS — día 3 paga gemas, día 7 regala
+     el aspecto exclusivo ESTELAR, y así hasta el día 30. Cada hito se cobra
+     UNA vez por racha (si la racha se rompe, se pueden volver a ganar). */
+  if(!save.streakClaimed)save.streakClaimed={};
+  for(const m of STREAK_MILES){
+    if(save.streak<m.d||save.streakClaimed[m.d])continue;
+    save.streakClaimed[m.d]=1;
+    if(m.skin){
+      const sk=SKINS.find(s=>s.id===m.skin);
+      if(sk&&!save.skins.owned.includes(m.skin)){
+        save.skins.owned.push(m.skin);
+        banner('★ RECOMPENSA DE RACHA · DÍA '+m.d,'¡ASPECTO EXCLUSIVO '+sk.name+' desbloqueado en el HANGAR!');
+      }else{
+        save.gems+=25;save.totGems=(save.totGems||0)+25;
+        banner('★ RECOMPENSA DE RACHA · DÍA '+m.d,'+25 gemas (ya tenías el aspecto)');
+      }
+    }else{
+      save.gems+=m.gems;save.totGems=(save.totGems||0)+m.gems;
+      banner('★ RECOMPENSA DE RACHA · DÍA '+m.d,'+'+m.gems+' GEMAS por mantener la racha');
+    }
+    SFX.legend();vib(90);
+  }
   checkAch();persist();
 }
 function missionTick(kind,amt){

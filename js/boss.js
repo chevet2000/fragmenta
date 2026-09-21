@@ -510,20 +510,29 @@ function updBullets(dt){
     }
     if(!b.dead){
       for(const p of pickups){
-        if(p.t!=='schest')continue;
+        /* v4.20: también el CUBO SORPRESA se le quita el escudo a disparos */
+        if(p.t!=='schest'&&p.t!=='cube')continue;
+        if(p.shield<=0)continue; /* v4.20: ya resuelto — evita doble premio en el mismo frame */
         if(Math.hypot(b.x-p.x,b.y-p.y)<24+b.r){
           b.dead=true;
           p.shield-=b.dmg;
           burst(p.x+rand(-8,8),p.y+rand(-8,8),'#64C7FF',3,70);
-          floater(p.x,p.y-30,'-'+b.dmg,'#64C7FF',10);
+          floater(p.x,p.y-30,'-'+b.dmg,p.t==='cube'?'#FF7EB6':'#64C7FF',10);
           tone(760,520,.05,'sine',.02);
           if(p.shield<=0){
-            p.t='chest';
-            rings.push({x:p.x,y:p.y,r:10,R:86,t:0,life:.5,color:'#64C7FF'});
-            hostRing(p.x,p.y,86,'#64C7FF');
-            floater(p.x,p.y-42,'¡ESCUDO ROTO!','#64C7FF',13);
-            tone(200,900,.3,'sine',.06);
-            vib(40);
+            if(p.t==='cube'){ /* v4.20: el cubo resuelve su sorpresa al instante
+              (cambia de tipo ANTES de resolverse: ninguna otra bala puede
+              re-disparar el premio en el mismo frame) */
+              p.t='gone';p.dead=true;
+              resolveCube(p);
+            }else{
+              p.t='chest';
+              rings.push({x:p.x,y:p.y,r:10,R:86,t:0,life:.5,color:'#64C7FF'});
+              hostRing(p.x,p.y,86,'#64C7FF');
+              floater(p.x,p.y-42,'¡ESCUDO ROTO!','#64C7FF',13);
+              tone(200,900,.3,'sine',.06);
+              vib(40);
+            }
           }
           break;
         }
@@ -845,13 +854,15 @@ function updCollisions(){
 }
 function updPickups(dt){
   for(const p of pickups){
-    p.vy=Math.min(p.t==='minichest'?50:p.t==='schest'?26:p.t==='chest'?40:70,p.vy+150*dt);p.vx*=.99;
+    /* v4.20: el CUBO cae despacio como el cofre blindado y no se imanta */
+    const slow=p.t==='schest'||p.t==='cube';
+    p.vy=Math.min(p.t==='minichest'?50:slow?26:p.t==='chest'?40:70,p.vy+150*dt);p.vx*=.99;
     const pl=nearestPlayer(p.x,p.y);
     const dx=pl.x-p.x,dy=pl.y-p.y,d=Math.hypot(dx,dy)||1;
     const R2=70*pl.magnet;
-    if(d<R2&&p.t!=='schest'){const f=(1-d/R2)*1100;p.vx+=dx/d*f*dt;p.vy+=dy/d*f*dt;}
+    if(d<R2&&!slow){const f=(1-d/R2)*1100;p.vx+=dx/d*f*dt;p.vy+=dy/d*f*dt;}
     p.x+=p.vx*dt;p.y+=p.vy*dt;
-    if(d<24&&p.t!=='schest'){
+    if(d<24&&!slow){
       p.dead=true;
       /* v4.15: el botín va a la billetera del piloto que lo recoge (slot>0 = cliente) */
       const remote=pl.slot>0&&net.mode==='host';
@@ -932,6 +943,20 @@ function checkClear(dt){
           for(const c of net.conns)if(c.open)c.wg=(c.wg||0)+per;
         }else save.gold+=bonus;
         run.goldRun+=bonus;
+        /* v4.20: la DIMENSIÓN ANÓMALA paga su reliquia garantizada al cerrarse */
+        if(anomalyWave){
+          anomalyWave=false;
+          const pool=RELICS.filter(r=>!run.relics.includes(r.id));
+          let msg='reliquia sin hueco · +300 ORO';
+          if(pool.length){
+            const r=pool[irand(0,pool.length-1)];
+            run.relics.push(r.id);recompute();
+            if(r.id==='hierro')healPlayerOnce(0,3);
+            msg='RELIQUIA: '+r.name;
+          }else{save.gold+=300;run.goldRun+=300;save.totGold=(save.totGold||0)+300;}
+          banner('◈ LA DIMENSIÓN ANÓMALA SE CIERRA',msg);
+          SFX.legend();vib(70);
+        }
         banner('OLEADA DESPEJADA','+'+bonus+' de oro');
         run.level++;nextWave();persist();
       }

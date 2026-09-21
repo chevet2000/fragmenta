@@ -439,7 +439,7 @@ function applySnap(d){
   cBossPct=d.bp||0;
   cEB=d.eb.map(b=>({x:b[0],y:b[1],r:b[2],color:ECOLORS[b[3]]||'#F2EFE6'}));
   cBL=d.bl.map(b=>({x:b[0],y:b[1],ang:b[2]/100,kind:b[3]}));
-  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest'][p[0]]||'gold',x:p[1],y:p[2],shield:p[3]||0,shieldMax:p[4]||0}));
+  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest','cube'][p[0]]||'gold',x:p[1],y:p[2],shield:p[3]||0,shieldMax:p[4]||0}));
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));
   cNovaCd=d.nc;
 }

@@ -96,10 +96,14 @@ function buyNode(){
 }
 function updateShopRes(){
   $('#shopGold').textContent=save.gold;$('#shopGems').textContent=save.gems;
-  /* v4.9: mercado de gemas — el oro sigue sirviendo al final del juego */
+  /* v4.9: mercado de gemas — el oro sigue sirviendo al final del juego
+     v4.20: ESCALERA — la primera compra 1500, luego 1750, 2000… (+250) */
   const gx=$('#btnGemX');
-  if(gx){gx.disabled=save.gold<GEMX_COST;gx.textContent=save.gold>=GEMX_COST?
-    `CAMBIO · ${GEMX_COST} ORO → ${GEMX_GEMS} GEMAS`:`CAMBIO · ${GEMX_COST} ORO → ${GEMX_GEMS} GEMAS (ORO INSUFICIENTE)`;}
+  if(gx){const pr=gemXPrice();
+    const lab=`CAMBIO · ${pr} ORO → ${GEMX_GEMS} GEMAS`+((save.gemxBuys||0)>0?` (Nº ${save.gemxBuys+1})`:'');
+    gx.disabled=save.gold<pr;
+    gx.textContent=save.gold>=pr?lab:lab+' · ORO INSUFICIENTE';
+    gx.title=(save.gemxBuys||0)>0?'La próxima compra costará '+(pr+GEMX_STEP)+' de oro':'';}
   const prof=saveProfile==='local'?'PERFIL LOCAL':'PERFIL ONLINE';
   $('#shopHint').innerHTML=`<span class="prof">${prof}</span> · ${ownedCount()}/${TREE.length} · ${Object.keys(BX).length} RAMAS · v${VERSION}`;
 }

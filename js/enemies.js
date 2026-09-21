@@ -28,6 +28,8 @@ function spawnEnemy(tk,elvl,o){
   e.goldTotal=Math.max(1,Math.round((.25+run.level*.15)*(players[0]?players[0].goldMul:1)))*gPieces;
   /* v4.18: en la OLEADA DORADA todo el mundo suelta +60% de oro */
   if(goldenWave)e.goldTotal=Math.round(e.goldTotal*1.6);
+  /* v4.20: en la DIMENSIÓN ANÓMALA (traída por el PORTAL MISTERIOSO) el botín se DOBLA */
+  if(anomalyWave)e.goldTotal=Math.round(e.goldTotal*2);
   /* v4.12: BESTIARIO — la figura queda registrada al aparecer (bandera, sin persistir aquí) */
   if(!save.seen)save.seen={};
   save.seen[tk]=1;

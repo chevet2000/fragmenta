@@ -239,16 +239,19 @@ function openHangar(){
     g.restore();
     el.appendChild(c);
     const t=document.createElement('div');t.className='at';
+    const sub=eq?'EQUIPADA':(owned?(s.streak?'RECOMPENSA DE RACHA · CONSEGUIDA':'toca EQUIPAR'):(s.streak?'RACHA DE MISIONES · DÍA '+s.streak:s.cost+' de oro'));
     t.innerHTML=`<b style="color:${s.color==='prisma'?'#FFD166':s.color}">${s.name}</b>`+
-      `<small>${eq?'EQUIPADA':(owned?'toca EQUIPAR':s.cost+' de oro')}</small>`;
+      `<small>${sub}</small>`;
     el.appendChild(t);
     const b=document.createElement('button');
     b.className='skbtn'+(eq?' on':'');
-    b.textContent=eq?'✓':(owned?'EQUIPAR':'COMPRAR');
+    b.textContent=eq?'✓':(owned?'EQUIPAR':(s.streak?'★ DÍA '+s.streak:'COMPRAR'));
     b.addEventListener('click',()=>{
       audio();
       if(eq)return;
       if(!owned){
+        /* v4.20: el ESTELAR no se compra — se gana con la racha (día 7) */
+        if(s.streak){banner('ASPECTO EXCLUSIVO',s.name+' se gana manteniendo la RACHA · DÍA '+s.streak);SFX.hurt();return;}
         if(save.gold<s.cost){banner('ORO INSUFICIENTE',s.name+' cuesta '+s.cost+' de oro');SFX.hurt();return;}
         save.gold-=s.cost;
         save.skins.owned.push(s.id);
@@ -268,15 +271,20 @@ function openHangar(){
 function openMissions(){
   ensureDailyM();
   const box=$('#missList');box.innerHTML='';
-  /* v4.19: cabecera de RACHA — día 1, 2, 3… completando las 3 cada día */
+  /* v4.19: cabecera de RACHA — día 1, 2, 3… completando las 3 cada día
+     v4.20: RECOMPENSAS VISIBLES — los hitos de la racha se ven aquí */
   const st=effStreak(),bs=Math.max(save.streakBest||0,st);
+  const nx=STREAK_MILES.find(m=>st<m.d);
+  const miles=STREAK_MILES.map(m=>((st>=m.d)?'✓ ':'· ')+'DÍA '+m.d+': '+streakMileTxt(m)).join('  ·  ');
   const head=document.createElement('div');
   head.className='streakrow'+(st>0?' on':'');
   head.innerHTML=st>0
     ?`<b>★ RACHA DE MISIONES · DÍA ${st}</b>`+
-     `<small>MEJOR RACHA · ${bs} ${bs===1?'DÍA':'DÍAS'} · COMPLETA LAS 3 CADA DÍA PARA NO PERDERLA<br>BONO DE HOY YA PAGADO · MAÑANA +${Math.min(7,st+1)} GEMA${Math.min(7,st+1)>1?'S':''} (TOPE +7)</small>`
+     `<small>MEJOR RACHA · ${bs} ${bs===1?'DÍA':'DÍAS'} · COMPLETA LAS 3 CADA DÍA PARA NO PERDERLA<br>BONO DE HOY YA PAGADO · MAÑANA +${Math.min(7,st+1)} GEMA${Math.min(7,st+1)>1?'S':''} (TOPE +7)`+
+     (nx?`<br>PRÓXIMA RECOMPENSA · DÍA ${nx.d} → <b style="color:#FFE9B0">${streakMileTxt(nx)}</b>`:'<br>¡TODAS LAS RECOMPENSAS DE RACHA CONSEGUIDAS!')+
+     `</small><small style="margin-top:4px;display:block">${miles}</small>`
     :`<b>SIN RACHA ACTIVA</b>`+
-     `<small>COMPLETA LAS 3 MISIONES DE HOY Y ENCIENDES EL DÍA 1 · CADA DÍA SEGUIDO PAGA +1 GEMA MÁS (TOPE +7)${bs>0?'<br>TU MEJOR RACHA · '+bs+' '+(bs===1?'DÍA':'DÍAS'):''}</small>`;
+     `<small>COMPLETA LAS 3 MISIONES DE HOY Y ENCIENDES EL DÍA 1 · CADA DÍA SEGUIDO PAGA +1 GEMA MÁS (TOPE +7)${bs>0?'<br>TU MEJOR RACHA · '+bs+' '+(bs===1?'DÍA':'DÍAS'):''}<br>RECOMPENSAS POR MANTENERLA · DÍA 3 → +15 GEMAS · DÍA 5 → +25 GEMAS · DÍA 7 → <b style="color:#FFE9B0">ASPECTO ESTELAR ★</b></small>`;
   box.appendChild(head);
   for(const m of save.dailyM.l){
     const el=document.createElement('div');
@@ -322,6 +330,12 @@ function openStats(){
     ['OLEADAS DORADAS',save.totGolden||0],
     ['RACHA DE MISIONES',(effStreak()||0)+' DÍA(S) · MEJOR '+(save.streakBest||0)],
     ['METEORITOS REVENTADOS',save.totMeteor||0],
+    /* v4.20: púrpura, cubos, naves amigas, portales y cambios de gemas */
+    ['METEORITOS PÚRPURA',save.totMeteorP||0],
+    ['CUBOS SORPRESA',save.totCube||0],
+    ['NAVES AMIGAS',save.totAlly||0],
+    ['PORTALES ABIERTOS',save.totPortal||0],
+    ['CAMBIOS DE GEMAS',save.gemxBuys||0],
     ['ASCENSOS',save.prest||0],
   ];
   const box=$('#statsList');box.innerHTML='';
@@ -388,6 +402,9 @@ function resetRunCommon(){
   run.newComboRec=false; /* v4.18: sin récord de combo todavía */
   hitStopT=0;goldenWave=false;lastGolden=-9;kcN=0;kcLast=-9; /* v4.18: dopamina a cero */
   meteors=[];meteorT=rand(16,30);meteorWarned=false; /* v4.19: meteoritos a cero */
+  /* v4.20: eventos nuevos a cero — cubos, portal, naves amigas y anomalía */
+  cubeT=rand(8,13);portals=[];portalT=rand(40,75);portalWarned=false;
+  allies=[];updAllies.warn=false;anomalyWave=false;run.portalNext=false;
   bots=[]; /* v4.9: sin aliados al empezar */
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();

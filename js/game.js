@@ -14,9 +14,11 @@ function loop(now){
     run.time+=dt;
     for(const pl of players)updPlayer(pl,dt);
     updBots(dt); /* v4.9: aliado bot de combate */
+    updAllies(dt); /* v4.20: naves amigas del cubo sorpresa */
     updBullets(dt);
     updWaveSpawns(dt);
     updMeteors(dt); /* v4.19: meteoritos dorados que cruzan la pantalla */
+    updEvents(dt); /* v4.20: cubos sorpresa + portal misterioso */
     updEnemies(dt);
     updBoss(dt);
     updHoles(dt); /* v4.14: agujeros negros */

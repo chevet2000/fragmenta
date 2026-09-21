@@ -655,6 +655,10 @@ function renderGame(dt){
   if(goldenWave&&state==='play'){
     ctx.fillStyle='rgba(255,209,102,.045)';ctx.fillRect(0,0,W,H);
   }
+  /* v4.20: tinte violáceo de la DIMENSIÓN ANÓMALA */
+  if(anomalyWave&&state==='play'){
+    ctx.fillStyle='rgba(138,90,255,.055)';ctx.fillRect(0,0,W,H);
+  }
   drawHoles(); /* v4.14: agujeros negros bajo el resto */
   ctx.save();
   if(shake>.2)ctx.translate(rand(-shake,shake)*.5,rand(-shake,shake)*.5);
@@ -715,6 +719,22 @@ function renderGame(dt){
       ctx.beginPath();ctx.arc(0,0,30,-Math.PI/2,-Math.PI/2+TAU*frac);ctx.stroke();
       ctx.globalAlpha=1;
     }
+    else if(p.t==='cube'){ /* v4.20: CUBO SORPRESA — cubo rosa giratorio + escudo */
+      const rot=time*1.2;
+      ctx.strokeStyle='#FF7EB6';ctx.lineWidth=2;
+      ctx.save();ctx.rotate(rot);ctx.strokeRect(-8,-8,16,16);ctx.restore();
+      ctx.save();ctx.rotate(-rot*.7+.6);ctx.globalAlpha=.65;ctx.strokeRect(-8,-8,16,16);ctx.restore();
+      ctx.font='700 10px "Chakra Petch",monospace';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='#FF7EB6';ctx.fillText('?',0,1);
+      const frac=clamp((p.shield||0)/(p.shieldMax||1),0,1);
+      ctx.globalAlpha=.4+Math.sin(time*7)*.18;
+      ctx.strokeStyle='#B388FF';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(0,0,20,0,TAU);ctx.stroke();
+      ctx.globalAlpha=.85;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.arc(0,0,25,-Math.PI/2,-Math.PI/2+TAU*frac);ctx.stroke();
+      ctx.globalAlpha=1;
+    }
     else if(p.t==='lchest'){ /* v4.18: cofre de la Fortuna — brillo según rareza */
       const col=p.rar==='c'?'#F2EFE6':p.rar==='r'?'#64C7FF':p.rar==='e'?'#B388FF':'#FFD166';
       const leg=p.rar==='l';
@@ -737,25 +757,56 @@ function renderGame(dt){
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();}
     ctx.restore();
   }
-  /* v4.19: METEORITOS DORADOS — roca incandescente con halo y grietas */
+  /* v4.19: METEORITOS DORADOS — roca incandescente con halo y grietas
+     v4.20: el ANÓMALO (púrpura) usa su propia paleta */
   for(const m of meteors){
+    const mCol=m.pur?'#B388FF':'#FFD166',mDark=m.pur?'#3A2454':'#8A5A22',
+      mSpark=m.pur?'#D6BCFF':'#FFE9B0',mHalo=m.pur?'#8A5AFF':'#FFD166';
     ctx.save();ctx.translate(m.x,m.y);
     ctx.globalAlpha=.22+Math.sin(time*9)*.08;
-    ctx.fillStyle='#FFD166';
+    ctx.fillStyle=mHalo;
     ctx.beginPath();ctx.arc(0,0,m.r+8,0,TAU);ctx.fill();
     ctx.globalAlpha=1;ctx.rotate(m.rot);
-    ctx.fillStyle='#8A5A22';ctx.strokeStyle='#FFD166';ctx.lineWidth=2.2;
+    ctx.fillStyle=mDark;ctx.strokeStyle=mCol;ctx.lineWidth=2.2;
     ctx.beginPath();
     for(let i=0;i<7;i++){const a=TAU*i/7,rr=m.r*m.verts[i];
       i?ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr):ctx.moveTo(Math.cos(a)*rr,Math.sin(a)*rr);}
     ctx.closePath();ctx.fill();ctx.stroke();
     if(m.hp<m.maxhp){ /* grietas según el daño recibido */
-      ctx.strokeStyle='#FFE9B0';ctx.lineWidth=1.4;ctx.globalAlpha=.85;
+      ctx.strokeStyle=mSpark;ctx.lineWidth=1.4;ctx.globalAlpha=.85;
       const cr=m.maxhp-m.hp;
       for(let i=0;i<cr;i++){const a=TAU*(i+.5)/cr;
         ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*m.r*.82,Math.sin(a)*m.r*.82);ctx.stroke();}
       ctx.globalAlpha=1;
     }
+    ctx.restore();
+  }
+  /* v4.20: PORTAL MISTERIOSO — vórtice violáceo de anillos giratorios */
+  for(const p of portals){
+    ctx.save();ctx.translate(p.x,p.y);
+    ctx.globalAlpha=.18+Math.sin(time*5)*.07;
+    ctx.fillStyle='#8A5AFF';
+    ctx.beginPath();ctx.arc(0,0,p.r+12,0,TAU);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#0B0E13';
+    ctx.beginPath();ctx.arc(0,0,p.r*.4,0,TAU);ctx.fill();
+    for(let i=0;i<3;i++){
+      ctx.save();ctx.rotate(time*(1.1+i*.5)*(i%2?-1:1)+i*2.1);
+      ctx.strokeStyle=i===1?'#64C7FF':'#B388FF';
+      ctx.lineWidth=2.4-i*.4;
+      ctx.globalAlpha=.9-i*.2;
+      ctx.beginPath();ctx.ellipse(0,0,p.r*(1-i*.24),p.r*.44,0,0,TAU);ctx.stroke();
+      ctx.restore();
+    }
+    if(p.hp<p.maxhp){ /* pulso de grietas al recibir impactos */
+      ctx.globalAlpha=.5+Math.sin(time*12)*.25;
+      ctx.strokeStyle='#D6BCFF';ctx.lineWidth=1.6;
+      const cr=p.maxhp-p.hp;
+      for(let i=0;i<cr;i++){const a=TAU*(i+.5)/cr+time*.7;
+        ctx.beginPath();ctx.moveTo(Math.cos(a)*p.r*.35,Math.sin(a)*p.r*.35);
+        ctx.lineTo(Math.cos(a)*p.r*.95,Math.sin(a)*p.r*.95);ctx.stroke();}
+    }
+    ctx.globalAlpha=1;
     ctx.restore();
   }
   if(amClient()){
@@ -790,6 +841,7 @@ function renderGame(dt){
         ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-5,4);ctx.lineTo(-5,-4);ctx.closePath();ctx.fill();
         ctx.restore();
       }else if(b.dr){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-1.2,b.y-5,2.4,10);}
+      else if(b.ally){ /* v4.20: balas de la NAVE AMIGA — doradas */ ctx.fillStyle='#FFE9B0';ctx.fillRect(b.x-1.6,b.y-7,3.2,14);}
       else if(b.bot){ /* v4.9: balas del aliado bot */ ctx.fillStyle='#B388FF';ctx.fillRect(b.x-1.5,b.y-6,3,12);}
       else if(b.heavy){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-2.5,b.y-9,5,18);}
       else{ctx.fillStyle=b.crit?'#FFD166':'#F2EFE6';ctx.fillRect(b.x-1.5,b.y-7,3,14);}
@@ -822,6 +874,19 @@ function renderGame(dt){
     else drawShip(pl,!amClient());
   }
   drawGhost(); /* v4.14: fantasma del ranking (frenético) */
+  /* v4.20: NAVES AMIGAS — escolta dorada orbitando a la nave del anfitrión */
+  if(!amClient()){
+    for(const a of allies){
+      ctx.save();ctx.translate(a.x,a.y);
+      ctx.globalAlpha=.45+Math.sin(time*5+a.ph)*.15;
+      ctx.strokeStyle='#FFE9B0';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.arc(0,0,16,time*3+a.ph,time*3+a.ph+TAU*.55);ctx.stroke();
+      ctx.globalAlpha=1;
+      ctx.rotate(Math.sin(time*6+a.ph)*.12);
+      drawShipIcon(ctx,.85,'#FFE9B0','#FFD166');
+      ctx.restore();
+    }
+  }
   for(const p of parts){
     const a=1-p.t/p.life;
     ctx.globalAlpha=a;ctx.strokeStyle=p.color;ctx.lineWidth=1.5;

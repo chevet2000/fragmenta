@@ -9,8 +9,12 @@ const SLOT_COL=['#7FD1B9','#FF7EB6','#64C7FF'];
 
 /* v4.9: mercado de gemas — cambia oro por gemas en el ARSENAL.
    Así el oro conserva uso incluso con todas las mejoras al máximo:
-   financia las mejoras del ALIADO (que se pagan con gemas). */
-const GEMX_COST=1500, GEMX_GEMS=10;
+   financia las mejoras del ALIADO (que se pagan con gemas).
+   v4.20: EL CAMBIO SE ENCARCECE — la primera compra vale 1500, la segunda
+   1750, la tercera 2000… (+250 cada vez). El contador es por perfil y
+   nunca se reinicia: cambiar mucho oro de golpe se paga cada vez peor. */
+const GEMX_BASE=1500, GEMX_STEP=250, GEMX_GEMS=10;
+function gemXPrice(){return GEMX_BASE+GEMX_STEP*(save.gemxBuys||0);}
 
 /* ============ v4.12: HANGAR — aspectos de nave ============ */
 /* Solo cosmético: cambia el color del casco y del núcleo de TU nave.
@@ -30,7 +34,24 @@ const SKINS=[
  {id:'vulcano',  name:'VULCANO',  color:'#FF9F43',cost:1200},
  {id:'obsidiana',name:'OBSIDIANA',color:'#9AA6B5',cost:2000},
  {id:'prisma', name:'PRISMA ∞', color:'prisma',  cost:2500},
+ /* v4.20: aspecto EXCLUSIVO de la racha — no se compra: se gana
+   manteniendo la racha de misiones diarias hasta el DÍA 7. */
+ {id:'estelar',name:'ESTELAR ★', color:'#FFE9B0',cost:0,streak:7},
 ];
+
+/* ============ v4.20: RECOMPENSAS VISIBLES DE LA RACHA ============
+   Hitos de la racha de misiones diarias: al completar las 3 misiones
+   el día N de la racha se paga la recompensa del hito (una sola vez
+   por racha). El DÍA 7 regala el aspecto exclusivo ESTELAR. */
+const STREAK_MILES=[
+ {d:3, gems:15},
+ {d:5, gems:25},
+ {d:7, skin:'estelar'},
+ {d:14,gems:40},
+ {d:21,gems:60},
+ {d:30,gems:100},
+];
+function streakMileTxt(m){return m.skin?('ASPECTO '+SKINS.find(s=>s.id===m.skin).name):('+'+m.gems+' GEMAS');}
 
 /* ============ v4.12: MISIONES DIARIAS ============ */
 /* Cada día se sortean 3 (determinista por fecha, iguales para todos).
@@ -67,10 +88,19 @@ const BESTIARY={
 /* v4.9: DIFICULTAD BRUTAL — desde la PRIMERA oleada los enemigos son de
    nivel ~100 (nv 96–100) y la vida sigue creciendo x1.055 por nivel.
    hp(nv100)≈275 PS · hp(nv150)≈5.300 · hp(nv200)≈100.000: incluso con el
-   árbol al máximo en HARDCORE cuesta mucho purgar cada oleada. */
+   árbol al máximo en HARDCORE cuesta mucho purgar cada oleada.
+   v4.20: REBALANCEO DE LAS PRIMERAS ETAPAS (para poder probar y progresar):
+   · NORMAL / SOLO / RETO DIARIO / SEMANAL (y co-op NORMAL): enemigos nv 40–50
+     desde la oleada 1 (antes 96–100).
+   · DIFÍCIL: nv 70–90 desde la oleada 1.
+   · HARDCORE (y el FRENÉTICO, que es hardcore): se queda como estaba (96–100).
+   El crecimiento por oleada se mantiene igual en todos los modos, así que
+   el juego largo no cambia: la normal alcanza los niveles antiguos hacia la
+   oleada 50. */
 function hpForLevel(l){return Math.max(1,Math.round((0.011*l+0.17)*Math.pow(1.055,l)*multHP()));}
-function maxLvlOf(L){return 99+L;}
-function minLvlOf(L){return 96+Math.max(0,Math.floor((L-1)/5))*2;}
+function lvlBase(){return runDiff==='dificil'?{mn:70,mx:89}:runDiff==='hardcore'?{mn:96,mx:99}:{mn:40,mx:49};}
+function maxLvlOf(L){return lvlBase().mx+L;}
+function minLvlOf(L){return lvlBase().mn+Math.max(0,Math.floor((L-1)/5))*2;}
 const TYPES={
   orb:    {shape:'circle', color:'#7FD1B9',mult:1.0, spd:1.0},
   dart:   {shape:'tri',    color:'#FFD166',mult:0.7, spd:1.5},

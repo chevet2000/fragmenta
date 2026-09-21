@@ -146,6 +146,11 @@ function buildWave(L){
     goldenWave=true;lastGolden=L;
     save.totGolden=(save.totGolden||0)+1;
   }else goldenWave=false;
+  /* ---- v4.20: DIMENSIÓN ANÓMALA — si el PORTAL MISTERIOSO se abrió, la
+     próxima oleada NO jefa nace anómala: botín ×2 y reliquia garantizada
+     al despejarla (se paga en checkClear). Los jefes no la consumen. ---- */
+  if(L%5===0)anomalyWave=false;
+  else{anomalyWave=!!run.portalNext;if(anomalyWave)run.portalNext=false;}
   wave.type=comps.length>1?'mix':comps[0];
   wave.types=comps;lastWaveType=comps[0];
   const f=1/Math.sqrt(comps.length);
@@ -193,6 +198,10 @@ function buildWave(L){
     banner('¡OLEADA DORADA!','LLUVIA DE ORO · botín +60% durante toda la oleada');
     SFX.relic();checkAch();
   }
+  if(anomalyWave){ /* v4.20: la oleada traída por el PORTAL MISTERIOSO */
+    banner('◈ DIMENSIÓN ANÓMALA','La oleada nace distorsionada · botín ×2 · RELIQUIA al despejar');
+    SFX.warp();checkAch();
+  }
   /* ---- cofre blindado cada 2 oleadas ---- */
   if(L>=2&&L%2===0&&L%5!==0&&!pickups.some(p=>p.t==='schest')){
     /* escudo = 2x la vida del enemigo de nivel más alto de la oleada (nunca menor que la fórmula antigua) */
@@ -200,7 +209,7 @@ function buildWave(L){
     const cx=clamp(W/2+rand(-W*.3,W*.3),50,W-50);
     pickups.push({t:'schest',x:cx,y:-46,vx:0,vy:0,shield:sh,shieldMax:sh,kind:'arm'});
     floater(cx,110,'COFRE BLINDADO','#64C7FF',13);
-    if(run.level<=4)banner('COFRE BLINDADO','Destruye su escudo a disparos y atrápalo');
+    if(run.level<=4&&!anomalyWave)banner('COFRE BLINDADO','Destruye su escudo a disparos y atrápalo');
   }
 }
 function updWaveSpawns(dt){

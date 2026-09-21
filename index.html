@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.19">
+<html lang="es" data-v="4.20">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.19 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.20 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.19">
+<link rel="stylesheet" href="css/styles.css?v=4.20">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -33,6 +33,7 @@
     <div class="buffbar curserow hidden" id="curseBar"></div>
     <div class="wavebar"><i id="waveFill"></i></div>
     <div id="comboTag" class="hidden"></div>
+    <div id="allyTag" class="hidden"></div>
     <div id="ghostTag" class="hidden"></div>
     <div id="netTag" class="hidden"></div>
   </div>
@@ -95,8 +96,8 @@
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.19</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.19</b> premia tu constancia: las <b>MISIONES DIARIAS ahora tienen RACHA</b> — completa las 3 el mismo día y enciendes el <b>DÍA 1, 2, 3…</b> cada día seguido paga un bono de gemas creciente (hasta +7) y hay 2 logros nuevos. Cruzan la pantalla los <b>★ METEORITOS DORADOS</b>: reventarlos a disparos antes de que escapen suelta una lluvia de oro, gemas y corazones. Y por petición popular, el <b>buscador de ACTUALIZACIONES</b> (y el botón ⟳ ACTUALIZAR) viven ahora <b>en la pantalla principal</b>, sin entrar en ajustes.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.20</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.20</b> desata los eventos: caen <b>CUBOS SORPRESA</b> desde la primera oleada — rómpeles el escudo a disparos y sortearán una <b>PURGA</b> de 2–5 enemigos al azar o una <b>NAVE AMIGA</b> que te escolta 60 s con el <b>DOBLE de tu daño</b>. El <b>◈ PORTAL MISTERIOSO</b> (el reservado para esta versión) cruza la pantalla: revéntalo y la <b>OLEADA ANÓMALA</b> siguiente paga <b>botín ×2</b> y una <b>reliquia garantizada</b>. Los meteoritos ahora tienen rareza: el raro <b>PÚRPURA</b> suelta reliquia. El <b>CAMBIO de gemas</b> se encarece en escalera (1500 · 1750 · 2000…). Las primeras etapas de NORMAL, DIARIO y SEMANAL bajan de nv 100 a <b>40–50</b> (DIFÍCIL 70–90 · HARDCORE igual). Y la racha estrena <b>recompensas visibles</b>: día 3 y 5 gemas, y al <b>DÍA 7 el aspecto exclusivo ESTELAR ★</b>.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -132,7 +133,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.19 · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.20 · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -373,31 +374,31 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.19"></script>
-<script src="js/profile.js?v=4.19"></script>
-<script src="js/achievements.js?v=4.19"></script>
-<script src="js/audio.js?v=4.19"></script>
-<script src="js/config.js?v=4.19"></script>
-<script src="js/tree.js?v=4.19"></script>
-<script src="js/relics.js?v=4.19"></script>
-<script src="js/state.js?v=4.19"></script>
-<script src="js/net.js?v=4.19"></script>
-<script src="js/core.js?v=4.19"></script>
-<script src="js/enemies.js?v=4.19"></script>
-<script src="js/waves.js?v=4.19"></script>
-<script src="js/boss.js?v=4.19"></script>
-<script src="js/loot.js?v=4.19"></script>
-<script src="js/player.js?v=4.19"></script>
-<script src="js/azar.js?v=4.19"></script>
-<script src="js/curses.js?v=4.19"></script>
-<script src="js/chests.js?v=4.19"></script>
-<script src="js/netsync.js?v=4.19"></script>
-<script src="js/render.js?v=4.19"></script>
-<script src="js/screens.js?v=4.19"></script>
-<script src="js/treeui.js?v=4.19"></script>
-<script src="js/hud.js?v=4.19"></script>
-<script src="js/input.js?v=4.19"></script>
-<script src="js/game.js?v=4.19"></script>
-<script src="js/update.js?v=4.19"></script>
+<script src="js/utils.js?v=4.20"></script>
+<script src="js/profile.js?v=4.20"></script>
+<script src="js/achievements.js?v=4.20"></script>
+<script src="js/audio.js?v=4.20"></script>
+<script src="js/config.js?v=4.20"></script>
+<script src="js/tree.js?v=4.20"></script>
+<script src="js/relics.js?v=4.20"></script>
+<script src="js/state.js?v=4.20"></script>
+<script src="js/net.js?v=4.20"></script>
+<script src="js/core.js?v=4.20"></script>
+<script src="js/enemies.js?v=4.20"></script>
+<script src="js/waves.js?v=4.20"></script>
+<script src="js/boss.js?v=4.20"></script>
+<script src="js/loot.js?v=4.20"></script>
+<script src="js/player.js?v=4.20"></script>
+<script src="js/azar.js?v=4.20"></script>
+<script src="js/curses.js?v=4.20"></script>
+<script src="js/chests.js?v=4.20"></script>
+<script src="js/netsync.js?v=4.20"></script>
+<script src="js/render.js?v=4.20"></script>
+<script src="js/screens.js?v=4.20"></script>
+<script src="js/treeui.js?v=4.20"></script>
+<script src="js/hud.js?v=4.20"></script>
+<script src="js/input.js?v=4.20"></script>
+<script src="js/game.js?v=4.20"></script>
+<script src="js/update.js?v=4.20"></script>
 </body>
 </html>

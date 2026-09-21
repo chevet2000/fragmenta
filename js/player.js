@@ -373,6 +373,44 @@ function updHoles(dt){
   holes=holes.filter(h=>!h.dead);
 }
 
+/* ============ v4.20: NAVE AMIGA (escolta temporal del CUBO SORPRESA) ============
+   Vuela junto a tu nave 60 s y dispara al enemigo más cercano con el
+   DOBLE de tu daño actual (se recalcula en cada disparo: si mejoras la
+   nave, la escolta mejora contigo). No interfiere con el bot del árbol
+   ALIADO: usa su propia lista `allies`. */
+function updAllies(dt){
+  const P0=players[0]||P;
+  if(!allies.length||!P0)return;
+  for(const a of allies){
+    a.life-=dt;
+    a.ph+=dt;
+    const ang=time*1.1+a.ph;
+    const tx=P0.x+Math.cos(ang)*64,ty=P0.y+Math.sin(ang)*52-14;
+    a.x=lerp(a.x,tx,1-Math.exp(-5.5*dt));
+    a.y=lerp(a.y,ty,1-Math.exp(-5.5*dt));
+    a.cd-=dt;
+    if(a.cd<=0){
+      const t=nearestEnemy(a.x,a.y,[],560);
+      if(t){
+        a.cd=.8;
+        const ang2=Math.atan2(t.y-a.y,t.x-a.x);
+        /* v4.20: cada disparo de la escolta pega el DOBLE del daño del jugador */
+        bullets.push({x:a.x,y:a.y,vx:Math.cos(ang2)*520,vy:Math.sin(ang2)*520,
+          dmg:Math.max(2,Math.round(P0.dmg*2)),r:4,crit:false,pierce:0,hits:[],bounce:0,
+          ally:true,slot:0,life:3,dead:false});
+        tone(1150,780,.05,'triangle',.02);
+      }else a.cd=.3;
+    }
+  }
+  const had=allies.length;
+  allies=allies.filter(a=>a.life>0);
+  /* aviso de retirada cuando se acaba la escolta (se rearma al invocar otra) */
+  if(had>0&&!allies.length&&state==='play'&&!updAllies.warn){
+    updAllies.warn=true;
+    floater(P0.x,P0.y-56,'LA NAVE AMIGA SE RETIRA','#FFE9B0',12);
+  }
+}
+
 /* ============ rescate ============ */
 function updWrecks(dt){
   for(const w of wrecks){

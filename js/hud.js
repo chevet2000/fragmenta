@@ -58,6 +58,17 @@ function refreshHUD(){
       cg.classList.toggle('hot',n>=40);
     }else{cg.classList.add('hidden');cg.style.opacity='0';}
   }
+  /* v4.20: NAVES AMIGAS activas — chip con los segundos de escolta restantes */
+  const at=$('#allyTag');
+  if(at){
+    const al=(runActive&&state==='play'&&!amClient())?allies:[];
+    if(al.length){
+      at.classList.remove('hidden');
+      const mx=Math.max(...al.map(a=>a.life||0));
+      at.textContent='▲ NAVE AMIGA · '+Math.ceil(mx)+'s';
+      at.style.color='#FFE9B0';
+    }else at.classList.add('hidden');
+  }
   /* v4.14: marcador del FANTASMA del ranking (solo frenético con traza) */
   const gt=$('#ghostTag');
   if(gt){

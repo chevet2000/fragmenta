@@ -87,10 +87,13 @@ document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault();},
  bindEl('#btnStatsBack', 'click',()=>{refreshMenu();showScr('menu');});
  bindEl('#btnBest', 'click',openBestiary);
  bindEl('#btnBestBack', 'click',()=>{refreshMenu();showScr('menu');});
- bindEl('#btnGemX', 'click',()=>{ /* v4.9: mercado de gemas */
-  if(save.gold<GEMX_COST){banner('ORO INSUFICIENTE','Necesitas '+GEMX_COST+' de oro');return;}
-  save.gold-=GEMX_COST;save.gems+=GEMX_GEMS;persist();SFX.buy();vib(25);
-  banner('CAMBIO HECHO','+'+GEMX_GEMS+' gemas para el arsenal');
+ bindEl('#btnGemX', 'click',()=>{ /* v4.9: mercado de gemas · v4.20: precio en escalera */
+  const pr=gemXPrice();
+  if(save.gold<pr){banner('ORO INSUFICIENTE','El cambio Nº '+((save.gemxBuys||0)+1)+' cuesta '+pr+' de oro');return;}
+  save.gold-=pr;save.gems+=GEMX_GEMS;
+  save.gemxBuys=(save.gemxBuys||0)+1;
+  persist();SFX.buy();vib(25);
+  banner('CAMBIO Nº '+save.gemxBuys+' HECHO','+'+GEMX_GEMS+' gemas · el próximo costará '+gemXPrice()+' de oro');
   updateShopRes();
  });
  bindEl('#btnRetry', 'click',()=>{
@@ -175,6 +178,8 @@ let wipeArm=false,wipeT=null;
   save.totCurses=0;save.totRevKills=0;
   /* v4.19: racha de misiones y meteoritos */
   save.streak=0;save.streakBest=0;save.streakLast='';save.totMeteor=0;
+  /* v4.20: escalera de gemas, hitos de racha, cubos, naves amigas, púrpura y portales */
+  save.gemxBuys=0;save.streakClaimed={};save.totCube=0;save.totAlly=0;save.totMeteorP=0;save.totPortal=0;save.seenCube=0;
   save.pilot=pilot;save.mus=mus;save.diff=diff; /* se conservan identidad, sonido y dificultad */
   persist();
   try{localStorage.setItem(KEY_LOCAL,JSON.stringify(save));}catch(e){}

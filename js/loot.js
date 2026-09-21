@@ -231,9 +231,13 @@ function killBoss(){
    Cada 20–36 s un meteorito DORADO cruza la pantalla. Revéntalo a
    disparos antes de que escape y suelta una lluvia de oro (+ gema y
    corazón a veces). Es un premio que se ESCAPA si no reaccionas:
-   ventanas de recompensa impredecibles durante la partida. */
+   ventanas de recompensa impredecibles durante la partida.
+   v4.20: RAREZAS — el 18% de los meteoritos es PÚRPURA (ANÓMALO):
+   más duro (7 impactos), estela violeta y suelta una RELIQUIA
+   garantizada además del oro y 2–3 gemas. */
 function spawnMeteor(){
-  const m={x:0,y:0,vx:0,vy:0,r:15,hp:4,maxhp:4,rot:rand(0,TAU),vr:rand(-2.2,2.2),t:0,dead:false,
+  const pur=run.level>=2&&Math.random()<.18; /* v4.20: meteorito PÚRPURA raro */
+  const m={x:0,y:0,vx:0,vy:0,r:pur?17:15,hp:pur?7:4,maxhp:pur?7:4,rot:rand(0,TAU),vr:rand(-2.2,2.2),t:0,dead:false,pur,
     verts:Array.from({length:7},()=>rand(.74,1))};
   const style=Math.random();
   if(style<.55){ /* cruza en diagonal desde un lateral superior */
@@ -245,9 +249,11 @@ function spawnMeteor(){
     m.vx=rand(-85,85);m.vy=rand(115,175);
   }
   meteors.push(m);
-  SFX.meteor();
+  if(pur){tone(900,120,.7,'sawtooth',.035);tone(240,700,.5,'sine',.03,.15);}
+  else SFX.meteor();
   if(!meteorWarned){meteorWarned=true;
     banner('★ METEORITO DORADO','¡Revéntalo a tiempo y llévate su oro!');}
+  else if(pur)banner('◈ METEORITO ANÓMALO','Violeta y más duro · esconde una RELIQUIA');
 }
 function updMeteors(dt){
   if(state!=='play')return;
@@ -255,11 +261,12 @@ function updMeteors(dt){
   if(meteorT<=0&&meteors.length<2){spawnMeteor();meteorT=rand(20,36);}
   for(const m of meteors){
     m.t+=dt;m.x+=m.vx*dt;m.y+=m.vy*dt;m.rot+=m.vr*dt;
-    /* estela dorada */
+    /* estela dorada (o violeta en el ANÓMALO) */
     if(Math.random()<.8&&parts.length<250)
       parts.push({x:m.x+rand(-4,4),y:m.y+rand(-4,4),vx:-m.vx*.12+rand(-24,24),vy:-m.vy*.12+rand(-24,24),
         rot:rand(0,TAU),vr:rand(-7,7),life:rand(.22,.48),t:0,
-        color:Math.random()<.55?'#FFD166':'#FF9F43',kind:Math.random()<.6?'tri':'line',size:rand(1.6,3.4)});
+        color:m.pur?(Math.random()<.55?'#B388FF':'#8A5AFF'):(Math.random()<.55?'#FFD166':'#FF9F43'),
+        kind:Math.random()<.6?'tri':'line',size:rand(1.6,3.4)});
     /* colisión con balas del jugador */
     for(const b of bullets){
       if(b.dead)continue;
@@ -279,6 +286,37 @@ function popMeteor(m){
   m.dead=true;
   save.totMeteor=(save.totMeteor||0)+1;
   const gMul=players[0]?players[0].goldMul:1;
+  if(m.pur){ /* v4.20: PÚRPURA — oro extra, 2–3 gemas, corazón y RELIQUIA garantizada */
+    save.totMeteorP=(save.totMeteorP||0)+1;
+    const n=irand(8,12);
+    for(let i=0;i<n;i++)
+      pickups.push({t:'gold',x:m.x,y:m.y,vx:rand(-150,150),vy:rand(-240,-60),
+        val:Math.max(3,Math.round((5+run.level*.9)*gMul))});
+    const ng=irand(2,3);
+    for(let i=0;i<ng;i++)
+      pickups.push({t:'gem',x:m.x,y:m.y,vx:rand(-100,100),vy:rand(-210,-60)});
+    if(Math.random()<.35)pickups.push({t:'heart',x:m.x,y:m.y,vx:rand(-60,60),vy:rand(-160,-60)});
+    const pool=RELICS.filter(r=>!run.relics.includes(r.id));
+    let relicMsg='reliquia sin hueco · +300 ORO';
+    if(pool.length){
+      const r=pool[irand(0,pool.length-1)];
+      run.relics.push(r.id);recompute();
+      if(r.id==='hierro')healPlayerOnce(0,3);
+      relicMsg='RELIQUIA: '+r.name;
+      pickups.push({t:'gem',x:m.x,y:m.y,vx:rand(-70,70),vy:rand(-190,-70)});
+    }else{
+      const v=300;save.gold+=v;save.totGold=(save.totGold||0)+v;run.goldRun+=v;
+    }
+    burst(m.x,m.y,'#B388FF',30,260);burst(m.x,m.y,'#8A5AFF',16,180);
+    rings.push({x:m.x,y:m.y,r:8,R:140,t:0,life:.55,color:'#B388FF'});
+    hostRing(m.x,m.y,140,'#B388FF');
+    floater(m.x,m.y-26,'¡METEORITO PÚRPURA!','#B388FF',15);
+    SFX.legend();tone(140,50,.4,'sawtooth',.09);
+    shake=Math.min(16,shake+6);hitStopT=Math.max(hitStopT,.06);vib(80);
+    banner('◈ ¡ANOMALÍA CAPTURADA!','Oro · gemas · '+relicMsg);
+    checkAch();persist();
+    return;
+  }
   const n=irand(6,9);
   for(let i=0;i<n;i++)
     pickups.push({t:'gold',x:m.x,y:m.y,vx:rand(-140,140),vy:rand(-230,-60),
@@ -293,5 +331,129 @@ function popMeteor(m){
   shake=Math.min(16,shake+4);hitStopT=Math.max(hitStopT,.05);vib(60);
   banner('★ ¡METEORITO REVENTADO!','Lluvia de oro · recógela antes de que caiga');
   checkAch();persist();
+}
+
+/* ============ v4.20: CUBOS SORPRESA ============
+   Desde que ENTRAS (oleada 1) y cada cierto tiempo cruza un cubo con
+   escudo. Se le QUITA EL ESCUDO a disparos y al romperlo sortea UNO de
+   dos premios: PURGA — destruye 2, 3, 4 o 5 enemigos al azar (con todo
+   su botín) — o una NAVE AMIGA que te escolta 60 s disparando con el
+   DOBLE de tu daño. Si se te escapa, se va con su sorpresa. */
+function spawnCube(){
+  if(pickups.some(p=>p.t==='cube'))return;
+  const sh=Math.max(22,Math.round(hpForLevel(maxLvlOf(run.level))*.9));
+  const cx=clamp(W/2+rand(-W*.32,W*.32),50,W-50);
+  pickups.push({t:'cube',x:cx,y:-40,vx:rand(-12,12),vy:rand(8,16),shield:sh,shieldMax:sh});
+  floater(cx,110,'CUBO SORPRESA','#FF7EB6',13);
+  tone(340,720,.25,'square',.05);tone(720,480,.2,'square',.035,.14);
+  if(!save.seenCube){save.seenCube=1;
+    banner('CUBO SORPRESA','Rompe su escudo a disparos: purga de enemigos o nave amiga');}
+}
+/* romper el escudo del cubo = resolver su sorpresa */
+function resolveCube(p){
+  save.totCube=(save.totCube||0)+1;
+  rings.push({x:p.x,y:p.y,r:10,R:130,t:0,life:.55,color:'#FF7EB6'});
+  hostRing(p.x,p.y,130,'#FF7EB6');
+  burst(p.x,p.y,'#FF7EB6',22,200);burst(p.x,p.y,'#FFE9B0',12,140);
+  SFX.cube();shake=Math.min(16,shake+5);hitStopT=Math.max(hitStopT,.06);vib(60);
+  if(Math.random()<.45){ /* 45%: NAVE AMIGA · 60 s con el doble de tu daño */
+    const pl=players[0]||P;
+    allies.push({x:pl?pl.x:W/2,y:pl?pl.y-60:H*.7,cd:.5,life:60,ph:rand(0,TAU)});
+    updAllies.warn=false; /* rearma el aviso de retirada */
+    save.totAlly=(save.totAlly||0)+1;
+    floater(p.x,p.y-40,'¡NAVE AMIGA! 60 s','#FFE9B0',15);
+    banner('NAVE AMIGA DESPLEGADA','Te escolta 60 s · dispara con el DOBLE de tu daño');
+    SFX.ally();
+  }else{ /* 55%: PURGA — 2 a 5 enemigos al azar explotan con su botín */
+    const r=Math.random();
+    const n=r<.35?2:r<.65?3:r<.86?4:5;
+    const vivos=shuffle(enemies.filter(e=>!e.dead)).slice(0,n);
+    for(const e of vivos){
+      floater(e.x,e.y-e.r-8,'¡PURGADO!','#FF7EB6',13);
+      burst(e.x,e.y,'#FF7EB6',14,150);
+      rings.push({x:e.x,y:e.y,r:6,R:64,t:0,life:.4,color:'#FF7EB6'});
+      e.hp=0;killEnemy(e,0);
+    }
+    floater(p.x,p.y-40,'¡PURGA ×'+vivos.length+'!','#FF7EB6',15);
+    banner('CUBO SORPRESA · PURGA',vivos.length+' enemigo'+(vivos.length>1?'s':'')+' destruidos al azar · +su botín');
+  }
+  checkAch();persist();
+}
+
+/* ============ v4.20: EL PORTAL MISTERIOSO ============
+   El que quedó reservado: cada 45–80 s (nunca con Guardián ni en
+   frenético) cruza un portal violáceo. Revéntalo a disparos (6 impactos)
+   y se ABRE: suelta gemas al instante y ABRE LA DIMENSIÓN ANÓMALA — la
+   oleada siguiente nace distorsionada: botín DOBLE en todos sus enemigos
+   y una RELIQUIA garantizada al despejarla. */
+function spawnPortal(){
+  const side=Math.random()<.5?-1:1;
+  portals.push({x:side<0?-36:W+36,y:rand(H*.22,H*.5),vx:side*rand(52,86),vy:0,
+    r:26,hp:6,maxhp:6,rot:rand(0,TAU),t:0,dead:false});
+  tone(120,900,.6,'sine',.05);tone(900,240,.45,'sine',.04,.25);
+  if(!portalWarned){portalWarned=true;
+    banner('◈ ALGO SE ACERCA','Un portal desconocido cruza el sector…');
+  }else banner('◈ PORTAL MISTERIOSO','Revéntalo y abre la DIMENSIÓN ANÓMALA');
+}
+function openPortal(p){
+  p.dead=true;
+  save.totPortal=(save.totPortal||0)+1;
+  run.portalNext=true; /* la SIGUIENTE oleada (no jefa) será anómala */
+  const gMul=players[0]?players[0].goldMul:1;
+  const n=irand(6,10);
+  for(let i=0;i<n;i++)
+    pickups.push({t:'gold',x:p.x,y:p.y,vx:rand(-130,130),vy:rand(-220,-60),
+      val:Math.max(2,Math.round((3+run.level*.6)*gMul))});
+  const ng=irand(2,3);
+  for(let i=0;i<ng;i++)
+    pickups.push({t:'gem',x:p.x,y:p.y,vx:rand(-90,90),vy:rand(-200,-60)});
+  burst(p.x,p.y,'#B388FF',30,240);burst(p.x,p.y,'#64C7FF',18,170);
+  rings.push({x:p.x,y:p.y,r:10,R:170,t:0,life:.65,color:'#B388FF'});
+  rings.push({x:p.x,y:p.y,r:10,R:110,t:0,life:.45,color:'#64C7FF'});
+  hostRing(p.x,p.y,170,'#B388FF');
+  floater(p.x,p.y-30,'¡PORTAL ABIERTO!','#B388FF',15);
+  SFX.portal();SFX.legend();
+  shake=Math.min(18,shake+8);hitStopT=Math.max(hitStopT,.09);vib(90);
+  banner('◈ PORTAL MISTERIOSO ABIERTO','La OLEADA ANÓMALA llega: botín ×2 · reliquia garantizada');
+  checkAch();persist();
+}
+function updPortals(dt){
+  if(state!=='play')return;
+  /* el portal no aparece en frenético (oleada única) ni con un Guardián vivo */
+  if(!frenzyMode&&!boss){
+    portalT-=dt;
+    if(portalT<=0&&portals.length<1&&!run.portalNext){spawnPortal();portalT=rand(45,80);}
+  }
+  for(const p of portals){
+    p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.rot+=dt*2.4;
+    /* vórtice: chupa levemente a los enemigos cercanos (misterio visual) */
+    for(const e of enemies){
+      if(e.dead||e.state==='enter')continue;
+      const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy);
+      if(d<130&&d>1){e.x+=dx/d*26*dt;e.y+=dy/d*26*dt;}
+    }
+    for(const b of bullets){
+      if(b.dead)continue;
+      const rr=p.r+b.r;
+      if((b.x-p.x)**2+(b.y-p.y)**2<rr*rr){
+        b.dead=true;p.hp--;
+        tone(420+irand(0,300),180,.09,'sine',.045);
+        burst(b.x,b.y,'#D6BCFF',5,110);
+        if(p.hp<=0){openPortal(p);break;}
+      }
+    }
+    if(p.t>34||p.x<-110||p.x>W+110)p.dead=true;
+  }
+  portals=portals.filter(p=>!p.dead);
+}
+/* v4.20: temporizador de los CUBOS SORPRESA (junto al de meteoritos) */
+function updEvents(dt){
+  if(state!=='play')return;
+  cubeT-=dt;
+  if(cubeT<=0){
+    if(!boss&&!pickups.some(p=>p.t==='cube')){spawnCube();cubeT=rand(16,26);}
+    else cubeT=rand(4,7); /* ocupado: reintenta enseguida */
+  }
+  updPortals(dt);
 }
 
