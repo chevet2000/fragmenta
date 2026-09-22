@@ -26,7 +26,7 @@ cv.addEventListener('pointerdown',e=>{
   const p=clampShip(pl,e.clientX,e.clientY-TOUCH_LEAD);
   pl.touch={active:true,tx:p.x,ty:p.y};
   /* v4.8: el cliente anuncia su posición al instante (la nave remota no espera al primer movimiento) */
-  if(amClient())sendMsg({t:'inp',x:Math.round(pl.x),y:Math.round(pl.y)});
+  if(amClient())sendMsg({t:'inp',x:Math.round(pl.x),y:Math.round(pl.y),ne:pl.noElec?1:0});
 });
 window.addEventListener('pointermove',e=>{
   if(state!=='play')return;
@@ -52,7 +52,7 @@ window.addEventListener('pointermove',e=>{
   t.px=e.clientX;t.py=e.clientY;t.lastMs=now;
   t.x=e.clientX;t.y=e.clientY;
   if(amClient()&&t.slot===localSlot){
-    if(now-(window._lastSent||0)>60){window._lastSent=now;sendMsg({t:'inp',x:Math.round(pl.x),y:Math.round(pl.y)});}
+    if(now-(window._lastSent||0)>60){window._lastSent=now;sendMsg({t:'inp',x:Math.round(pl.x),y:Math.round(pl.y),ne:pl.noElec?1:0});}
   }
 });
 function endTouch(e){

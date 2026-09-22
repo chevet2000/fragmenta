@@ -69,6 +69,11 @@ function mkPlayer(slot){return{
   bh:false,bhCdMax:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false,bhT:0,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
+  /* v4.29: ENERGÍA — combustible (mover) y electricidad (armas/drones).
+     Arrancan LLENOS cada incursión; el combustible NO se regenera (bidones),
+     la electricidad sí (reactor). emergT = propulsores de emergencia. */
+  fuel:100,fuelMax:100,en:100,enMax:100,enRegen:6,enUseMul:1,fuelUseMul:1,
+  energyDropMul:1,emergT:0,noElec:false,
   touch:null
 };}
 let players=[mkPlayer(0)];

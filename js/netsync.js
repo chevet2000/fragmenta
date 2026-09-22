@@ -33,6 +33,9 @@ function sendSnap(){
     p.t==='cube'?[6,Math.round(p.x),Math.round(p.y),Math.max(0,Math.ceil(p.shield)),p.shieldMax]:
     /* v4.21: el COFRE SELLADO viaja como tipo 7 (con su rareza c/r/e/l → 0-3) */
     p.t==='vchest'?[7,Math.round(p.x),Math.round(p.y),RARS.indexOf(p.rar)]:
+    /* v4.29: el BIDÓN y la CELDA viajan como tipos 8 y 9 */
+    p.t==='fuel'?[8,Math.round(p.x),Math.round(p.y)]:
+    p.t==='elec'?[9,Math.round(p.x),Math.round(p.y)]:
     [2,Math.round(p.x),Math.round(p.y)]);
   const wk=wrecks.map(w=>[w.slot,Math.round(w.x),Math.round(w.y),Math.round(w.prog*100)]);
   const cN=players[1]&&players[1].nova;

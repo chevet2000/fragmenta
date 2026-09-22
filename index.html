@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.28">
+<html lang="es" data-v="4.29">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.28 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.29 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.28">
+<link rel="stylesheet" href="css/styles.css?v=4.29">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -47,6 +47,10 @@
   <div id="hpBox">
     <svg viewBox="0 0 12 12"><path d="M6 1 L11 6 L6 11 L1 6 Z" fill="#FF6B6B"/></svg>
     <b id="hpTxt">4/4</b><span id="dmgTxt">DAÑO 2</span>
+  </div>
+  <div id="energyBar">
+    <div class="eg" id="fuelGauge"><span class="egi">⛽</span><div class="egt"><i id="fuelFill"></i></div></div>
+    <div class="eg" id="elecGauge"><span class="egi">⚡</span><div class="egt"><i id="elecFill"></i></div></div>
   </div>
   <div id="botBtns">
     <button id="btnEmo" class="hidden" aria-label="Emoticones">
@@ -107,7 +111,7 @@
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
   <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.26</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.28</b> te da el mando: <b>1 · DESPLIEGUE</b> — antes de la oleada 1 aparece «¿QUÉ LLEVAS A LA INCURSIÓN?»: toca las MEJORAS ARMADAS que quieras usar ESTA vez (se pierden al caer) y deja marcado el resto; lo que NO marques se queda guardado en la Bóveda para la próxima incursión — se acabó perder lo bueno sin elegir. En co-op cada piloto elige lo suyo y la incursión espera a todos. <b>2 · REVANCHA EN CO-OP</b> — al morir todos, la sala NO se cierra: botón ¡REVANCHA! con 30 s de votación; si vota el 100% del equipo, cuenta atrás de 3 y la incursión se rearma NUEVA en la misma sala, sin reconectar. <b>3 · RAMA ESTABILIDAD</b> — 6 nodos nuevos en el arsenal (ahora 16 ramas): ESTABILIZADORES bajan el temblor de cámara por bajas y explosiones, SUSPENSIÓN MAGNÉTICA lo apaga del todo, CONTRAPESADO calla tus propias detonaciones y los críticos, GIROSCOPIO DOBLE estabiliza al doble y la CABINA GIMBAL (carísima) deja la cámara quietísima incluso con daño recibido — la vibración de peligro siempre se queda. Se mantienen: ranking única con reintentos, QR de sala, cerraduras de eco y llaves.</p>
+  <p class="tagline hidden" id="tagBody">La <b>v4.29</b> enciende la nave: <b>1 · COMBUSTIBLE</b> — el tanque arranca lleno (100) y gotea con los propulsores; NO se regenera: recoge BIDONES VERDES de las bajas, élites y Guardianes. Si llegas a 0: 5 s de propulsores de emergencia al 40% y luego manejas al 20% — no mueres, pero sufres. <b>2 · ELECTRICIDAD</b> — el reactor regenera 6/s y cada disparo, dron y escudo consume: build grande = más hambre. A 0 suena el APAGÓN: daño x0.5 y drones apagados hasta recuperar 20 de carga. <b>3 · RAMA ENERGÍA (17)</b> — 8 nodos: TANQUE I/II agrandan el depósito, RECOLECTOR duplica bidones, REACTOR I/II y EFICIENCIA I/II afinan el balance, y el NÚCLEO PERPETUO (carísimo) deja la nave casi autosuficiente. <b>4 · EL PIRATA VENDE ENERGÍA</b> — RESERVA DE COMBUSTIBLE (se activa sola al caer a 0, tanque al 60%) y GENERADOR PORTÁTIL (+60% regeneración): se compran con oro/gemas y se activan en el DESPLIEGUE. Además: la cámara también responde a la rama ESTABILIDAD (v4.28) con sus IDs arreglados. Se mantiene todo: despliegue de mejoras, revancha, ranking única y QR.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -148,7 +152,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.28 · DESPLIEGUE (ELIGE TUS MEJORAS ARMADAS) · REVANCHA EN CO-OP · RAMA ESTABILIDAD · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.29 · COMBUSTIBLE + ELECTRICIDAD · RAMA ENERGÍA · SUMINISTROS DEL PIRATA · DESPLIEGUE (ELIGE TUS MEJORAS ARMADAS) · REVANCHA EN CO-OP · RAMA ESTABILIDAD · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -295,6 +299,8 @@
     <div class="vsub" id="mercRes"></div>
     <div style="font-size:9px;letter-spacing:.2em;color:var(--dim);text-align:center;margin:4px 0 8px">MERCADO NEGRO · PAGAS ORO Y GEMAS · EL BOTÍN VA A LA BÓVEDA<br>OFERTA DEL DÍA −40% · CADA COMPRA DEL MISMO COFRE HOY +10%</div>
     <div id="mercList"></div>
+    <div style="font-size:9px;letter-spacing:.2em;color:var(--mint);text-align:center;margin:8px 0 4px">SUMINISTROS · SE ACTIVAN EN EL DESPLIEGUE DE CADA INCURSIÓN</div>
+    <div id="mercSup"></div>
     <div style="font-size:9px;letter-spacing:.08em;color:var(--dim);text-align:center;margin:6px 0">RIESGO DEL MERCADO NEGRO: SI LA CERRADURA CEDA (4 FALLOS) EL COFRE BAJA DE CALIDAD.<br>EL BOTÍN SON MEJORAS ARMADAS · DURAN HASTA QUE MUERAS</div>
     <button class="btn" id="btnMercBoveda">IR A LA BÓVEDA</button>
     <button class="btn" id="btnMercBack" style="margin-top:6px">VOLVER</button>
@@ -358,6 +364,7 @@
     <p class="dep-sub">Toca lo que quieras USAR ESTA VEZ · se pierde al caer.
     Lo que NO marques se queda guardado para la próxima incursión.</p>
     <div id="depList"></div>
+    <div id="depSup" class="hidden"></div>
     <div id="depNote"></div>
     <button class="btn primary pulse" id="btnDeployGo">DESPEGAR</button>
     <button class="btn" id="btnDeploySkip">GUARDAR TODO PARA LUEGO</button>
@@ -440,36 +447,36 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.28"></script>
-<script src="js/profile.js?v=4.28"></script>
-<script src="js/achievements.js?v=4.28"></script>
-<script src="js/audio.js?v=4.28"></script>
-<script src="js/config.js?v=4.28"></script>
-<script src="js/tree.js?v=4.28"></script>
-<script src="js/relics.js?v=4.28"></script>
-<script src="js/state.js?v=4.28"></script>
-<script src="js/net.js?v=4.28"></script>
-<script src="js/vendor/qrcode.js?v=4.28"></script>
-<script src="js/vendor/jsQR.js?v=4.28"></script>
-<script src="js/qr.js?v=4.28"></script>
-<script src="js/core.js?v=4.28"></script>
-<script src="js/enemies.js?v=4.28"></script>
-<script src="js/waves.js?v=4.28"></script>
-<script src="js/boss.js?v=4.28"></script>
-<script src="js/loot.js?v=4.28"></script>
-<script src="js/player.js?v=4.28"></script>
-<script src="js/azar.js?v=4.28"></script>
-<script src="js/curses.js?v=4.28"></script>
-<script src="js/chests.js?v=4.28"></script>
-<script src="js/netsync.js?v=4.28"></script>
-<script src="js/render.js?v=4.28"></script>
-<script src="js/screens.js?v=4.28"></script>
-<script src="js/treeui.js?v=4.28"></script>
-<script src="js/hud.js?v=4.28"></script>
-<script src="js/vault.js?v=4.28"></script>
-<script src="js/merc.js?v=4.28"></script>
-<script src="js/input.js?v=4.28"></script>
-<script src="js/game.js?v=4.28"></script>
-<script src="js/update.js?v=4.28"></script>
+<script src="js/utils.js?v=4.29"></script>
+<script src="js/profile.js?v=4.29"></script>
+<script src="js/achievements.js?v=4.29"></script>
+<script src="js/audio.js?v=4.29"></script>
+<script src="js/config.js?v=4.29"></script>
+<script src="js/tree.js?v=4.29"></script>
+<script src="js/relics.js?v=4.29"></script>
+<script src="js/state.js?v=4.29"></script>
+<script src="js/net.js?v=4.29"></script>
+<script src="js/vendor/qrcode.js?v=4.29"></script>
+<script src="js/vendor/jsQR.js?v=4.29"></script>
+<script src="js/qr.js?v=4.29"></script>
+<script src="js/core.js?v=4.29"></script>
+<script src="js/enemies.js?v=4.29"></script>
+<script src="js/waves.js?v=4.29"></script>
+<script src="js/boss.js?v=4.29"></script>
+<script src="js/loot.js?v=4.29"></script>
+<script src="js/player.js?v=4.29"></script>
+<script src="js/azar.js?v=4.29"></script>
+<script src="js/curses.js?v=4.29"></script>
+<script src="js/chests.js?v=4.29"></script>
+<script src="js/netsync.js?v=4.29"></script>
+<script src="js/render.js?v=4.29"></script>
+<script src="js/screens.js?v=4.29"></script>
+<script src="js/treeui.js?v=4.29"></script>
+<script src="js/hud.js?v=4.29"></script>
+<script src="js/vault.js?v=4.29"></script>
+<script src="js/merc.js?v=4.29"></script>
+<script src="js/input.js?v=4.29"></script>
+<script src="js/game.js?v=4.29"></script>
+<script src="js/update.js?v=4.29"></script>
 </body>
 </html>

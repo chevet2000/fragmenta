@@ -901,6 +901,18 @@ function updPickups(dt){
           banner('COFRE PEQUEÑO','+'+v+' GEMAS');
         }
         persist();
+      }else if(p.t==='fuel'){
+        /* v4.29: BIDÓN DE COMBUSTIBLE — +14 al tanque de quien lo recoge */
+        pl.fuel=Math.min(pl.fuelMax||100,(pl.fuel==null?0:pl.fuel)+14);
+        SFX.coin();floater(pl.x,pl.y-24,'+COMBUSTIBLE','#7DFF9E',10);
+        if(remote){const c=net.conns.find(x=>x.slot===pl.slot&&x.open);
+          if(c)try{c.c.send({t:'ev',k:'energy',e:'fuel'});}catch(e2){}}
+      }else if(p.t==='elec'){
+        /* v4.29: CELDA ELÉCTRICA — +22 de carga al reactor */
+        pl.en=Math.min(pl.enMax||100,(pl.en==null?0:pl.en)+22);
+        SFX.gem();floater(pl.x,pl.y-24,'+CARGA','#64C7FF',10);
+        if(remote){const c=net.conns.find(x=>x.slot===pl.slot&&x.open);
+          if(c)try{c.c.send({t:'ev',k:'energy',e:'elec'});}catch(e2){}}
       }else{
         pl.hp=Math.min(pl.maxHp,pl.hp+1);SFX.gem();
         floater(pl.x,pl.y-26,'+1 VIDA','#FF6B6B',12);

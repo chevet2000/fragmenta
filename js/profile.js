@@ -1,6 +1,6 @@
 'use strict';
 /* ============ perfiles ============ */
-const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.28';
+const KEY_LOCAL='fragmenta_v3', KEY_OLD='fragmenta_v2', KEY_NET='fragmenta_v3_net', VERSION='4.29';
 function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:1,bestAll:0,totKills:0,runs:0,prest:0,diff:'solo',
   ach:{},achClaimed:{},totElite:0,totRescue:0,totChest:0,totCamp:0,bestHard:0,bossKills:{},weekly:null,weekBestAll:0,mus:true,frenzy:{bestT:0,bestK:0},
   pilot:null,ranking:[],mShots:0,mHits:0,mDmg:0,mTaken:0,mPerfect:0,
@@ -25,7 +25,11 @@ function blankSave(){return{gold:0,gems:0,tree:{},best:{lvl:0,kills:0},bestShip:
   /* v4.23: récord de oleada POR MODO (gates del arsenal por modo) y
      memoria de compras del día en el MERCADER PIRATA */
   bestMode:{solo:0,normal:0,dificil:0,hardcore:0,coop:0},
-  merc:{d:'',buys:{}},totMerc:0};}
+  merc:{d:'',buys:{}},totMerc:0,
+  /* v4.29: SUMINISTROS DEL PIRATA — reservas de combustible y generadores
+     eléctricos que se compran con oro/gemas y se ACTIVAN en el DESPLIEGUE */
+  supplies:{fuel:0,gen:0}};
+}
 function loadSave(key,migrate){
   try{
     const d=JSON.parse(localStorage.getItem(key));

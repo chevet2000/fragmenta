@@ -46,6 +46,17 @@ function dropLoot(e){
   if(Math.random()<gr)pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
   if(Math.random()<.006*(players.some(pl=>pl.heartDrop)?1.8:1))
     pickups.push({t:'heart',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-120,-40)});
+  /* v4.29: ENERGÍA — bidones verdes y celdas azules. Generosos en las
+     oleadas 1-10 (se aprende el ciclo), más rares después. RECOLECTOR los
+     duplica. Élite: siempre suelta uno al azar. */
+  const eMul=players[0].energyDropMul||1;
+  const eCh=.045*eMul*(run.level<=10?1.8:1);
+  if(!e.elite&&!e.camp&&pickups.length<250){
+    if(Math.random()<eCh)pickups.push({t:'fuel',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
+    if(Math.random()<eCh)pickups.push({t:'elec',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
+  }
+  if(e.elite&&pickups.length<250)
+    pickups.push({t:Math.random()<.5?'fuel':'elec',x:e.x,y:e.y,vx:rand(-60,60),vy:rand(-150,-50)});
 }
 function killEnemy(e,bySlot){
   if(e.dead)return;
@@ -245,6 +256,11 @@ function killBoss(){
   for(let i=0;i<gm;i++)
     pickups.push({t:'gem',x:b.x,y:b.y,vx:rand(-140,140),vy:rand(-240,-60)});
   pickups.push({t:'heart',x:b.x,y:b.y,vx:0,vy:-120});
+  /* v4.29: el Guardián paga en ENERGÍA — 2 bidones y 2 celdas garantizados */
+  for(let i=0;i<2;i++){
+    pickups.push({t:'fuel',x:b.x,y:b.y,vx:rand(-120,120),vy:rand(-220,-60)});
+    pickups.push({t:'elec',x:b.x,y:b.y,vx:rand(-120,120),vy:rand(-220,-60)});
+  }
   if(run.level%10===0){
     pickups.push({t:'chest',x:b.x,y:b.y,vx:rand(-20,20),vy:-80});
     floater(b.x,b.y-60,'¡COFRE! ATRÁPALO','#FFD166',15);

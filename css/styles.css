@@ -560,3 +560,19 @@ button{font-family:inherit}
   min-height:14px;margin:6px 0;font-weight:700;line-height:1.7}
 #rvStat{font-size:9px;letter-spacing:.16em;color:var(--amber);text-align:center;
   margin:2px 0 6px;font-weight:700;line-height:1.7}
+
+/* ============ v4.29: MEDIDORES DE ENERGÍA ============
+   Combustible (verde) y electricidad (azul) de TU nave en el hudBot.
+   Parpadean en rojo cuando quedan menos del 25% / están a cero. */
+#energyBar{display:flex;gap:6px;align-items:center;margin-left:8px}
+.eg{display:flex;align-items:center;gap:3px}
+.eg .egi{font-size:9px;line-height:1;filter:saturate(.9)}
+.eg .egt{width:44px;height:7px;border:1px solid var(--line);border-radius:4px;
+  overflow:hidden;background:rgba(0,0,0,.4)}
+.eg .egt i{display:block;height:100%;width:100%;background:#7DFF9E;
+  border-radius:3px;transition:width .18s linear}
+.eg .egt i#elecFill{background:#64C7FF}
+.eg.low .egt{border-color:var(--coral);animation:egblink 1s steps(2) infinite}
+.eg.low .egt i{background:var(--coral)}
+.eg.dead .egi{opacity:.4}
+@keyframes egblink{50%{opacity:.45}}

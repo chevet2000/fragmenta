@@ -45,6 +45,15 @@ function recompute(){
     pl.prism=b.prism;pl.priFast=b.priFast;pl.msl=b.msl;pl.neb=b.neb;pl.pointDef=b.pointDef;
     pl.slowField=b.slowField;pl.novaRadial=b.novaRadial;pl.novaCdMul=b.novaCdMul;pl.novaMul=b.novaMul;
     pl.ojiva=b.ojiva;pl.gemLuck=b.gemLuck;pl.heartDrop=b.heartDrop;pl.vortex=b.vortex;
+    /* v4.29: ENERGÍA — tanque, reactor y multiplicadores de consumo */
+    const oldFuelMax=pl.fuelMax||b.fuelMax;
+    pl.fuelMax=b.fuelMax;pl.enMax=b.enMax;
+    pl.enRegen=b.enRegen*b.enRegenMul;
+    pl.enUseMul=b.enUseMul;pl.fuelUseMul=b.fuelUseMul;pl.energyDropMul=b.energyDropMul;
+    if(pl.fuel==null)pl.fuel=pl.fuelMax;
+    else if(pl.fuelMax>oldFuelMax)pl.fuel+=pl.fuelMax-oldFuelMax; /* el tanque nuevo llega lleno */
+    pl.fuel=Math.min(pl.fuel,pl.fuelMax);
+    if(pl.en==null)pl.en=pl.enMax;else pl.en=Math.min(pl.en,pl.enMax);
     /* v4.9: ALIADO · bot de combate desbloqueable en el árbol */
     pl.bot=b.bot||0;pl.botDmg=b.botDmg||1;pl.botRate=b.botRate||1;
     pl.botMsl=!!b.botMsl;pl.botTwin=b.botTwin||0;pl.botPrc=b.botPrc||0;

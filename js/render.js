@@ -687,6 +687,24 @@ function renderGame(dt){
       ctx.fillStyle='#FFD166';ctx.beginPath();ctx.arc(0,0,2,0,TAU);ctx.fill();}
     else if(p.t==='gem'){ctx.strokeStyle='#64C7FF';ctx.lineWidth=1.8;
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.stroke();}
+    else if(p.t==='fuel'){ /* v4.29: BIDÓN DE COMBUSTIBLE — lata verde brillante */
+      ctx.strokeStyle='#7DFF9E';ctx.lineWidth=1.8;
+      ctx.strokeRect(-4.5,-6,9,12);
+      ctx.beginPath();ctx.moveTo(-2.5,-6);ctx.lineTo(-2.5,-8.5);ctx.lineTo(2.5,-8.5);ctx.lineTo(2.5,-6);ctx.stroke();
+      ctx.fillStyle='#7DFF9E';ctx.fillRect(-2.5,-2,5,4);
+      ctx.globalAlpha=.25+Math.sin(time*5+p.x)*.12;
+      ctx.strokeStyle='#7DFF9E';ctx.beginPath();ctx.arc(0,0,13,0,TAU);ctx.stroke();
+      ctx.globalAlpha=1;}
+    else if(p.t==='elec'){ /* v4.29: CELDA ELÉCTRICA — batería azul con chispa */
+      ctx.strokeStyle='#64C7FF';ctx.lineWidth=1.8;
+      ctx.strokeRect(-4,-6,8,12);
+      ctx.beginPath();ctx.moveTo(-2,-6);ctx.lineTo(-2,-8);ctx.lineTo(2,-8);ctx.lineTo(2,-6);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,-3.5);ctx.lineTo(-1.8,0);ctx.lineTo(0,0);ctx.lineTo(-1.2,3.5);
+      ctx.moveTo(0,3.5);ctx.lineTo(1.8,0);ctx.lineTo(0,0);ctx.lineTo(1.2,-3.5);
+      ctx.lineWidth=1.3;ctx.stroke();
+      ctx.globalAlpha=.25+Math.sin(time*7+p.y)*.15;
+      ctx.strokeStyle='#64C7FF';ctx.beginPath();ctx.arc(0,0,13,0,TAU);ctx.stroke();
+      ctx.globalAlpha=1;}
     else if(p.t==='chest'){
       ctx.rotate(0);
       ctx.strokeStyle='#FFD166';ctx.lineWidth=2;

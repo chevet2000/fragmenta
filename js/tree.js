@@ -4,8 +4,8 @@
    global: cada gate lleva MODO. wave<=8 → cualquier modo · 9-14 → en
    NORMAL · 15-21 → en DIFÍCIL · 22+ → en HARDCORE (récord de oleada por
    modo, save.bestMode). Para completar el arsenal hay que jugarlos todos. */
-const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',est:'ESTABILIDAD',mrg:'FUSIÓN'};
-const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290,est:1385};
+const BR={off:'OFENSIVA',def:'DEFENSA',sup:'SOPORTE',tac:'TÁCTICA',rap:'RAPIDEZ',ric:'RIQUEZA',sab:'SABIDURÍA',ele:'ELEMENTOS',ima:'IMÁN',for:'PROSPERIDAD',sor:'AZAR',enl:'ENLACE',bot:'ALIADO',dfn:'DEFINITIVA',est:'ESTABILIDAD',nrg:'ENERGÍA',mrg:'FUSIÓN'};
+const BX={off:55,def:150,sup:245,tac:340,rap:435,ric:530,sab:625,ele:720,ima:815,for:910,sor:1005,enl:1100,bot:1195,dfn:1290,est:1385,nrg:1480};
 const TREE=[
  {id:'o1',b:'off',i:0,cost:{gold:300},wave:1,tag:'CAL',name:'CALIBRE',desc:'Daño +1.',fx:b=>b.dmg+=1},
  {id:'o2',b:'off',i:1,cost:{gold:700},wave:3,tag:'CAD',name:'CADENCIA',desc:'Disparas un 20% más rápido.',fx:b=>b.rate*=1.2},
@@ -187,12 +187,26 @@ const TREE=[
     Solo temblor VISUAL: la vibración de daño, muerte y Guardián (regla
     sagrada de v4.22) siempre se siente. El temblor ambiental (bajas,
     explosiones, meteoritos, eventos) es lo que la rama apaga. */
- {id:'e1',b:'est',i:0,cost:{gold:500},wave:3,tag:'EST',name:'ESTABILIZADORES I',desc:'El temblor de cámara por bajas y explosiones baja un 35%.',fx:b=>b.quakeMul*=.65},
- {id:'e2',b:'est',i:1,req:'e1',cost:{gold:1200},wave:6,tag:'EST2',name:'ESTABILIZADORES II',desc:'Otro -35% de temblor por bajas y explosiones (acumulado -58%).',fx:b=>b.quakeMul*=.65},
- {id:'e3',b:'est',i:2,req:'e2',cost:{gems:8},wave:8,md:'normal',tag:'SUS',name:'SUSPENSIÓN MAGNÉTICA',desc:'Las explosiones de bajas, élites, campistas y meteoritos ya NO sacuden la cámara.',fx:b=>b.noQuake=true},
- {id:'e4',b:'est',i:3,req:'e3',cost:{gems:12},wave:10,md:'normal',tag:'CON',name:'CONTRAPESADO',desc:'Tus propias detonaciones (nova, Aniquilador, agujero negro) y los críticos tampoco mueven la mira.',fx:b=>{b.noSelfQuake=true;b.noCritShake=true}},
- {id:'e5',b:'est',i:4,req:'e4',cost:{gems:18},wave:9,md:'dificil',tag:'GIR',name:'GIROSCOPIO DOBLE',desc:'La cámara se estabiliza al DOBLE de velocidad tras cualquier sacudida.',fx:b=>b.quakeDecay=2},
- {id:'e6',b:'est',i:5,req:'e5',cost:{gold:4000,gems:40},wave:12,md:'hardcore',ship:14,tag:'GIM',name:'CABINA GIMBAL',desc:'TOPE · ni siquiera el daño recibido sacude la cámara (solo tu muerte). La vibración sigue: es tu aviso de peligro.',fx:b=>b.noHurtShake=true},
+ {id:'st1',b:'est',i:0,cost:{gold:500},wave:3,tag:'EST',name:'ESTABILIZADORES I',desc:'El temblor de cámara por bajas y explosiones baja un 35%.',fx:b=>b.quakeMul*=.65},
+ {id:'st2',b:'est',i:1,req:'st1',cost:{gold:1200},wave:6,tag:'EST2',name:'ESTABILIZADORES II',desc:'Otro -35% de temblor por bajas y explosiones (acumulado -58%).',fx:b=>b.quakeMul*=.65},
+ {id:'st3',b:'est',i:2,req:'st2',cost:{gems:8},wave:8,md:'normal',tag:'SUS',name:'SUSPENSIÓN MAGNÉTICA',desc:'Las explosiones de bajas, élites, campistas y meteoritos ya NO sacuden la cámara.',fx:b=>b.noQuake=true},
+ {id:'st4',b:'est',i:3,req:'st3',cost:{gems:12},wave:10,md:'normal',tag:'CON',name:'CONTRAPESADO',desc:'Tus propias detonaciones (nova, Aniquilador, agujero negro) y los críticos tampoco mueven la mira.',fx:b=>{b.noSelfQuake=true;b.noCritShake=true}},
+ {id:'st5',b:'est',i:4,req:'st4',cost:{gems:18},wave:9,md:'dificil',tag:'GIR',name:'GIROSCOPIO DOBLE',desc:'La cámara se estabiliza al DOBLE de velocidad tras cualquier sacudida.',fx:b=>b.quakeDecay=2},
+ {id:'st6',b:'est',i:5,req:'st5',cost:{gold:4000,gems:40},wave:12,md:'hardcore',ship:14,tag:'GIM',name:'CABINA GIMBAL',desc:'TOPE · ni siquiera el daño recibido sacude la cámara (solo tu muerte). La vibración sigue: es tu aviso de peligro.',fx:b=>b.noHurtShake=true},
+ /* ===== v4.29: rama ENERGÍA — combustible y electricidad de la nave =====
+    El tanque arranca LLENO cada incursión (100). El combustible gotea con
+    los propulsores y NO se regenera: se recoge de bidones y cofres. La
+    electricidad se regenera sola (reactor 6/s) pero cada arma, dron y
+    escudo consume. Sin combustible: movilidad al 20% (5 s de emergencia
+    al 40%). Sin electricidad: daño x0.5 y drones/bot apagados. */
+ {id:'n1',b:'nrg',i:0,cost:{gold:600},wave:4,tag:'TAN',name:'TANQUE I',desc:'Tanque de combustible +40 (100 → 140). Más margen entre bidones.',fx:b=>b.fuelMax+=40},
+ {id:'n2',b:'nrg',i:1,req:'n1',cost:{gold:1400},wave:8,tag:'TA2',name:'TANQUE II',desc:'Tanque +60 más (hasta 200). Las rutas largas ya no asustan.',fx:b=>b.fuelMax+=60},
+ {id:'n3',b:'nrg',i:2,req:'n2',cost:{gems:8},wave:10,md:'normal',tag:'REC',name:'RECOLECTOR',desc:'Los bidones de combustible y celdas eléctricas caen el DOBLE.',fx:b=>b.energyDropMul*=2},
+ {id:'n4',b:'nrg',i:3,cost:{gems:10},wave:8,tag:'RE1',name:'REACTOR I',desc:'La electricidad se regenera un 50% más rápido (9/s en vez de 6/s).',fx:b=>b.enRegenMul*=1.5},
+ {id:'n5',b:'nrg',i:4,req:'n4',cost:{gems:14},wave:10,md:'dificil',tag:'EF1',name:'EFICIENCIA I',desc:'Todo el consumo eléctrico (disparos, drones, escudo, bot) baja un 20%.',fx:b=>b.enUseMul*=.8},
+ {id:'n6',b:'nrg',i:5,req:'n5',cost:{gems:20},wave:12,md:'dificil',tag:'RE2',name:'REACTOR II',desc:'Regeneración eléctrica x2 total (12/s). Los drones comen poco.',fx:b=>b.enRegenMul*=1.33},
+ {id:'n7',b:'nrg',i:6,req:'n6',cost:{gems:30},wave:12,md:'hardcore',ship:12,tag:'EF2',name:'EFICIENCIA II',desc:'Consumo eléctrico -35% total y el combustible gotea un 25% más lento.',fx:b=>{b.enUseMul*=.65;b.fuelUseMul*=.75}},
+ {id:'n8',b:'nrg',i:7,req:'n7',cost:{gold:5000,gems:60},wave:14,md:'hardcore',ship:15,tag:'NPE',name:'NÚCLEO PERPETUO',desc:'TOPE CARÍSIMO · tanque +100, reactor x2 y consumo -40%: una nave casi autosuficiente.',fx:b=>{b.fuelMax+=100;b.enRegenMul*=2;b.enUseMul*=.6}},
 ];
 TREE.forEach(nd=>{
   if(nd.b==='mrg')return;

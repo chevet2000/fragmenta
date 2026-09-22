@@ -74,6 +74,11 @@ function refreshMerc(){
     ' <span style="color:#FFD166">HOY: '+deal.name+' por '+pr.gold+' ORO'+(pr.gems?' + '+pr.gems+' GEMAS':'')+
     (buys?' · ya ×'+buys:'')+'</span>':'');
 }
+/* ---- v4.29: SUMINISTROS — reservas y generadores que se activan en el DESPLIEGUE ---- */
+const MERC_SUPS=[
+  {id:'fuel',name:'⛽ RESERVA DE COMBUSTIBLE',desc:'Se activa sola al quedarte a 0: tanque al 60%. Una por incursión.',gold:1200,gems:0},
+  {id:'gen',name:'⚡ GENERADOR PORTÁTIL',desc:'Reactor +60% de regeneración eléctrica toda la incursión.',gold:900,gems:3},
+];
 function openMerc(){
   const full=vaultCount()>=VCAP;
   $('#mercRes').innerHTML=
@@ -99,7 +104,38 @@ function openMerc(){
     el.addEventListener('click',()=>buyMerc(t));
     box.appendChild(el);
   }
+  /* v4.29: tarjetas de SUMINISTROS (no van a la Bóveda: se guardan en bodega) */
+  const supBox=$('#mercSup');
+  if(supBox){
+    supBox.innerHTML='';
+    const sup=save.supplies||{fuel:0,gen:0};
+    for(const s of MERC_SUPS){
+      const payOk=save.gold>=s.gold&&save.gems>=(s.gems||0);
+      const el=document.createElement('button');
+      el.className='mtier sup';
+      el.style.borderColor=s.id==='fuel'?'#7DFF9E':'#64C7FF';
+      el.disabled=!payOk;
+      el.innerHTML=
+        '<div class="mt-skull" style="color:'+(s.id==='fuel'?'#7DFF9E':'#64C7FF')+'">'+(s.id==='fuel'?'⛽':'⚡')+'</div>'+
+        '<div class="mt-info"><b>'+s.name+'</b><small>'+s.desc+'</small>'+
+        '<small>EN BODEGA: '+(sup[s.id]||0)+'</small></div>'+
+        '<div class="mt-pay">'+icoGold+' '+s.gold+(s.gems?'<br>'+icoGem+' '+s.gems:'')+
+        '<em>'+(payOk?'COMPRAR':'SIN FONDOS')+'</em></div>';
+      el.addEventListener('click',()=>buySup(s));
+      supBox.appendChild(el);
+    }
+  }
   showScr('merc');
+}
+function buySup(s){
+  if(save.gold<s.gold||save.gems<(s.gems||0)){SFX.hurt();vib(60);return;}
+  save.gold-=s.gold;save.gems-=(s.gems||0);
+  if(!save.supplies)save.supplies={fuel:0,gen:0};
+  save.supplies[s.id]=(save.supplies[s.id]||0)+1;
+  persist();
+  SFX.buy();vib(40);
+  banner('SUMINISTRO COMPRADO',s.name+' · actívalo en el DESPLIEGUE de tu próxima incursión');
+  openMerc();refreshMenu();
 }
 function buyMerc(t){
   const full=vaultCount()>=VCAP;

@@ -431,6 +431,8 @@ function resetRunCommon(){
   run.curses=[]; /* v4.17: sin maldiciones al empezar */
   run.newComboRec=false; /* v4.18: sin récord de combo todavía */
   run.armedShown=false; /* v4.21: aviso de mejoras armadas pendiente */
+  /* v4.29: energía a cero — avisos sin disparar y suministros del despliegue */
+  run.noFuelWarned=false;run.noElecWarned=false;run.supFuel=0;run.supGen=0;
   hitStopT=0;goldenWave=false;lastGolden=-9;kcN=0;kcLast=-9; /* v4.18: dopamina a cero */
   meteors=[];meteorT=rand(16,30);meteorWarned=false; /* v4.19: meteoritos a cero */
   /* v4.20: eventos nuevos a cero — cubos, portal, naves amigas y anomalía */
@@ -450,6 +452,8 @@ function primePlayers(){
     pl.hp=pl.maxHp;pl.invul=1;pl.shots=0;pl.fireAcc=0;pl.emerUsed=false;
     pl.shieldLvl=true;pl.regAcc=0;pl.shieldUp=false;pl.shieldCd=0;
     pl.homeCd=1;pl.priCd=3;pl.intAcc=0;pl.orbT=0;pl.dashCd=0;pl.vengeT=0;
+    /* v4.29: tanque y reactor LLENOS al despegar; sin apagones heredados */
+    pl.fuel=pl.fuelMax||100;pl.en=pl.enMax||100;pl.emergT=0;pl.noElec=false;
     pl.touch=null;
   }
 }
@@ -460,14 +464,16 @@ function primePlayers(){
    hardcore. En co-op cada piloto elige lo suyo y la incursión espera a
    todos (con timeout de seguridad de 8 s por piloto mudo). */
 let deployThen=null,deployCoop=false,deployT=0,depSel=new Set();
+let supSel={fuel:false,gen:false}; /* v4.29: suministros del pirata (default APAGADO: son preciados) */
 function deployGate(then,coop){
   deployThen=then;deployCoop=!!coop;deployT=0;run.armedTaken=null;
   const armed=(save.armed||[]).length>0;
+  const sup=((save.supplies&&save.supplies.fuel)||0)>0||((save.supplies&&save.supplies.gen)||0)>0;
   if(coop&&net.mode==='client'){
-    if(!armed){run.armedTaken=[];sendMsg({t:'depOk'});deployLaunch();return;}
+    if(!armed&&!sup){run.armedTaken=[];sendMsg({t:'depOk'});deployLaunch();return;}
     state='deploy';openDeploy();return;
   }
-  if(armed){state='deploy';openDeploy();return;}
+  if(armed||sup){state='deploy';openDeploy();return;}
   run.armedTaken=[];
   if(coop&&net.mode==='host'){net.depOk[0]=true;state='deploy';showScr(null);checkDeployReady();return;}
   deployLaunch();
@@ -500,6 +506,33 @@ function openDeploy(){
     box.appendChild(el);
   }
   $('#depNote').textContent=deployCoop?'CADA PILOTO ELIGE LO SUYO · LA INCURSIÓN ESPERA A TODOS':'';
+  /* v4.29: SUMINISTROS DEL PIRATA — se activan aquí y se consumen */
+  const sup=save.supplies||{fuel:0,gen:0};
+  supSel={fuel:false,gen:false};
+  const supBox=$('#depSup');
+  supBox.innerHTML='';
+  const SUPL=[
+    {id:'fuel',name:'⛽ RESERVA DE COMBUSTIBLE',desc:'Se activa sola al quedarte a 0: tanque al 60%.'},
+    {id:'gen',name:'⚡ GENERADOR PORTÁTIL',desc:'Reactor +60% de regeneración eléctrica toda la incursión.'},
+  ];
+  let anySup=false;
+  for(const s of SUPL){
+    const stock=sup[s.id]||0;
+    if(stock<=0)continue;
+    anySup=true;
+    const el=document.createElement('button');
+    el.className='dep-item sup';el.type='button';
+    el.innerHTML='<span class="dt-mark">✓</span><span class="dt-info"><b>'+s.name+'</b><small>'+s.desc+' · tienes '+stock+' en bodega</small></span><span class="dt-n">DESACTIVADO</span>';
+    el.addEventListener('click',()=>{
+      audio();
+      supSel[s.id]=!supSel[s.id];
+      el.classList.toggle('on',supSel[s.id]);
+      el.querySelector('.dt-n').textContent=supSel[s.id]?'SE USA ESTA VEZ':'DESACTIVADO';
+      SFX.buy();vib(20);
+    });
+    supBox.appendChild(el);
+  }
+  if(anySup)supBox.classList.remove('hidden');else supBox.classList.add('hidden');
   $('#btnDeployGo').disabled=false;$('#btnDeploySkip').disabled=false;
   showScr('deploy');
 }
@@ -511,6 +544,14 @@ function confirmDeploy(skip){
   }
   save.armed=kept;
   run.armedTaken=taken;
+  /* v4.29: los suministros marcados se CONSUMEN de la bodega */
+  run.supFuel=0;run.supGen=0;
+  if(!skip){
+    const sup=save.supplies||{fuel:0,gen:0};
+    if(supSel.fuel&&(sup.fuel||0)>0){sup.fuel--;run.supFuel=1;}
+    if(supSel.gen&&(sup.gen||0)>0){sup.gen--;run.supGen=1;}
+    save.supplies=sup;
+  }
   persist();recompute();primePlayers();
   SFX.buy();vib(40);
   if(deployCoop&&net.mode==='host'){
@@ -685,6 +726,9 @@ function startRunClient(d){
   cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
   run.buffs=players.map(()=>[]);
   run.curses=[]; /* v4.17 */
+  /* v4.29: avisos y suministros a cero también en el cliente */
+  run.noFuelWarned=false;run.noElecWarned=false;run.supFuel=0;run.supGen=0;
+  run.armedTaken=null;
   recompute();
   for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
   players[0].x=W*.42;players[0].y=H-130;
@@ -737,6 +781,11 @@ function nextWave(){
     persist();
   }
   for(const pl of players)if(pl.hp<=0){pl.hp=Math.ceil(pl.maxHp/2);floater(pl.x,pl.y-30,'REDESPLIEGUE','#7FD1B9',13);}
+  /* v4.29: cada nueva oleada repone un 35% de tanque y reactor (alivio co-op) */
+  for(const pl of players){
+    pl.fuel=Math.min(pl.fuelMax||100,(pl.fuel||0)+(pl.fuelMax||100)*.35);
+    pl.en=Math.min(pl.enMax||100,(pl.en||0)+(pl.enMax||100)*.35);
+  }
   wrecks=[];
   for(const pl of players){pl.shieldLvl=true;pl.emerUsed=false;}
   if(P.secondWind&&L%5===0)for(const pl of players){pl.hp=pl.maxHp;floater(pl.x,pl.y-30,'SEGUNDO AIRE','#7FD1B9',13);}

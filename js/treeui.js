@@ -175,7 +175,7 @@ function openShop(from){
 }
 
 /* ============ zoom del arsenal ============ */
-const TREE_W=1520, TREE_H=1420; /* v4.28: +100 px por la rama ESTABILIDAD */
+const TREE_W=1620, TREE_H=1420; /* v4.29: +100 px por la rama ENERGÍA */
 let treeZoom=1;
 function applyZoom(){
   const svg=$('#treeSvg');if(!svg)return;

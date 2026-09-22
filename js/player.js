@@ -70,6 +70,11 @@ function shoot(pl){
   pl.shots++;
   run.stShots++;
   if(bullets.length>380)return; /* v4.8: tope de balas propias (anti-lag) */
+  /* v4.29: cada ráfaga bebe de la red eléctrica (solo naves locales; las
+     remotas ya traen su apagón por el bit 'ne'). Con APAGÓN: daño x0.5. */
+  if(isLocalControlled(pl))
+    pl.en=Math.max(0,pl.en-.5*(1+.12*(pl.bullets-1))*pl.enUseMul);
+  const eMul=pl.noElec?.5:1;
   const heavy=pl.overdrive&&pl.shots%(pl.overEvery||6)===0;
   for(let f=0;f<pl.files;f++){
     const ox=(f-(pl.files-1)/2)*13;
@@ -78,7 +83,7 @@ function shoot(pl){
       const crit=Math.random()<pl.crit;
       /* v4.10: cada disparo varía ±50% (base 10 => 5–15 por bala),
          los críticos (x2.5) y los disparos pesados (x3) se calculan encima */
-      let dmg=Math.max(1,Math.round(pl.dmg*(.5+Math.random())));
+      let dmg=Math.max(1,Math.round(pl.dmg*(.5+Math.random())*eMul));
       dmg*=crit?2.5:1;
       if(heavy)dmg*=3;
       bullets.push({x:pl.x+ox,y:pl.y-16,vx:Math.cos(a)*540,vy:Math.sin(a)*540,
@@ -108,13 +113,63 @@ function fireNovaLocal(){
   fireNovaSlot(localSlot);
 }
 
+/* ============ v4.29: ENERGÍA — combustible y electricidad ============
+   Cada dispositivo simula SOLO sus naves locales (el anfitrión las suyas,
+   el cliente la propia): el movil afecta al manejo (local) y el apagón viaja
+   al anfitrión por el bit 'ne' del 'inp' para aplicarlo al daño en el sim. */
+function isLocalControlled(pl){
+  if(net.mode==='client')return pl.slot===localSlot;
+  if(net.mode==='host')return pl.slot===0; /* online: solo tu nave se simula aquí */
+  return true; /* solitario y co-op local de un dispositivo */
+}
+/* factor de manejo: 1 normal · 40% en emergencia (5 s) · 20% sin combustible */
+function mobK(pl){ return pl.fuel>0?1:(pl.emergT>0?.4:.2); }
+function updEnergy(pl,dt){
+  if(state!=='play'||pl.hp<=0)return;
+  /* COMBUSTIBLE — gotea con los propulsores; jamás se regenera */
+  if(pl.touch&&pl.touch.active&&pl.fuel>0){
+    pl.fuel=Math.max(0,pl.fuel-1.1*pl.fuelUseMul*dt);
+    if(pl.fuel<=0){
+      if((run.supFuel||0)>0){ /* RESERVA DEL PIRATA: un salvavidas automático */
+        run.supFuel--;
+        pl.fuel=pl.fuelMax*.6;
+        banner('RESERVA DE COMBUSTIBLE','El pirata te salva: tanque al 60%');
+        SFX.relic();vib(60);
+      }else{
+        pl.emergT=5;
+        if(!run.noFuelWarned){run.noFuelWarned=true;
+          banner('SIN COMBUSTIBLE','5 s de propulsores de emergencia · luego al 20% · recoge bidones verdes');}
+        SFX.hurt();vib(90,true);
+      }
+    }
+  }
+  if(pl.fuel<=0&&pl.emergT>0)pl.emergT-=dt;
+  if(pl.fuel>0)pl.emergT=0;
+  /* ELECTRICIDAD — el reactor regenera; drones y escudo consumen;
+     el disparo consume en shoot() por bala */
+  const regen=pl.enRegen*(run.supGen?1.6:1);
+  let use=0;
+  if(pl.drones)use+=.6*pl.drones;
+  if(pl.shieldUp)use+=1.0;
+  pl.en=clamp(pl.en+(regen-use*pl.enUseMul)*dt,0,pl.enMax);
+  const was=pl.noElec;
+  if(pl.en<=.01)pl.noElec=true;
+  else if(pl.noElec&&pl.en>=20)pl.noElec=false;
+  if(pl.noElec&&!was){
+    if(!run.noElecWarned){run.noElecWarned=true;
+      banner('APAGÓN ELÉCTRICO','Daño x0.5 y drones apagados hasta recuperar 20 de carga');}
+    SFX.hurt();vib(80,true);
+  }
+}
 /* ============ updates de jugador ============ */
 function updPlayer(pl,dt){
+  if(isLocalControlled(pl))updEnergy(pl,dt); /* v4.29: energía de las naves locales */
   pl.invul=Math.max(0,pl.invul-dt);
   pl.vengeT=Math.max(0,pl.vengeT-dt);
   pl.dashCd=Math.max(0,pl.dashCd-dt);
   if(pl.touch&&pl.touch.active){
-    const k=1-Math.exp(-42*dt);
+    /* v4.29: sin combustible el manejo pesa (40% en emergencia, 20% después) */
+    const k=1-Math.exp(-42*mobK(pl)*dt);
     pl.x=lerp(pl.x,pl.touch.tx,k);
     pl.y=lerp(pl.y,pl.touch.ty,k);
   }
@@ -214,7 +269,8 @@ function updAbilities(pl,dt){
       dronePos[key][i].x=pl.x+Math.cos(a)*44;
       dronePos[key][i].y=pl.y+Math.sin(a)*44-6;
       droneCd[key][i]-=dt;
-      if(droneCd[key][i]<=0){
+      /* v4.29: APAGÓN — los drones orbitan pero no disparan */
+      if(droneCd[key][i]<=0&&!pl.noElec){
         droneCd[key][i]=pl.droneFast?.6:1.15;
         const t=nearestEnemy(dronePos[key][i].x,dronePos[key][i].y,[],430);
         const ang=t?Math.atan2(t.y-dronePos[key][i].y,t.x-dronePos[key][i].x):-Math.PI/2;

@@ -77,7 +77,9 @@ function blankStats(){
     bh:false,bhCd:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false,
     /* v4.28: ESTABILIDAD — control de temblor de cámara (no viaja: cada
        pantalla calcula los suyos en recompute con su árbol local) */
-    quakeMul:1,quakeDecay:1,noQuake:false,noSelfQuake:false,noCritShake:false,noHurtShake:false};
+    quakeMul:1,quakeDecay:1,noQuake:false,noSelfQuake:false,noCritShake:false,noHurtShake:false,
+    /* v4.29: ENERGÍA — tanque de combustible y red eléctrica de la nave */
+    fuelMax:100,enMax:100,enRegen:6,enRegenMul:1,enUseMul:1,fuelUseMul:1,energyDropMul:1};
 }
 /* v4.15: lobby del anfitrión con lista de pilotos conectados (1–2 pueden entrar) */
 /* v4.26: estado REAL de sincronía en el lobby — el ranking de cada piloto
@@ -225,7 +227,11 @@ function hostOnData(d,wrap){
     return;
   }
   if(d.t==='inp'&&players[slot]&&players[slot].hp>0){
-    players[slot].x=clamp(d.x,16,W-16); players[slot].y=clamp(d.y,16,H-16); return;
+    players[slot].x=clamp(d.x,16,W-16); players[slot].y=clamp(d.y,16,H-16);
+    /* v4.29: el APAGÓN del cliente viaja en el bit 'ne' y el sim del
+       anfitrión le aplica daño x0.5 y silencia sus drones */
+    players[slot].noElec=!!d.ne;
+    return;
   }
   if(d.t==='nova'){ fireNovaSlot(slot); return; }
   if(d.t==='emo'){
@@ -466,6 +472,12 @@ function clientEvent(d){
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
   if(k==='depGo'){ /* v4.28: el anfitrión lanzó la incursión — informativo, el cliente ya está en play */ return; }
   if(k==='rvGo'){ clientRevanchaGo(); return; } /* v4.28: todos votaron revancha */
+  if(k==='energy'){ /* v4.29: el anfitrión dice que TU nave recogió bidón/celda */
+    const pl=players[localSlot];if(!pl)return;
+    if(d.e==='fuel')pl.fuel=Math.min(pl.fuelMax||100,(pl.fuel||0)+14);
+    else pl.en=Math.min(pl.enMax||100,(pl.en||0)+22);
+    return;
+  }
   if(k==='over'){
     save.best.lvl=Math.max(save.best.lvl,d.level);
     save.bestAll=Math.max(save.bestAll,d.level);
@@ -541,7 +553,7 @@ function applySnap(d){
   cBossPct=d.bp||0;
   cEB=d.eb.map(b=>({x:b[0],y:b[1],r:b[2],color:ECOLORS[b[3]]||'#F2EFE6'}));
   cBL=d.bl.map(b=>({x:b[0],y:b[1],ang:b[2]/100,kind:b[3]}));
-  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest','cube','vchest'][p[0]]||'gold',x:p[1],y:p[2],
+  cPK=d.pk.map(p=>({t:['gold','gem','heart','chest','minichest','schest','cube','vchest','fuel','elec'][p[0]]||'gold',x:p[1],y:p[2],
     shield:(p[0]===5||p[0]===6)?(p[3]||0):0,shieldMax:(p[0]===5||p[0]===6)?(p[4]||0):0,
     rar:p[0]===7?(RARS[p[3]]||'c'):undefined}));
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));

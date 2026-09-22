@@ -38,9 +38,16 @@ function loop(now){
       if(snapAcc>.08){snapAcc=0;sendSnap();}
     }
   }else if(state==='play'&&amClient()){
+    /* v4.29: el cliente simula la energía de SU nave (combustible local +
+       apagón que viaja al anfitrión en el bit 'ne' del inp) */
+    const myPl=players[localSlot];
+    if(myPl)updEnergy(myPl,dt);
+    inpAcc+=dt;
+    if(inpAcc>.5&&myPl){inpAcc=0;sendMsg({t:'inp',x:Math.round(myPl.x),y:Math.round(myPl.y),ne:myPl.noElec?1:0});}
     for(const pl of players){
       if(pl.slot===localSlot&&pl.touch&&pl.touch.active&&pl.hp>0){
-        const k=1-Math.exp(-42*dt);
+        /* v4.29: sin combustible el manejo pesa también en el cliente */
+        const k=1-Math.exp(-42*mobK(pl)*dt);
         pl.x=lerp(pl.x,pl.touch.tx,k);
         pl.y=lerp(pl.y,pl.touch.ty,k);
       }

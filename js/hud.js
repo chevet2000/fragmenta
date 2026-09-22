@@ -16,6 +16,20 @@ function refreshHUD(){
       :`OLEADA ${run.level}${tn?' · '+tn:''} · nv ${minLvlOf(run.level)}–${maxLvlOf(run.level)}`);
   $('#shipTxt').textContent='NV '+run.shipLv;
   $('#expFill').style.width=clamp(run.exp/shipNeed(run.shipLv)*100,0,100)+'%';
+  /* v4.29: MEDIDORES DE ENERGÍA — combustible y electricidad de TU nave */
+  const myE=players[localSlot]||players[0];
+  const fg=$('#fuelGauge'),eg=$('#elecGauge');
+  if(fg&&eg&&runActive&&state!=='menu'){
+    const fp=clamp((myE.fuel||0)/(myE.fuelMax||100)*100,0,100);
+    const ep=clamp((myE.en||0)/(myE.enMax||100)*100,0,100);
+    $('#fuelFill').style.width=fp+'%';
+    $('#elecFill').style.width=ep+'%';
+    fg.classList.toggle('low',fp<25);
+    eg.classList.toggle('low',ep<20);
+    fg.classList.toggle('dead',fp<=0);
+    eg.classList.toggle('dead',ep<=0);
+    fg.classList.remove('hidden');eg.classList.remove('hidden');
+  }else if(fg&&eg){fg.classList.add('hidden');eg.classList.add('hidden');}
   /* v4.8: barra de iconos de poderes temporales activos (❖ + oleadas restantes) */
   const bb=$('#buffBar');
   const tbs=run.tempBuffs||[];
