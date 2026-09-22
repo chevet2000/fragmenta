@@ -69,9 +69,15 @@ button{font-family:inherit}
 .emorow .face{font-size:24px;width:46px;height:46px;line-height:1;
   font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif}
 
-.scr{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+/* v4.32: las pantallas se alinean arriba y su contenido se centra con
+   margin:auto — si la ventana es más alta que la pantalla, el desborde
+   queda ARRIBA y se puede hacer scroll (con justify-content:center el
+   sobrante superior era inalcanzable: la ventana de mejora "salía" de
+   la pantalla en móvil horizontal). */
+.scr{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   padding:24px;background:rgba(7,9,13,.87);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s,visibility .25s;overflow-y:auto}
+.scr>.achbox,.scr>.panel,.scr>.netbox{margin:auto}
 .scr.show{opacity:1;visibility:visible;pointer-events:auto}
 #scrMenu{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 20px)}
 .btn{display:block;width:100%;padding:13px;border:1px solid var(--line);background:rgba(12,16,22,.6);color:var(--ink);
@@ -183,6 +189,10 @@ button{font-family:inherit}
   padding:12px;margin-bottom:12px;outline:none;user-select:text;-webkit-user-select:text}
 #joinInput:focus{border-color:var(--amber)}
 
+/* v4.32: la ventana de MEJORA envuelve su contenido en .lvin (margin:auto):
+   centrada cuando cabe, con scroll desde arriba cuando no cabe */
+#scrLevel{padding:14px}
+.lvin{margin:auto;display:flex;flex-direction:column;align-items:center;width:100%}
 .lv-head{text-align:center;margin-bottom:18px}
 .lv-kicker{font-size:9px;letter-spacing:.5em;color:var(--mint);font-weight:700}
 .lv-head h2{font-size:28px;letter-spacing:.2em;margin:7px 0 5px}
@@ -586,3 +596,19 @@ button{font-family:inherit}
 .crew-msg span{display:block;font-size:11.5px;line-height:1.35;color:#E8E4D8;font-weight:500}
 .crew-msg.out{opacity:0;transform:translateX(-10px);transition:opacity .22s ease,transform .22s ease}
 @keyframes crewIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+/* v4.32: PANTALLAS BAJAS (móvil en horizontal ≈360–440 px de alto) —
+   la ventana de mejora y los paneles se compactan para caber de una pieza;
+   si aún no cabe, .scr ya permite hacer scroll desde arriba */
+@media (max-height:620px){
+  .lv-head{margin-bottom:8px}
+  .lv-head h2{font-size:19px;margin:2px 0 3px}
+  .lv-head p{font-size:9.5px}
+  #cards{gap:7px;width:min(430px,94vw)}
+  .card{padding:9px 12px 9px 15px}
+  .card p{font-size:10.5px;line-height:1.35}
+  .c-top b{font-size:13.5px}
+  .panel{padding:14px 16px}
+  .panel h2{font-size:18px;margin:5px 0 10px}
+  .panel .btn{margin-top:7px;padding:11px}
+  .netbox .btn{padding:11px}
+}

@@ -1,6 +1,6 @@
 'use strict';
 /* ============ pantallas ============ */
-const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver'),
+const scr={menu:$('#scrMenu'),rank:$('#scrRank'),guide:$('#scrGuide'),ach:$('#scrAch'),chest:$('#scrChest'),lobby:$('#scrLobby'),join:$('#scrJoin'),level:$('#scrLevel'),post:$('#scrPost'),shop:$('#scrShop'),pause:$('#scrPause'),over:$('#scrOver'),mplay:$('#scrMplay'), /* v4.32: ventana MULTIJUGADOR */
   /* v4.12: hangar de naves, misiones diarias, perfil y bestiario */
   hangar:$('#scrHangar'),missions:$('#scrMissions'),stats:$('#scrStats'),best:$('#scrBest'),
   /* v4.15: ajustes (engranaje) */
@@ -155,6 +155,9 @@ function renderRankList(){
  /* v4.8: eliminado añadir/copiar registros por código — el ranking se
     sincroniza automáticamente al conectar dos jugadores en el lobby co-op */
  bindEl('#btnRank', 'click',openRank);
+ bindEl('#btnRankO', 'click',openRank); /* v4.32: RANKING dentro de la ventana MULTIJUGADOR */
+ bindEl('#btnMplay', 'click',()=>{audio();showScr('mplay');});
+ bindEl('#btnMplayBack', 'click',()=>{audio();refreshMenu();showScr('menu');});
  bindEl('#btnRankBack', 'click',()=>{refreshMenu();showScr('menu');});
 /* v4.15: pestañas de filtro del ranking */
 document.querySelectorAll('#rankTabs button').forEach(b=>{
@@ -837,9 +840,10 @@ function showShipCards(picks,onPick,waitNote){
   }
   showScr('level');
 }
-function showShipLevelLocal(){
-  state='levelup';SFX.lvl();
-  const cnt=id=>cardStacks(0,id);
+/* v4.32: genera las 3 cartas candidatas (misma lógica para la ventana y
+   para la MEJORA AL AZAR). cnt(id) cuenta los stacks — en co-op el
+   anfitrión pasa una cnt que exige stack libre en TODAS las naves. */
+function genShipPicks(cnt){
   const picks=[],used=new Set();
   for(let i=0;i<3;i++){
     const r=Math.random();
@@ -853,6 +857,24 @@ function showShipLevelLocal(){
     const c=CARDS.find(c=>cnt(c.id)<MAX_STACKS&&!picks.includes(c))||CARDS[0];
     picks.push(c);
   }
+  return picks;
+}
+/* v4.32: MEJORA AL AZAR (solo/local) — elige una carta al azar, la instala
+   y sigue el juego sin abrir la ventana */
+function autoApplyLocal(picks){
+  const c=picks[irand(0,picks.length-1)];
+  applyShipCard(0,c.id);SFX.buy();
+  const pl=players[0];
+  if(pl)floater(pl.x,pl.y-56,'AL AZAR: '+c.name,'#B388FF',14);
+  crewSay('autoUp',{n:c.name});
+  pendingShipLevels--;
+  if(pendingShipLevels>0){showShipLevelLocal();return;}
+  state='play';showScr(null);persist();
+}
+function showShipLevelLocal(){
+  const picks=genShipPicks(id=>cardStacks(0,id));
+  if(autoUpOn()){autoApplyLocal(picks);return;} /* v4.32: casilla MEJORA AL AZAR */
+  state='levelup';SFX.lvl();
   showShipCards(picks,id=>{
     applyShipCard(0,id);SFX.buy(); /* v4.8: tope 10 por carta + curación instantánea */
     pendingShipLevels--;

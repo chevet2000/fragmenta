@@ -48,7 +48,7 @@ function recompute(){
     const oldMax=pl.maxHp;
     pl.dmg=b.dmg;pl.fireRate=b.rate;pl.bullets=b.bul;pl.files=b.files;pl.speed=b.spd;pl.pierce=b.pierce;
     pl.crit=b.crit;pl.magnet=b.magnet;pl.maxHp=Math.max(1,b.maxHp);pl.regenRate=b.regenRate;
-    pl.nova=b.nova;pl.slow=b.slow;pl.goldMul=b.goldMul;pl.expMul=b.expMul;pl.goldRate=b.goldRate;
+    pl.nova=b.nova;pl.slow=b.slow;pl.goldMul=b.goldMul;pl.expMul=softExp(b.expMul);pl.goldRate=b.goldRate; /* v4.32: expMul con tope suave */
     pl.aura=b.aura;pl.emergency=b.emergency;pl.field=b.field;pl.bounce=b.bounce;pl.overdrive=b.over;
     pl.drones=b.drones;pl.orbs=b.orbs;pl.shield=b.shield;pl.shieldFast=b.shieldFast;
     pl.vamp=b.vamp;pl.frenzy=b.frenzy;pl.execute=b.execute;pl.presa=b.presa;pl.reflect=b.reflect;
@@ -128,10 +128,23 @@ function redFlash(){const f=$('#flash');f.classList.add('on');setTimeout(()=>f.c
    gates del arsenal se consigue jugando los modos tranquilos.
    Además la XP por baja escala con la ESCALA VIVA (xpUpMul). */
 const HC_XP_BASE=5000;
+/* v4.32: CURVA DE NAVE REBALANCEADA — en SOLO/NORMAL/DIFÍCIL la subida
+   era lineal (100, 150, 200…) y un piloto con el árbol completo apilaba
+   ×30 de experiencia: en la oleada 3 ya llevaba 8–10 niveles de nave.
+   Ahora cada nivel pide un extra CUADRÁTICO (+5k²): los primeros niveles
+   casi no cambian (2º: 155, 5º: 370) y los altos frenan (10º: 945,
+   15º: 1845, 20º: 2995). HARDCORE/FRENÉTICO siguen con su curva ×2. */
 function shipNeed(lv){
   if(runDiff==='hardcore')return Math.round(HC_XP_BASE*Math.pow(2,lv-1));
-  return 100+(lv-1)*50;
+  const k=lv-1;
+  return 100+50*k+5*k*k;
 }
+/* v4.32: RENDIMIENTOS DECRECIENTES de la experiencia — los nodos del
+   árbol se MULTIPLICAN entre sí (SABIDURÍA + PROSPERIDAD + FUSIONES
+   llegan a ×30, y con cartas SABIDURÍA de la partida a ×100+). Por
+   encima de ×2.5 cada punto extra cuenta menos, para que el nivel de
+   nave siga siendo un logro y no una cinta transportadora. */
+const softExp=m=>m<=2.5?m:Math.round((2.5+Math.pow(m-2.5,.55))*100)/100;
 const XP_MUL=.6;
 let expFrac=0;
 const waveXp=()=>clamp(1+Math.floor(run.level/9),1,5)*xpUpMul(); /* v4.23: escala viva */

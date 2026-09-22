@@ -2,7 +2,7 @@
 /* ============ v4.26: QR DE SALA ============
    El anfitrión pinta un QR con el CÓDIGO de la sala (solo esos 5
    caracteres, sin URL) y el compañero, si está cerca, puede escanearlo
-   desde «ONLINE · UNIRSE» → ESCANEAR QR: la cámara lee el código, lo
+   desde «MULTIJUGADOR · ONLINE» → UNIRSE → ESCANEAR QR: la cámara lee el código, lo
    rellena y entra directo al lobby sin teclear nada.
    Generador: qrcode-generator (MIT) — bundled en js/vendor/qrcode.js.
    Escáner: BarcodeDetector (Chrome/Android) y, si el navegador no lo

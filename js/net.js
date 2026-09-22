@@ -281,22 +281,20 @@ function beginShipChoiceHost(){
   if(!net.connected){ showShipLevelLocal(); return; }
   state='shipwait';shipwaitT=0;
   net.chosen={};net.cards={};
-  const cnt=(slot,id)=>cardStacks(slot,id);
-  const picks=[],used=new Set();
-  for(let i=0;i<3;i++){
-    const r=Math.random();
-    let tier=r<.12&&run.level>=4?2:r<.40?1:0;
-    for(let t2=tier;t2>=0;t2--){
-      const cands=CARDS.filter(c=>c.tier===t2&&!used.has(c.id)&&
-        players.every(pl=>cnt(pl.slot,c.id)<MAX_STACKS));
-      if(cands.length){const c=cands[irand(0,cands.length-1)];used.add(c.id);picks.push(c);break;}
-    }
-  }
-  while(picks.length<3){
-    const c=CARDS.find(c=>players.every(pl=>cnt(pl.slot,c.id)<MAX_STACKS)&&!picks.includes(c))||CARDS[0];
-    picks.push(c);
-  }
+  /* v4.32: generación compartida de cartas (exige stack libre en todas las naves) */
+  const picks=genShipPicks(id=>players.every(pl=>cardStacks(pl.slot,id)<MAX_STACKS));
   sendMsg({t:'ev',k:'ship',lv:run.shipLv,ids:picks.map(c=>c.id)});
+  /* v4.32: MEJORA AL AZAR del ANFITRIÓN — elige al azar sin abrir la
+     ventana; el cliente sigue viendo la suya si no tiene la casilla */
+  if(autoUpOn()){
+    const c=picks[irand(0,picks.length-1)];
+    net.chosen[0]=true;net.cards[0]=c.id;SFX.buy();
+    const pl=players[0];
+    if(pl)floater(pl.x,pl.y-56,'AL AZAR: '+c.name,'#B388FF',14);
+    checkShipChoice();
+    crewSay('autoUp',{n:c.name}); /* tras checkShipChoice: state vuelve a 'play' si nadie espera */
+    return;
+  }
   showShipCards(picks,c=>{
     net.chosen[0]=true; net.cards[0]=c.id; SFX.buy();
     markChoiceDone('JUGADOR 1');
@@ -441,6 +439,16 @@ function clientEvent(d){
   if(k==='ship'){
     save.bestShip=Math.max(save.bestShip,d.lv);run.shipLv=d.lv;persist();
     const picks=d.ids.map(id=>CARDS.find(c=>c.id===id)).filter(Boolean);
+    /* v4.32: MEJORA AL AZAR del CLIENTE — envía la elección al instante y
+       no abre la ventana; el 'resume' del anfitrión reactiva el juego */
+    if(autoUpOn()&&picks.length){
+      const c=picks[irand(0,picks.length-1)];
+      sendMsg({t:'pickC',id:c.id});SFX.buy();
+      const my=players[localSlot];
+      if(my)floater(my.x,my.y-56,'AL AZAR: '+c.name,'#B388FF',14);
+      crewSay('autoUp',{n:c.name});
+      return;
+    }
     state='levelup';SFX.lvl();
     showShipCards(picks,c=>{
       sendMsg({t:'pickC',id:c.id}); SFX.buy();

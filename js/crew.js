@@ -44,6 +44,8 @@ const CREW_LINES={
   down:{sp:'med',prio:3,cd:6,tx:['¡La nave del compañero ha caído! Rescátenlo, capitán.']},
   resc:{sp:'med',prio:2,cd:6,tx:['¡Compañero rescatado! Bien hecho, caporales.']},
   shipUp:{sp:'art',prio:2,cd:4,tx:['Nave evolucionada: nivel {n}, capitán.','La nave sube a nivel {n}. ¡Menudo arsenal!']},
+  /* v4.32: MEJORA AL AZAR — el ingeniero instala lo que salga */
+  autoUp:{sp:'ing',prio:1,cd:4,tx:['Instalando {n} a ciegas… listo, capitán.','{n} conectada al azar. La máquina eligió, no yo.']},
   /* v4.31: EL PIRATA GALÁCTICO — la tripulación entra en pánico */
   pirIn:{sp:'rad',prio:3,cd:4,tx:['¡Escondan sus pertenencias, llegaron los piratas!','¡Piratas en el radar, capitán! Protejan la carga.','¡Contacto hostil… es el PIRATA GALÁCTICO!']},
   pirSteal:{sp:'med',prio:2,cd:10,tx:['¡Nos están robando el botín, capitán!','¡Ahí va nuestro oro, directo a sus bodegas!','¡El pirata aspira la carga, capitán!']},

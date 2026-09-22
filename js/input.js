@@ -358,8 +358,27 @@ function updSoundBtns(){
   $('#btnPSound').textContent='SONIDO: '+(muted?'NO':'SÍ');
   $('#btnPMus').textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
   crewLbls(); /* v4.30: etiqueta TRIPULACIÓN sincronizada al abrir pausa/ajustes */
+  autoLbls(); /* v4.32: etiqueta MEJORA AL AZAR sincronizada */
   const sm=$('#btnSMus');if(sm)sm.textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
 }
+/* v4.32: MEJORA AL AZAR — casilla para quien no quiere abrir la ventana de
+   mejoras cada vez que sube de nave: el juego instala una al azar y sigue.
+   Cada piloto tiene la SUYA (local): en co-op el anfitrión y el cliente
+   deciden por separado. Apagada por defecto. */
+function autoUpOn(){return save.autoUp===true;}
+function autoToggle(){
+  save.autoUp=!autoUpOn();
+  persist();autoLbls();
+}
+function autoLbls(){
+  const lab='MEJORA AL AZAR: '+(autoUpOn()?'SÍ':'NO');
+  const b1=$('#btnAutoUp'),b2=$('#btnPAuto');
+  if(b1)b1.textContent=lab;
+  if(b2)b2.textContent=lab;
+}
+bindEl('#btnAutoUp','click',()=>{audio();autoToggle();});
+bindEl('#btnPAuto','click',()=>{audio();autoToggle();});
+autoLbls();
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
     persist();
