@@ -51,17 +51,22 @@ function refreshHUD(){
     bb.title=tbs.map(t=>{const p=TEMP_POOL.find(x=>x.id===t.id);return p?p.name:'';}).join(' · ');
   }else{bb.classList.add('hidden');bb.innerHTML='';}
   /* v4.17: maldiciones activas del HECHICERO (◈ = mientras él viva · Nol = oleadas)
-     v4.31: + el chip ☠ de la MALDICIÓN PIRATA */
+     v4.31: + el chip ☠ de la MALDICIÓN PIRATA
+     v4.33: + el chip de la ZONA DE GUERRA de la oleada */
   const cb=$('#curseBar');
   if(cb){
     const csl=(run.curses&&runActive)?run.curses:[];
     const seal=(run.pirSeal&&runActive)?run.pirSeal:null;
-    if(csl.length||seal){
+    const zn=(run.zone&&runActive&&state==='play')?run.zone:null;
+    const zd=zn?ZONES[zn.k]:null;
+    if(csl.length||seal||zn){
       cb.classList.remove('hidden');
       cb.innerHTML=csl.map(c=>'<span class="bicon curse">'+(CURSE_ICON[c.id]||'✖')+'<i>'+(c.alive?'◈':c.waves+'ol')+'</i></span>').join('')+
-        (seal?'<span class="bicon curse" style="border-color:#FF9F43">☠<i>◈</i></span>':'');
+        (seal?'<span class="bicon curse" style="border-color:#FF9F43">☠<i>◈</i></span>':'')+
+        (zn&&zd?'<span class="bicon curse" style="border-color:'+zd.color+'">'+zd.icon+'<i>◈</i></span>':'');
       cb.title='MALDICIONES: '+csl.map(c=>CURSES[c.id].name).join(' · ')+
-        (seal?(csl.length?' · ':'')+'PIRATA: '+(typeof pirSealName==='function'?pirSealName(seal):seal):'');
+        (seal?(csl.length?' · ':'')+'PIRATA: '+(typeof pirSealName==='function'?pirSealName(seal):seal):'')+
+        (zn&&zd?(csl.length||seal?' · ':'')+zoneLabel():'');
     }else{cb.classList.add('hidden');cb.innerHTML='';}
   }
   /* v4.12: contador de COMBO de bajas (se desvanece en su último segundo) */

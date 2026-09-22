@@ -16,8 +16,10 @@ function reflectBlast(pl,slot){
     hostBeam(pl.x,pl.y,best.x,best.y);
     floater(best.x,best.y-20,'REFLEJADO','#64C7FF',11);}
 }
-function hitPlayer(pl,d){
-  if(pl.invul>0||state!=='play'||pl.hp<=0)return;
+/* v4.33: force=true ignora SOLO los i-frames de arma (choque de casco:
+   embestir SIEMPRE cuesta; escudos, reserva y fénix siguen protegiendo) */
+function hitPlayer(pl,d,force){
+  if((pl.invul>0&&!force)||state!=='play'||pl.hp<=0)return;
   const slot=pl.slot;
   if(boss)run.bossDmgTaken=true;
   if(pl.field&&pl.shieldLvl){
@@ -123,8 +125,11 @@ function isLocalControlled(pl){
   if(net.mode==='host')return pl.slot===0; /* online: solo tu nave se simula aquí */
   return true; /* solitario y co-op local de un dispositivo */
 }
-/* factor de manejo: 1 normal · 40% en emergencia (5 s) · 20% sin combustible */
-function mobK(pl){ return pl.fuel>0?1:(pl.emergT>0?.4:.2); }
+/* factor de manejo: 1 normal · 30% en emergencia (5 s) · 8% sin combustible.
+   v4.33: ANTES era 40%/20% — con 20% el manejo apenas cambiaba y el piloto
+   «no veía que pasara nada» al quedarse seco. Ahora la nave pesa de verdad:
+   42*0.08≈3.4/s de corrección (se nota muchísimo) + chispas + HUD muerto. */
+function mobK(pl){ return pl.fuel>0?1:(pl.emergT>0?.3:.08); }
 function updEnergy(pl,dt){
   if(state!=='play'||pl.hp<=0)return;
   /* COMBUSTIBLE — gotea con los propulsores; jamás se regenera */
@@ -140,9 +145,9 @@ function updEnergy(pl,dt){
       }else{
         pl.emergT=5;
         if(!run.noFuelWarned){run.noFuelWarned=true;
-          banner('SIN COMBUSTIBLE','5 s de propulsores de emergencia · luego al 20% · recoge bidones verdes');
+          banner('SIN COMBUSTIBLE','5 s de propulsores de emergencia · luego el manejo pesa al 8% · recoge bidones verdes');
           crewSay('fuelOut'); /* v4.30 */}
-        SFX.hurt();vib(90,true);
+        SFX.hurt();vib(90,true);redFlash(); /* v4.33: el apagón se VE */
       }
     }
   }
@@ -153,8 +158,9 @@ function updEnergy(pl,dt){
   if(pl.fuel>0&&pl.fuel<=fMax*.25&&!run.crewF25){run.crewF25=true;crewSay('fuelLow');}
   if(pl.fuel>fMax*.6)run.crewF25=false;
   /* ELECTRICIDAD — el reactor regenera; drones y escudo consumen;
-     el disparo consume en shoot() por bala */
-  const regen=pl.enRegen*(run.supGen?1.6:1);
+     el disparo consume en shoot() por bala.
+     v4.33: en la ZONA IÓNICA la recarga baja un 45%. */
+  const regen=pl.enRegen*(run.supGen?1.6:1)*zoneIonMul();
   let use=0;
   if(pl.drones)use+=.6*pl.drones;
   if(pl.shieldUp)use+=1.0;
@@ -177,10 +183,15 @@ function updEnergy(pl,dt){
 function updPlayer(pl,dt){
   if(isLocalControlled(pl))updEnergy(pl,dt); /* v4.29: energía de las naves locales */
   pl.invul=Math.max(0,pl.invul-dt);
+  pl.contactCd=Math.max(0,(pl.contactCd||0)-dt); /* v4.33: reloj del choque de casco */
   pl.vengeT=Math.max(0,pl.vengeT-dt);
   pl.dashCd=Math.max(0,pl.dashCd-dt);
+  /* v4.33: con el tanque seco la nave escupe chispas y humo del motor */
+  if(pl.fuel<=0&&pl.hp>0&&state==='play'&&Math.random()<dt*7&&parts.length<240)
+    parts.push({x:pl.x+rand(-9,9),y:pl.y+12,vx:rand(-14,14),vy:rand(26,64),rot:rand(0,TAU),vr:rand(-5,5),
+      life:rand(.3,.6),t:0,color:Math.random()<.5?'#FF9F43':'#5A6570',kind:Math.random()<.5?'tri':'line',size:rand(1.6,3)});
   if(pl.touch&&pl.touch.active){
-    /* v4.29: sin combustible el manejo pesa (40% en emergencia, 20% después) */
+    /* v4.29/v4.33: sin combustible el manejo pesa (30% en emergencia, 8% después) */
     const k=1-Math.exp(-42*mobK(pl)*dt);
     pl.x=lerp(pl.x,pl.touch.tx,k);
     pl.y=lerp(pl.y,pl.touch.ty,k);
@@ -225,6 +236,24 @@ function nearestEnemy(x,y,excl,range){
   for(const e of enemies){if(e.dead||excl.includes(e.id))continue;
     const d=Math.hypot(e.x-x,e.y-y);if(d<bd){bd=d;best=e;}}
   return best;
+}
+/* ============ v4.33: DURABILIDAD DE DRONES ============
+   Los drones dejan de ser invencibles: las balas enemigas que los tocan
+   se consumen y les hacen 1 de daño; los enemigos que los rozan, 2/s.
+   Derribado = 9 s en el hangar; van reentrando UNO A UNO según caigan. */
+function damageDrone(pl,i,d){
+  const key=''+pl.slot;
+  if(!dronePos[key]||!droneHP[key]||droneDead[key][i])return false;
+  droneHP[key][i]-=d;
+  if(droneHP[key][i]<=0){
+    droneDead[key][i]=true;droneResp[key][i]=DRONE_RESPAWN;
+    const dp=dronePos[key][i];
+    burst(dp.x,dp.y,'#FFD166',10,130);
+    floater(dp.x,dp.y-14,'DRON PERDIDO','#FF6B6B',10);
+    addQuake(2,10);SFX.hurt();
+    if(isLocalControlled(pl))crewSay('droneLos');
+  }
+  return true;
 }
 function updAbilities(pl,dt){
   const key=''+pl.slot;
@@ -274,23 +303,43 @@ function updAbilities(pl,dt){
   if(pl.drones>0){
     if(!dronePos[key])dronePos[key]=[];
     if(!droneCd[key])droneCd[key]=[];
+    if(!droneHP[key])droneHP[key]=[];
+    if(!droneDead[key])droneDead[key]=[];
+    if(!droneResp[key])droneResp[key]=[];
     for(let i=0;i<pl.drones;i++){
       if(!dronePos[key][i])dronePos[key][i]={x:pl.x,y:pl.y};
       if(droneCd[key][i]==null)droneCd[key][i]=rand(0,1);
+      if(droneHP[key][i]==null)droneHP[key][i]=DRONE_HP;
+      if(droneDead[key][i]==null)droneDead[key][i]=false;
+      const dp=dronePos[key][i];
+      if(droneDead[key][i]){
+        /* HANGAR: se pega a la nave reparándose; reaparece uno a uno */
+        droneResp[key][i]-=dt;
+        dp.x=lerp(dp.x,pl.x,1-Math.exp(-6*dt));
+        dp.y=lerp(dp.y,pl.y-18,1-Math.exp(-6*dt));
+        if(droneResp[key][i]<=0){
+          droneDead[key][i]=false;droneHP[key][i]=DRONE_HP;
+          floater(dp.x,dp.y-14,'DRON EN LÍNEA','#7DFF9E',10);
+          if(isLocalControlled(pl))crewSay('droneBack');
+          tone(620,980,.12,'sine',.03);
+        }
+        continue;
+      }
       const a=time*2+i*TAU/pl.drones;
-      dronePos[key][i].x=pl.x+Math.cos(a)*44;
-      dronePos[key][i].y=pl.y+Math.sin(a)*44-6;
+      dp.x=pl.x+Math.cos(a)*44;
+      dp.y=pl.y+Math.sin(a)*44-6;
       droneCd[key][i]-=dt;
       /* v4.29: APAGÓN — los drones orbitan pero no disparan */
       if(droneCd[key][i]<=0&&!pl.noElec){
         droneCd[key][i]=pl.droneFast?.6:1.15;
-        const t=nearestEnemy(dronePos[key][i].x,dronePos[key][i].y,[],430);
-        const ang=t?Math.atan2(t.y-dronePos[key][i].y,t.x-dronePos[key][i].x):-Math.PI/2;
-        bullets.push({x:dronePos[key][i].x,y:dronePos[key][i].y,vx:Math.cos(ang)*460,vy:Math.sin(ang)*460,
+        const t=nearestEnemy(dp.x,dp.y,[],430);
+        const ang=t?Math.atan2(t.y-dp.y,t.x-dp.x):-Math.PI/2;
+        bullets.push({x:dp.x,y:dp.y,vx:Math.cos(ang)*460,vy:Math.sin(ang)*460,
           dmg:Math.max(1,Math.round(pl.dmg*.5)),r:3,crit:false,pierce:0,hits:[],bounce:0,dr:true,slot:pl.slot,dead:false});
       }
     }
     dronePos[key].length=pl.drones;droneCd[key].length=pl.drones;
+    droneHP[key].length=pl.drones;droneDead[key].length=pl.drones;droneResp[key].length=pl.drones;
   }
   if(pl.orbs>0){
     pl.orbT+=dt*2.4;

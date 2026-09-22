@@ -51,7 +51,9 @@ function sendSnap(){
     pirate.dir]:null;
   const cN=players[1]&&players[1].nova;
   const nc=novaCdGlobal>0?clamp(1-novaCdGlobal/((cN?cN.cd:18)*(cN?players[1].novaCdMul:1)),0,1):1;
-  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,pi,
+  /* v4.33: la ZONA DE GUERRA viaja en el snapshot para quien entre tarde */
+  const zn=run.zone?{k:run.zone.k,v:run.zone.v||''}:null;
+  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,pi,zn,
     sv:run.shipLv,se:run.exp,wl:run.level,nc:nc});
   /* v4.15: la billetera de CADA cliente viaja por SU conexión (oro/gemas propios) */
   for(const c of net.conns){

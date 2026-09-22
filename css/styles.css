@@ -585,6 +585,9 @@ button{font-family:inherit}
 .eg.low .egt{border-color:var(--coral);animation:egblink 1s steps(2) infinite}
 .eg.low .egt i{background:var(--coral)}
 .eg.dead .egi{opacity:.4}
+/* v4.33: tanque SECO — el medidor entero late en rojo (se acabó el silencio) */
+.eg.dead .egt{border-color:var(--coral);animation:egblink .7s steps(2) infinite}
+.eg.dead .egt i{background:var(--coral)}
 @keyframes egblink{50%{opacity:.45}}
 /* v4.30: LA TRIPULACIÓN — globos de radio de la nave (izquierda, sobre el HUD inferior) */
 #crewBox{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:4;

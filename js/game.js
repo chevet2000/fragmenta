@@ -28,7 +28,7 @@ function loop(now){
     updHoles(dt); /* v4.14: agujeros negros */
     updEBullets(dt);
     updPirate(dt); /* v4.31: ☠ EL PIRATA GALÁCTICO (solo anfitrión/solitario) */
-    updCollisions();
+    updCollisions(dt); /* v4.33: dt para el desgaste de contacto en drones */
     if(players.length>1)updWrecks(dt);
     updPickups(dt);
     updFx(dt);

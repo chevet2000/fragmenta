@@ -54,7 +54,16 @@ const CREW_LINES={
   pirEsc:{sp:'nav',prio:2,cd:4,tx:['El pirata escapó con el botín, capitán…','Se fue con nuestra carga. El próximo no escapa.']},
   pirMsl:{sp:'nav',prio:2,cd:4,tx:['¡Misil teledirigido, capitán! ¡Esquive!','¡Misil corsario entrante, maniobre, capitán!']},
   pirLas:{sp:'nav',prio:2,cd:4,tx:['¡Cargan el láser corsario! Fuera de la línea, capitán.','¡Láser al horno, capitán! Aparte.']},
-  pirCore:{sp:'art',prio:2,cd:5,tx:['¡Aros destruidos! ¡Al núcleo, caporales!','¡Núcleo expuesto, capitán! Fuego a discreción.']}
+  pirCore:{sp:'art',prio:2,cd:5,tx:['¡Aros destruidos! ¡Al núcleo, caporales!','¡Núcleo expuesto, capitán! Fuego a discreción.']},
+  /* v4.33: DRONES CON DURABILIDAD — el ingeniero sufre con cada pérdida */
+  droneLos:{sp:'ing',prio:2,cd:7,tx:['¡Dron derribado, capitán! El hangar tardará en rearmarlo.','¡Perdimos un dron! Irá entrando de uno en uno.']},
+  droneBack:{sp:'ing',prio:1,cd:6,tx:['Dron rearmado y en posición, capitán.','Dron de vuelta en línea, capitán.']},
+  /* v4.33: ZONAS DE GUERRA — el navegante y el timonel avisan */
+  zoneGrav:{sp:'nav',prio:2,cd:4,tx:['¡Anomalía gravitatoria, capitán! Los enemigos se refuerzan.','¡Gravedad hostil detectada, capitán! Cuidado.']},
+  zoneMet:{sp:'nav',prio:2,cd:4,tx:['¡Lluvia de meteoros, capitán! ¡Esas rocas NO se destruyen!','¡Campo de escombros, capitán! Vigilen el cielo.']},
+  zoneSol:{sp:'tim',prio:2,cd:4,tx:['¡Radiación solar, capitán! El botín se evapora.','¡Calor extremo, capitán! Casi nada cae del cielo.']},
+  zoneIon:{sp:'ing',prio:2,cd:4,tx:['¡Tormenta iónica, capitán! El reactor carga lento.','¡Interferencia eléctrica, capitán! Mida cada disparo.']},
+  zoneDist:{sp:'nav',prio:2,cd:4,tx:['¡Espacio distorsionado, capitán! Sus balas vuelan rápido.','¡Distorsión detectada, capitán! Maniobras evasivas.']}
 };
 let crewCd={},crewHpLast=null,crewShipLast=null,crewSnapWrecks=0;
 function crewEnabled(){return save.crewOn!==false;}

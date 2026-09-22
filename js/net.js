@@ -479,6 +479,11 @@ function clientEvent(d){
     run.pirSeal=d.a||null;recompute();
     return;
   }
+  if(k==='zone'){ /* v4.33: el anfitrión sorteó una ZONA DE GUERRA */
+    run.zone=d.z||null;meteorZoneT=null;
+    if(d.z&&d.z.k)crewSay('zone'+d.z.k.charAt(0).toUpperCase()+d.z.k.slice(1));
+    return;
+  }
   if(k==='curs'){ applyCurses(d.l); return; } /* v4.17: maldiciones del HECHICERO */
   if(k==='chestw'){ banner('COFRE','El anfitrión está abriendo…'); return; }
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
@@ -531,6 +536,9 @@ function applySnap(d){
     if(i!==localSlot){ pl.x=lerp(pl.x,pd[0],.45); pl.y=lerp(pl.y,pd[1],.45); }
   });
   run.shipLv=d.sv; run.exp=d.se; run.level=d.wl;
+  /* v4.33: la ZONA DE GUERRA del anfitrión (para quien entra tarde) */
+  if('zn' in d){const z=d.zn||null;
+    if(JSON.stringify(z)!==JSON.stringify(run.zone||null)){run.zone=z;meteorZoneT=null;}}
   /* v4.30: la tripulación del cliente celebra la subida de nivel de nave */
   if(crewShipLast!=null&&d.sv>crewShipLast)crewSay('shipUp',{n:d.sv});
   crewShipLast=d.sv;

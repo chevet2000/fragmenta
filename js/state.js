@@ -15,7 +15,12 @@ const run={level:1,kills:0,eliteKills:0,time:0,goldRun:0,gemsRun:0,buffs:[[],[]]
   /* v4.28: DESPLIEGUE — las mejoras armadas que el piloto marcó para ESTA
      incursión (salieron de save.armed al confirmar el despliegue; mueren
      con la nave). Las NO marcadas se quedan en save.armed y sobreviven. */
-  armedTaken:null};
+  armedTaken:null,
+  /* v4.33: ZONA DE GUERRA de la oleada actual ({k:'grav'|'met'|'sol'|'ion'|'dist', v})
+     o null. La decide el anfitrión/solitario al construir la oleada y viaja
+     al cliente por ev 'zone' + campo zn del snapshot. */
+  zone:null};
+let meteorZoneT=null; /* v4.33: cuenta atrás de la lluvia en la ZONA DE METEOROS */
 /* v4.18: DOPAMINA — hit-stop (micro cámara lenta al matar) y OLEADA DORADA */
 let hitStopT=0;
 let goldenWave=false,lastGolden=-9;
@@ -36,6 +41,10 @@ let emosFx=[];
 let bots=[]; /* v4.9: aliados bot de combate */
 let frenzyMode=false; /* v4.9: modo frenético */
 let dronePos={'0':[],'1':[]},droneCd={'0':[],'1':[]};
+/* v4.33: DURABILIDAD DE DRONES — vida, derribado y cuenta atrás de hangar
+   por dron y por slot (se simulan donde se simula el dueño). */
+const DRONE_HP=4,DRONE_RESPAWN=9;
+let droneHP={'0':[],'1':[]},droneDead={'0':[],'1':[]},droneResp={'0':[],'1':[]};
 let boss=null,bossName='';
 let formY=0,formT=0,time=0,shake=0,eid=1,fxId=1;
 /* v4.28: ESTABILIDAD — todo temblor AMBIENTAL (bajas, explosiones, meteoritos,
@@ -68,6 +77,7 @@ function mkPlayer(slot){return{
   /* v4.14: 2ª DEFINITIVA · Agujero Negro */
   bh:false,bhCdMax:20,bhRad:130,bhDur:4,bhPull:1,bhDmgMul:1,bhBoom:false,bhGold:false,bhHeal:false,bhT:0,
   invul:0,fireAcc:0,shots:0,shieldLvl:true,emerUsed:false,regAcc:0,
+  contactCd:0, /* v4.33: reloj propio del choque de casco */
   shieldUp:false,shieldCd:0,homeCd:1,priCd:3,intAcc:0,orbT:0,orbTick:0,dashCd:0,vengeT:0,
   /* v4.29: ENERGÍA — combustible (mover) y electricidad (armas/drones).
      Arrancan LLENOS cada incursión; el combustible NO se regenera (bidones),

@@ -691,8 +691,14 @@ function drawShip(pl,isLocal){
   }
   for(let i=0;i<(pl.drones||0)&&i<dronePos[key].length;i++){
     const d=dronePos[key][i];if(!d)continue;
-    g.save();g.translate(d.x,d.y);g.rotate(time*3+i);
-    g.strokeStyle='#FFD166';g.lineWidth=1.5;
+    /* v4.33: durabilidad — gris en el hangar, parpadeo rojo con vida crítica */
+    const dead=droneDead[key]&&droneDead[key][i];
+    const hpv=droneHP[key]?(droneHP[key][i]==null?DRONE_HP:droneHP[key][i]):DRONE_HP;
+    let dcol='#FFD166',dal=1;
+    if(dead){dcol='#8B93A1';dal=.26+Math.sin(time*6)*.12;}
+    else if(hpv<=1&&Math.sin(time*14)>0)dcol='#FF6B6B';
+    g.save();g.translate(d.x,d.y);g.rotate(time*3+i);g.globalAlpha=dal;
+    g.strokeStyle=dcol;g.lineWidth=1.5;
     g.beginPath();g.moveTo(0,-6);g.lineTo(5,4);g.lineTo(-5,4);g.closePath();g.stroke();
     g.fillStyle='rgba(255,209,102,.25)';g.fill();
     g.restore();
@@ -889,8 +895,9 @@ function renderGame(dt){
   /* v4.19: METEORITOS DORADOS — roca incandescente con halo y grietas
      v4.20: el ANÓMALO (púrpura) usa su propia paleta */
   for(const m of meteors){
-    const mCol=m.pur?'#B388FF':'#FFD166',mDark=m.pur?'#3A2454':'#8A5A22',
-      mSpark=m.pur?'#D6BCFF':'#FFE9B0',mHalo=m.pur?'#8A5AFF':'#FFD166';
+    const mCol=m.ind?'#D67A55':(m.pur?'#B388FF':'#FFD166'),
+      mDark=m.ind?'#3A2A24':(m.pur?'#3A2454':'#8A5A22'),
+      mSpark=m.ind?'#FFB08A':(m.pur?'#D6BCFF':'#FFE9B0'),mHalo=m.ind?'#FF7A55':(m.pur?'#8A5AFF':'#FFD166');
     ctx.save();ctx.translate(m.x,m.y);
     ctx.globalAlpha=.22+Math.sin(time*9)*.08;
     ctx.fillStyle=mHalo;
@@ -1070,7 +1077,42 @@ function renderGame(dt){
     ctx.globalAlpha=1;
   }
   ctx.restore();
+  drawZoneFx(); /* v4.33: velo y marcaje de la ZONA DE GUERRA (espacio estable, sin shake) */
   drawRadar();
+}
+function drawZoneFx(){
+  const z=run.zone;if(!z||state!=='play')return;
+  const d=ZONES[z.k];if(!d)return;
+  ctx.save();
+  ctx.globalAlpha=.05+Math.sin(time*2.1)*.018;
+  ctx.fillStyle=d.color;ctx.fillRect(0,0,W,H);
+  if(z.k==='met'){ /* brasas cayendo */
+    ctx.fillStyle=d.color;
+    for(let i=0;i<10;i++){
+      const x=(i*173+time*150*(1+i*.13))%W,y=(i*97+time*250)%H;
+      ctx.globalAlpha=.15;ctx.beginPath();ctx.arc(x,y,2.2,0,TAU);ctx.fill();
+    }
+  }else if(z.k==='ion'){ /* rayas de interferencia */
+    ctx.fillStyle=d.color;
+    for(let i=0;i<5;i++){
+      const y=((time*90*(i%2?-1:1)+i*H/5)%H+H)%H;
+      ctx.globalAlpha=.06;ctx.fillRect(0,y,W,2);
+    }
+  }else if(z.k==='dist'){ /* eco de bordes rotos */
+    ctx.globalAlpha=.11+Math.sin(time*7)*.05;
+    ctx.strokeStyle=d.color;ctx.lineWidth=2;
+    ctx.strokeRect(6,6,W-12,H-12);
+  }else if(z.k==='sol'){ /* gradiente abrasador desde arriba */
+    const gr=ctx.createLinearGradient(0,0,0,H*.5);
+    gr.addColorStop(0,'rgba(255,209,102,.20)');gr.addColorStop(1,'rgba(255,209,102,0)');
+    ctx.globalAlpha=1;ctx.fillStyle=gr;ctx.fillRect(0,0,W,H*.5);
+  }else if(z.k==='grav'){ /* anillos gravitatorios lejanos */
+    ctx.globalAlpha=.10;ctx.strokeStyle=d.color;ctx.lineWidth=1.4;
+    for(let i=0;i<3;i++){
+      ctx.beginPath();ctx.arc(W/2,H*.36,60+i*90+Math.sin(time*1.6+i)*10,0,TAU);ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 function renderMenuBG(dt){
   ctx.fillStyle='#07090D';ctx.fillRect(0,0,W,H);

@@ -38,19 +38,23 @@ function dropLoot(e){
   }
   /* v4.9: gemas y corazones más raros
      v4.24: GEMAS MÁS ESCASAS — el piloto nadaba en gemas: la tasa base baja a
-     la mitad, se le pone tope (2%) y los potenciadores suman menos. */
-  let gr=Math.min(.02,.011+run.level*.0006);
+     la mitad, se le pone tope (2%) y los potenciadores suman menos.
+     v4.33: la ZONA SOLAR evapora también gemas y corazones (-70%). */
+  let gr=Math.min(.02,.011+run.level*.0006)*zoneDropMul();
   if(players.some(pl=>pl.gemLuck))gr*=1.5;
   if(players.some(pl=>pl.gemExtra))gr+=.018;
   if(run.relics.includes('crudas'))gr+=.05;
   if(Math.random()<gr)pickups.push({t:'gem',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
-  if(Math.random()<.006*(players.some(pl=>pl.heartDrop)?1.8:1))
+  if(Math.random()<.006*zoneDropMul()*(players.some(pl=>pl.heartDrop)?1.8:1))
     pickups.push({t:'heart',x:e.x,y:e.y,vx:rand(-40,40),vy:rand(-120,-40)});
   /* v4.29: ENERGÍA — bidones verdes y celdas azules. Generosos en las
      oleadas 1-10 (se aprende el ciclo), más rares después. RECOLECTOR los
-     duplica. Élite: siempre suelta uno al azar. */
+     duplica. Élite: siempre suelta uno al azar.
+     v4.33: PETICIÓN DEL PILOTO — caían DEMASIADO seguido: base .045→.028 y
+     el bono inicial ×1.8→×1.45 (a la mitad prácticamente). La ZONA SOLAR
+     corta TODO el botín de energía un 70% más mientras dure. */
   const eMul=players[0].energyDropMul||1;
-  const eCh=.045*eMul*(run.level<=10?1.8:1);
+  const eCh=.028*eMul*(run.level<=10?1.45:1)*zoneDropMul();
   if(!e.elite&&!e.camp&&pickups.length<250){
     if(Math.random()<eCh)pickups.push({t:'fuel',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
     if(Math.random()<eCh)pickups.push({t:'elec',x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-130,-40)});
@@ -291,20 +295,26 @@ function killBoss(){
    v4.20: RAREZAS — el 18% de los meteoritos es PÚRPURA (ANÓMALO):
    más duro (7 impactos), estela violeta y suelta una RELIQUIA
    garantizada además del oro y 2–3 gemas. */
-function spawnMeteor(){
-  const pur=run.level>=2&&Math.random()<.18; /* v4.20: meteorito PÚRPURA raro */
-  const m={x:0,y:0,vx:0,vy:0,r:pur?17:15,hp:pur?7:4,maxhp:pur?7:4,rot:rand(0,TAU),vr:rand(-2.2,2.2),t:0,dead:false,pur,
+function spawnMeteor(ind){
+  /* v4.33: ind=true = roca de la ZONA DE METEOROS: gris-rojiza, NO se
+     destruye a disparos y estrella contra la nave (1 de daño). */
+  const pur=!ind&&run.level>=2&&Math.random()<.18; /* v4.20: meteorito PÚRPURA raro */
+  const m={x:0,y:0,vx:0,vy:0,r:ind?13:(pur?17:15),hp:ind?9999:(pur?7:4),maxhp:ind?9999:(pur?7:4),rot:rand(0,TAU),vr:rand(-2.2,2.2),t:0,dead:false,pur,ind:!!ind,
     verts:Array.from({length:7},()=>rand(.74,1))};
-  const style=Math.random();
+  const style=ind?(Math.random()<.7?2:0):Math.random();
   if(style<.55){ /* cruza en diagonal desde un lateral superior */
     const side=Math.random()<.5;
     m.x=side?-30:W+30;m.y=rand(30,Math.max(80,H*.3));
-    m.vx=(side?1:-1)*rand(105,165);m.vy=rand(55,105);
-  }else{ /* cae en diagonal desde arriba */
+    m.vx=(side?1:-1)*rand(105,165)*(ind?1.25:1);m.vy=rand(55,105)*(ind?1.25:1);
+  }else if(style<1){ /* cae en diagonal desde arriba */
     m.x=rand(W*.15,W*.85);m.y=-30;
     m.vx=rand(-85,85);m.vy=rand(115,175);
+  }else{ /* v4.33: lluvia vertical rápida desde arriba (zona de meteoros) */
+    m.x=rand(20,W-20);m.y=-30;
+    m.vx=rand(-40,40);m.vy=rand(170,240);
   }
   meteors.push(m);
+  if(ind){tone(180,90,.2,'sawtooth',.03);return;} /* el aviso ya lo dio la zona */
   crewSay(pur?'meteorP':'meteor'); /* v4.30 */
   if(pur){tone(900,120,.7,'sawtooth',.035);tone(240,700,.5,'sine',.03,.15);}
   else SFX.meteor();
@@ -316,14 +326,36 @@ function updMeteors(dt){
   if(state!=='play')return;
   meteorT-=dt;
   if(meteorT<=0&&meteors.length<2){spawnMeteor();meteorT=rand(20,36);}
+  /* v4.33: ZONA DE METEOROS — cada 5-7 s cae una ráfaga de rocas
+     INDESTRUCTIBLES (3-4 a la vez, tramos cruzados y verticales) */
+  if(run.zone&&run.zone.k==='met'){
+    if(meteorZoneT==null)meteorZoneT=2.2;
+    meteorZoneT-=dt;
+    if(meteorZoneT<=0){
+      meteorZoneT=rand(5.2,7.2);
+      const n=irand(3,4);
+      for(let i=0;i<n;i++)if(meteors.length<10)setTimeout(()=>{if(state==='play'&&run.zone&&run.zone.k==='met')spawnMeteor(true);},i*260);
+    }
+  }
   for(const m of meteors){
     m.t+=dt;m.x+=m.vx*dt;m.y+=m.vy*dt;m.rot+=m.vr*dt;
     /* estela dorada (o violeta en el ANÓMALO) */
     if(Math.random()<.8&&parts.length<250)
       parts.push({x:m.x+rand(-4,4),y:m.y+rand(-4,4),vx:-m.vx*.12+rand(-24,24),vy:-m.vy*.12+rand(-24,24),
         rot:rand(0,TAU),vr:rand(-7,7),life:rand(.22,.48),t:0,
-        color:m.pur?(Math.random()<.55?'#B388FF':'#8A5AFF'):(Math.random()<.55?'#FFD166':'#FF9F43'),
+        color:m.ind?(Math.random()<.5?'#FF9F43':'#8A5A4A'):(m.pur?(Math.random()<.55?'#B388FF':'#8A5AFF'):(Math.random()<.55?'#FFD166':'#FF9F43')),
         kind:Math.random()<.6?'tri':'line',size:rand(1.6,3.4)});
+    if(m.ind){
+      /* v4.33: roca de la zona — inmune a las balas; explota contra la nave */
+      for(const pl of players){
+        if(pl.hp>0&&Math.hypot(pl.x-m.x,pl.y-m.y)<m.r+11){
+          hitPlayer(pl,1);m.dead=true;
+          burst(m.x,m.y,'#FF9F43',16,160);addQuake(4,12);tone(220,60,.25,'sawtooth',.06);
+        }
+      }
+      if(m.t>26||m.y>H+70||m.x<-90||m.x>W+90)m.dead=true;
+      continue;
+    }
     /* colisión con balas del jugador */
     for(const b of bullets){
       if(b.dead)continue;

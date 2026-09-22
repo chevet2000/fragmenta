@@ -115,6 +115,8 @@ function makeElite(L,delay){
 }
 function buildWave(L){
   wave={type:'',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:1,side:1,pool:[]};
+  /* v4.33: cada oleada nace sin zona (se sortea más abajo; la 1 nunca lleva) */
+  clearZone();
   /* v4.31: incursión nueva (oleada 1) = sin pirata ni maldición heredada */
   if(L===1){pirate=null;pirateSpawnT=-1;run.pirSeal=null;}
   const coop=players.length>1&&net.mode==='host';
@@ -135,6 +137,10 @@ function buildWave(L){
     return;
   }
   let comps;
+  /* v4.33: ZONAS DE GUERRA — 32% desde la oleada 2 (nunca en oleada jefa ni
+     frenético): la zona dura TODA la oleada y el anfitrión la anuncia con
+     banner + tripulación + ev 'zone' para el cliente. */
+  if(L>=2&&R()<.32)startZone();
   if(L<=4)comps=[L===1?'form':L===2?'drip':L===3?'snake':'swarm'];
   else if(R()<.34){
     const all=shuffle(['form','drip','snake','swarm']);
@@ -230,6 +236,8 @@ function updWaveSpawns(dt){
       bumpModeRecord(nl); /* v4.23: el frenético alimenta el récord HARDCORE */
       floater(P.x,P.y-40,'NIVEL '+nl+' · MÁS FUERTES','#FF9F43',14);
       if(R()<.42){makeElite(nl,1.5);wave.total++;} /* v4.13: élite al azar, no siempre */
+      /* v4.33: el frenético también rota ZONAS DE GUERRA (25% por nivel) */
+      if(R()<.25)startZone();else clearZone();
     }
     /* v4.13: élites sueltos al azar cada 20–35 s (máx. 2 a la vez) */
     if(run.frenzyEliteT==null)run.frenzyEliteT=rand(20,35);

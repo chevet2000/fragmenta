@@ -54,7 +54,8 @@ function spawnBoss(L){
   const key=bossForWave(L);
   const D=BOSS_DEFS[key];
   bossName=D.name+'-'+String(L).padStart(2,'0');
-  const hp=Math.round(hpForLevel(maxLvlOf(L))*(4+L*1.2)*D.hpM); /* v4.9: factor compensado al nuevo nivel base ~100 */
+  /* v4.33: los jefes piden más en SOLO/NORMAL/DIFÍCIL (vida ×1.55) — HARDCORE/FRENÉTICO intactos */
+  const hp=Math.round(hpForLevel(maxLvlOf(L))*(4+L*1.2)*D.hpM*bossDiffMul()); /* v4.9: factor compensado al nuevo nivel base ~100 · v4.33: bossDiffMul */
   boss={x:W/2,y:-90,ty:Math.max(110,H*.16),hp,maxhp:hp,r:D.r,t:0,ph:1,rot:0,flash:0,
     kind:key,D,burn:null,
     /* v4.14: FASES 3–5 — base 3 fases; 4ª desde oleada 30; 5ª desde oleada 60
@@ -78,7 +79,7 @@ function fanAtk(b){
   const span=1.5;
   for(let i=0;i<n;i++){
     const a=Math.PI/2-span/2+span*i/(n-1);
-    ebullets.push({x:b.x,y:b.y+20,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:b.D.color,dead:false});
+    ebullets.push({x:b.x,y:b.y+20,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:b.D.color,dead:false,bz:1});
   }
   tone(400,150,.12,'square',.04);
 }
@@ -133,7 +134,7 @@ function updBoss(dt){
         if(d<b.r+6)continue;
         const ad=Math.atan2(pdy,pdx);
         const dd=Math.abs(Math.atan2(Math.sin(ad-L.a),Math.cos(ad-L.a)));
-        if(dd<(easy?0.065:0.09))hitPlayer(pl,1);
+        if(dd<(easy?0.065:0.09))hitPlayer(pl,bossBulDmg());
       }
     }
     b.fanT-=dt;
@@ -144,7 +145,7 @@ function updBoss(dt){
       const span=1.5;
       for(let i=0;i<n;i++){
         const a=Math.PI/2-span/2+span*i/(n-1);
-        ebullets.push({x:b.x,y:b.y+20,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:b.D.color,dead:false});
+        ebullets.push({x:b.x,y:b.y+20,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:b.D.color,dead:false,bz:1});
       }
       tone(400,150,.12,'square',.04);
     }
@@ -171,7 +172,7 @@ function updBoss(dt){
       b.aimT=(b.ph===2?2.4:3.4)*pM;
       const pl=nearestPlayer(b.x,b.y);
       const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(250,(150+run.level*3))*players[0].slow;
-      for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.14)*sp,vy:Math.sin(a+i*.14)*sp,r:5,color:'#64C7FF',dead:false});
+      for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.14)*sp,vy:Math.sin(a+i*.14)*sp,r:5,color:'#64C7FF',dead:false,bz:1});
     }
   }
   if(K==='OCTAHEDRO'||isSenor){
@@ -188,7 +189,7 @@ function updBoss(dt){
         b.swT2=0;
         const sp=Math.min(200,(100+run.level*2))*players[0].slow;
         for(const off of [0,Math.PI]){
-          ebullets.push({x:b.x,y:b.y,vx:Math.cos(b.swA+off)*sp,vy:Math.sin(b.swA+off)*sp,r:5,color:'#FF7EB6',dead:false});
+          ebullets.push({x:b.x,y:b.y,vx:Math.cos(b.swA+off)*sp,vy:Math.sin(b.swA+off)*sp,r:5,color:'#FF7EB6',dead:false,bz:1});
         }
       }
     }
@@ -254,7 +255,7 @@ function updBoss(dt){
       b.aimT=(b.ph===2?2.0:2.8)*pM;
       const pl=nearestPlayer(b.x,b.y);
       const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(250,(150+run.level*3))*players[0].slow;
-      ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF6B6B',dead:false});
+      ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF6B6B',dead:false,bz:1});
     }
   }
   if(K==='TESIS'||isSenor){
@@ -279,7 +280,7 @@ function updBoss(dt){
           for(let i=0;i<n;i++){
             const a=a0+(i-n/2)*.09;
             const sp=Math.min(260,(140+run.level*3))*players[0].slow;
-            ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false});
+            ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false,bz:1});
           }
           tone(600,200,.3,'sawtooth',.05);
         }
@@ -291,7 +292,7 @@ function updBoss(dt){
     b.ringT-=dt;if(b.ringT<=0){b.ringT=(b.ph===2?3.0:4.2)*pM;
       const n=10+Math.min(6,Math.floor(run.level/4)),sp=100*players[0].slow;
       for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
-        ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false});}}
+        ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF9F43',dead:false,bz:1});}}
   }
   if(!(K==='MONOLITO'||K==='AXIOMA'||K==='OCTAHEDRO'||K==='VERTICE'||K==='CUATERNIO'||K==='LEMNISCATA'||K==='TESIS'||K==='HECHICERO'||isSenor)){
     b.fanT-=dt;if(b.fanT<=0){b.fanT=(b.ph===2?1.7:2.5)*pM;fanAtk(b);}
@@ -302,7 +303,7 @@ function updBoss(dt){
       b.aimT=(b.ph===2?2.6:3.2)*pM;
       const pl=nearestPlayer(b.x,b.y);
       const a=Math.atan2(pl.y-b.y,pl.x-b.x),sp=Math.min(240,(140+run.level*3))*players[0].slow;
-      for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.15)*sp,vy:Math.sin(a+i*.15)*sp,r:5,color:'#B388FF',dead:false});
+      for(let i=-1;i<=1;i++)ebullets.push({x:b.x,y:b.y,vx:Math.cos(a+i*.15)*sp,vy:Math.sin(a+i*.15)*sp,r:5,color:'#B388FF',dead:false,bz:1});
       tone(520,260,.1,'sine',.04);
     }
     /* anillo de runas lento */
@@ -310,7 +311,7 @@ function updBoss(dt){
       b.ringT=(b.ph===2?3.4:4.4)*pM;
       const n=8+Math.min(6,Math.floor(run.level/5)),sp=95*players[0].slow;
       for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
-        ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#B388FF',dead:false});}
+        ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#B388FF',dead:false,bz:1});}
       tone(300,180,.2,'sine',.045);
     }
     /* PULSO ARCANO DEL JEFE: cura hasta N aliados heridos (radio 210).
@@ -388,7 +389,7 @@ function updBoss(dt){
         b.sprT2=.13;
         const sp=Math.min(215,(95+run.level*2))*players[0].slow;
         for(const off of [0,Math.PI])
-          ebullets.push({x:b.x,y:b.y,vx:Math.cos(b.sprA+off)*sp,vy:Math.sin(b.sprA+off)*sp,r:5,color:'#FF4757',dead:false});
+          ebullets.push({x:b.x,y:b.y,vx:Math.cos(b.sprA+off)*sp,vy:Math.sin(b.sprA+off)*sp,r:5,color:'#FF4757',dead:false,bz:1});
       }
     }
     if(b.ph>=4){ /* FASE 4: invoca refuerzos */
@@ -415,7 +416,7 @@ function updBoss(dt){
         b.ring5T=2.6;
         const n=12,sp=150*players[0].slow;
         for(let i=0;i<n;i++){const a=TAU*i/n+b.rot;
-          ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF4757',dead:false});}
+          ebullets.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:'#FF4757',dead:false,bz:1});}
         tone(300,120,.25,'sawtooth',.05);
       }
     }
@@ -463,11 +464,30 @@ function updEBullets(dt){
       }
     }
     if(consumed)continue;
+    /* v4.33: los DRONES interceptan balas (se consumen y salen dañados);
+       solo se simula donde vive el dueño — como el resto de la partida */
+    for(const pl of players){
+      if(pl.hp<=0||!pl.drones)continue;
+      const dkey=''+pl.slot,dpos=dronePos[dkey];
+      if(!dpos)continue;
+      for(let di=0;di<pl.drones&&di<dpos.length;di++){
+        if(droneDead[dkey]&&droneDead[dkey][di])continue;
+        const dp=dpos[di];if(!dp)continue;
+        if(Math.hypot(b.x-dp.x,b.y-dp.y)<b.r+9){
+          b.dead=true;burst(dp.x,dp.y,'#FFD166',3,70);
+          damageDrone(pl,di,1);consumed=true;break;
+        }
+      }
+      if(consumed)break;
+    }
+    if(consumed)continue;
     for(const pl of players){
       if(pl.hp<=0)continue;
       if(Math.hypot(b.x-pl.x,b.y-pl.y)<b.r+9){b.dead=true;
         if(b.pir){burst(b.x,b.y,'#FF7EB6',18,180);floater(pl.x,pl.y-30,'¡MISIL!','#FF7EB6',14);}
-        hitPlayer(pl,b.pir?2:1);break;}
+        /* v4.33: las balas de JEFE (bz) pegan 2 en solo/normal/difícil y las de la
+           ZONA GRAVITATORIA-DAÑO pegan el doble; el resto queda en 1 */
+        hitPlayer(pl,b.pir?2:(b.bz?bossBulDmg():(zoneGravDmg()?2:1)));break;}
     }
   }
   ebullets=ebullets.filter(b=>!b.dead);
@@ -692,6 +712,7 @@ function updEnemies(dt){
     }
     let sk=1;
     if(players.some(pl=>pl.slowField&&pl.hp>0&&Math.hypot(e.x-pl.x,e.y-pl.y)<140))sk=.65;
+    const zk=zoneSpdMul(); /* v4.33: ZONA GRAVITATORIA-VEL/DISTORSIÓN — también se mueven más rápido */
     if(e.state==='kam'){
       const pl=nearestPlayer(e.x,e.y);
       e.kamT+=dt;e.kamV+=dt*260;
@@ -728,7 +749,7 @@ function updEnemies(dt){
       passive(e,dt);
     }else if(e.state==='roam'){
       e.rt-=dt;
-      const spd=(34+run.level*1.2)*e.T.spd*sk;
+      const spd=(34+run.level*1.2)*e.T.spd*sk*zk;
       const dx=e.tx-e.x,dy=e.ty-e.y,d=Math.hypot(dx,dy)||1;
       if(d<12||e.rt<=0)pickRoamTarget(e);
       else{e.x+=dx/d*spd*dt;e.y+=dy/d*spd*dt;}
@@ -754,7 +775,7 @@ function updEnemies(dt){
       if(e.diveT<=0&&divers<maxDivers&&!e.elite&&!e.T.kami&&!e.camp&&!e.T.mage){startDive(e);divers++;}
       passive(e,dt);
     }else if(e.state==='dive'){
-      e.ds+=dt*e.diveSpd*sk;
+      e.ds+=dt*e.diveSpd*sk*zk;
       const k=clamp(e.ds,0,1);
       const p=qbez(e.sx,e.sy,e.cx,e.cy,e.tx,e.ty,k);
       e.x=p.x+(e.tk==='dash'?Math.sin(k*14+e.wob)*26:0);
@@ -768,7 +789,7 @@ function updEnemies(dt){
         e.diveT=rand(5,10);
       }
     }else if(e.state==='drift'){
-      e.y+=e.dvy*dt*sk;
+      e.y+=e.dvy*dt*sk*zk;
       e.x+=Math.sin(time*1.6+e.wob)*46*dt;
       if(e.x<14)e.x=14;if(e.x>W-14)e.x=W-14;
       if(e.y>H+34){e.y=-30;e.x=rand(26,W-26);}
@@ -805,7 +826,7 @@ function eShoot(e,n){
   n=n||1;
   const pl=nearestPlayer(e.x,e.y);
   const base=Math.atan2(pl.y-e.y,pl.x-e.x);
-  const sp=Math.min(240,(110+run.level*3))*players[0].slow;
+  const sp=eSpd(Math.min(240,(110+run.level*3))*players[0].slow); /* v4.33: zonas de guerra */
   for(let i=0;i<n;i++){
     const a=base+(i-(n-1)/2)*.22;
     ebullets.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:e.T.color,dead:false});
@@ -865,26 +886,56 @@ function bossRevive(b){
   }
   if(n){floater(b.x,b.y-b.r-16,'¡RESUCITA!','#B388FF',13);tone(240,540,.3,'sine',.05);}
 }
-function updCollisions(){
+function updCollisions(dt){
+  /* v4.33: CHOQUE DE CASCO REHECHO — el piloto reportó que la nave siega
+     enemigos a veces SIN recibir daño (el killEnemy corría aunque los
+     i-frames anularan el hitPlayer). Ahora: ① el choque SIEMPRE cuesta
+     (daño de contacto con reloj propio de 0,5 s que ignora i-frames de
+     arma — escudos/reserva/fénix siguen protegiendo); ② el enemigo ya no
+     muere gratis: recibe un golpe de ARIETE (daño ×1.5) y solo cae si
+     esa herida lo mata; ③ los kamikazes siguen estallando igual. */
   for(const e of enemies){
     if(e.dead)continue;
     for(const pl of players){
       if(pl.hp<=0)continue;
       if(Math.hypot(e.x-pl.x,e.y-pl.y)<e.r+10){
-        if(e.T.kami)kamiExplode(e,true);
-        else killEnemy(e,pl.slot);
-        hitPlayer(pl,1);break;
+        if(e.T.kami){kamiExplode(e,true);continue;}
+        if((pl.contactCd||0)<=0){
+          pl.contactCd=.5;
+          hitPlayer(pl,zoneGravDmg()?2:1,true);
+          damageEnemy(e,Math.max(2,Math.round(pl.dmg*1.5)),false,pl.slot);
+        }
+      }
+    }
+  }
+  /* v4.33: los enemigos que rozan un DRON lo golpean (2/s) */
+  for(const e of enemies){
+    if(e.dead)continue;
+    for(const pl of players){
+      if(pl.hp<=0||!pl.drones)continue;
+      const dkey=''+pl.slot,dpos=dronePos[dkey];
+      if(!dpos)continue;
+      for(let di=0;di<pl.drones&&di<dpos.length;di++){
+        if(droneDead[dkey]&&droneDead[dkey][di])continue;
+        const dp=dpos[di];if(!dp)continue;
+        if(Math.hypot(e.x-dp.x,e.y-dp.y)<e.r+8)damageDrone(pl,di,2*dt);
       }
     }
   }
   if(boss)for(const pl of players){
     if(pl.hp<=0)continue;
-    if(Math.hypot(boss.x-pl.x,boss.y-pl.y)<boss.r+10)hitPlayer(pl,2);
+    /* v4.33: embestir al GUARDIÁN duele más (3 en solo/normal/difícil) y
+       usa el reloj de contacto propio (antes vivía de los i-frames) */
+    if(Math.hypot(boss.x-pl.x,boss.y-pl.y)<boss.r+10&&(pl.contactCd||0)<=0){
+      pl.contactCd=.6;hitPlayer(pl,bossContactDmg(),true);
+    }
   }
   /* v4.31: embestir el casco del pirata duele (2) — el imán te puede arrastrar hacia él */
   if(pirate)for(const pl of players){
     if(pl.hp<=0)continue;
-    if(Math.hypot(pirate.x-pl.x,pirate.y-pl.y)<pirate.r+10)hitPlayer(pl,2);
+    if(Math.hypot(pirate.x-pl.x,pirate.y-pl.y)<pirate.r+10&&(pl.contactCd||0)<=0){
+      pl.contactCd=.6;hitPlayer(pl,2,true);
+    }
   }
 }
 function updPickups(dt){

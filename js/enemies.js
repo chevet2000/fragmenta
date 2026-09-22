@@ -3,7 +3,8 @@
 function spawnEnemy(tk,elvl,o){
   o=o||{};
   const T=TYPES[tk];
-  const hp=Math.max(1,Math.round(hpForLevel(elvl)*T.mult));
+  /* v4.33: en la ZONA GRAVITATORIA-DEFENSA los enemigos nacen con +35% de vida */
+  const hp=Math.max(1,Math.round(hpForLevel(elvl)*T.mult*zoneEnemyHpMul()));
   const e={id:eid++,tk,T,elvl,hp,maxhp:hp,x:0,y:0,
     r:clamp(10+Math.sqrt(elvl)*3.0,12,30)*(tk==='hive'?1.18:1)*(tk==='kami'?0.8:1),
     state:'enter',after:o.after||'form',t:0,delay:o.delay||0,flash:0,wob:rand(0,TAU),
@@ -97,7 +98,7 @@ function camperAI(e,dt){
     if(e.camp==='CENTINELA'){
       e.campT=2.6;
       const a0=rand(0,TAU);
-      const sp=Math.min(210,(110+run.level*2))*players[0].slow;
+      const sp=eSpd(Math.min(210,(110+run.level*2))*players[0].slow); /* v4.33: zonas */
       for(let i=0;i<7;i++){
         const a=a0+i*TAU/7;
         ebullets.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,r:5,color:e.CD.color,dead:false});
@@ -119,7 +120,7 @@ function camperAI(e,dt){
       }
       if(pl){
         const a=Math.atan2(pl.y-e.y,pl.x-e.x);
-        const sp=Math.min(220,(120+run.level*2))*players[0].slow;
+        const sp=eSpd(Math.min(220,(120+run.level*2))*players[0].slow); /* v4.33: zonas */
         for(let i=-1;i<=1;i++)
           ebullets.push({x:e.x,y:e.y,vx:Math.cos(a+i*.16)*sp,vy:Math.sin(a+i*.16)*sp,r:5,color:'#FF7EB6',dead:false});
       }
