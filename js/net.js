@@ -417,7 +417,7 @@ function clientOnData(d){
   if(d.t==='rankq'){ sendMsg({t:'rank',list:(save.ranking||[]).slice(-60),name:getPilot()}); return; } /* v4.27: el anfitrión pide el nuestro */
   if(d.t==='start'){ runDiff=d.diff||runDiff; if(d.skin)net.remoteSkin[0]=d.skin; startRunClient(d); return; }
   if(d.t==='snap'){ applySnap(d); return; }
-  if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; return; }
+  if(d.t==='bn'){ bannerTxt=d.a;bannerSub=d.b||'';bannerT=BANNER_LIFE; crewBannerMsg(d.a); return; } /* v4.30: la tripulación del cliente también habla */
   if(d.t==='fxr'){ rings.push({x:d.x,y:d.y,r:10,R:d.R,t:0,life:.45,color:d.c}); return; }
   if(d.t==='fxb'){ beams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.18}); return; }
   if(d.t==='fxu'){ ultBeams.push({x1:d.x1,y1:d.y1,x2:d.x2,y2:d.y2,t:0,life:.55}); return; } /* v4.13: rayo del Aniquilador */
@@ -474,8 +474,8 @@ function clientEvent(d){
   if(k==='rvGo'){ clientRevanchaGo(); return; } /* v4.28: todos votaron revancha */
   if(k==='energy'){ /* v4.29: el anfitrión dice que TU nave recogió bidón/celda */
     const pl=players[localSlot];if(!pl)return;
-    if(d.e==='fuel')pl.fuel=Math.min(pl.fuelMax||100,(pl.fuel||0)+14);
-    else pl.en=Math.min(pl.enMax||100,(pl.en||0)+22);
+    if(d.e==='fuel'){pl.fuel=Math.min(pl.fuelMax||100,(pl.fuel||0)+14);crewSay('fuelUp');} /* v4.30 */
+    else{pl.en=Math.min(pl.enMax||100,(pl.en||0)+22);crewSay('elecUp');} /* v4.30 */
     return;
   }
   if(k==='over'){
@@ -519,6 +519,9 @@ function applySnap(d){
     if(i!==localSlot){ pl.x=lerp(pl.x,pd[0],.45); pl.y=lerp(pl.y,pd[1],.45); }
   });
   run.shipLv=d.sv; run.exp=d.se; run.level=d.wl;
+  /* v4.30: la tripulación del cliente celebra la subida de nivel de nave */
+  if(crewShipLast!=null&&d.sv>crewShipLast)crewSay('shipUp',{n:d.sv});
+  crewShipLast=d.sv;
   const seen=new Set();
   for(const ed of d.en){
     const id=ed[0];seen.add(id);
@@ -557,6 +560,8 @@ function applySnap(d){
     shield:(p[0]===5||p[0]===6)?(p[3]||0):0,shieldMax:(p[0]===5||p[0]===6)?(p[4]||0):0,
     rar:p[0]===7?(RARS[p[3]]||'c'):undefined}));
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));
+  if(cWrecks.length>crewSnapWrecks)crewSay('down'); /* v4.30: pecio nuevo = médico grita */
+  crewSnapWrecks=cWrecks.length;
   cNovaCd=d.nc;
 }
 

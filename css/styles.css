@@ -576,3 +576,13 @@ button{font-family:inherit}
 .eg.low .egt i{background:var(--coral)}
 .eg.dead .egi{opacity:.4}
 @keyframes egblink{50%{opacity:.45}}
+/* v4.30: LA TRIPULACIÓN — globos de radio de la nave (izquierda, sobre el HUD inferior) */
+#crewBox{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:4;
+  display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:min(76vw,340px)}
+.crew-msg{background:rgba(10,14,20,.92);border:1px solid var(--line);border-left:3px solid var(--amber);
+  border-radius:9px;padding:7px 11px 8px;box-shadow:0 4px 14px rgba(0,0,0,.45);
+  animation:crewIn .18s ease-out both}
+.crew-msg b{display:block;font-size:8px;letter-spacing:.18em;font-family:'Chakra Petch',sans-serif;margin-bottom:2px}
+.crew-msg span{display:block;font-size:11.5px;line-height:1.35;color:#E8E4D8;font-weight:500}
+.crew-msg.out{opacity:0;transform:translateX(-10px);transition:opacity .22s ease,transform .22s ease}
+@keyframes crewIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}

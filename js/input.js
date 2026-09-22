@@ -356,6 +356,7 @@ function updSoundBtns(){
   $('#btnSound').textContent='SONIDO: '+(muted?'NO':'SÍ');
   $('#btnPSound').textContent='SONIDO: '+(muted?'NO':'SÍ');
   $('#btnPMus').textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
+  crewLbls(); /* v4.30: etiqueta TRIPULACIÓN sincronizada al abrir pausa/ajustes */
   const sm=$('#btnSMus');if(sm)sm.textContent='MÚSICA: '+(save.mus?'SÍ':'NO');
 }
 document.addEventListener('visibilitychange',()=>{

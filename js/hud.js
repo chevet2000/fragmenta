@@ -6,6 +6,15 @@ function refreshHUD(){
   const fmtHp=v=>Number.isInteger(v)?String(v):v.toFixed(1);
   $('#hpTxt').textContent=players.map(p=>(players.length>1?'P'+(p.slot+1)+' ':'')+fmtHp(p.hp)+'/'+p.maxHp).join(' · ');
   const myP=players[localSlot]||players[0];
+  /* v4.30: LA TRIPULACIÓN — el médico reacciona a CUALQUIER golpe recibido
+     (vale para anfitrión, cliente y solitario: mira TU vida, no el sim) */
+  if(runActive&&state==='play'){
+    if(crewHpLast!=null&&myP.hp<crewHpLast-.5){
+      crewSay('atk');
+      if(myP.hp<=myP.maxHp*.3)crewSay('lowhp');
+    }
+    crewHpLast=myP.hp;
+  }else crewHpLast=null;
   const tbn=(run.tempBuffs&&run.tempBuffs.length)?' · ✦'+run.tempBuffs.length:'';
   $('#dmgTxt').textContent='DAÑO '+myP.dmg+(weeklyMode?' · SEM':'')+tbn;
   const tn=wave.types&&wave.types.length>1?'MIXTA':'';

@@ -36,6 +36,7 @@ const SFX={
   rescue(){tone(300,700,.2,'sine',.06);tone(500,1100,.25,'sine',.05,.12)},
   emo(){tone(880,1500,.14,'sine',.06)},
   call(){tone(660,440,.18,'square',.06)},
+  crew(){tone(1150,1500,.06,'square',.028);tone(1500,1150,.06,'square',.022,.09)}, /* v4.30: blip de radio de la tripulación */
   chest(){tone(400,800,.2,'square',.06);tone(800,1600,.25,'square',.05,.15)},
   laser(){tone(1400,200,.4,'sawtooth',.05)},
   warp(){tone(200,1200,.3,'sine',.05)},

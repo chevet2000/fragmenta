@@ -49,7 +49,7 @@ async function checkUpdate(manual){
    saltándose la caché. Si tras recargar sigue roto, avisa sin buclear. */
 function integrityCheck(){
   try{
-    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList','btnBuyAll','vgKeys','vgEcho','lobbyQr','btnScan','scanBox','scrDeploy','depList','depSup','btnDeployGo','btnDeploySkip','btnRevancha','rvStat','fuelGauge','elecGauge','fuelFill','elecFill','mercSup']; /* v4.29: +despliegue, revancha y energía */
+    const need=['btnWipe','buffBar','curseBar','btnCheckUpd','comboGlow','ovHook','allyTag','btnBoveda','npcMerc','scrMerc','mercList','btnBuyAll','vgKeys','vgEcho','lobbyQr','btnScan','scanBox','scrDeploy','depList','depSup','btnDeployGo','btnDeploySkip','btnRevancha','rvStat','fuelGauge','elecGauge','fuelFill','elecFill','mercSup','crewBox','btnCrew','btnPCrew']; /* v4.30: +tripulación */
     const dv=document.documentElement.getAttribute('data-v');
     const ok=need.every(id=>!!document.getElementById(id))&&dv===String(VERSION);
     if(ok)return true;

@@ -174,17 +174,32 @@ function openShop(from){
   showScr('shop');
 }
 
-/* ============ zoom del arsenal ============ */
-const TREE_W=1620, TREE_H=1420; /* v4.29: +100 px por la rama ENERGÍA */
+/* ============ zoom del arsenal ============
+   v4.30: ENCUADRE AUTOMÁTICO — el viewBox se calcula desde la posición
+   REAL de los nodos (incluye FUSIÓN y subs), así las ramas nuevas ya no
+   se recortan (pasó con ESTABILIDAD y ENERGÍA: el viewBox estaba clavado
+   en 1330 y las ramas 16-17 quedaban fuera) y el árbol queda CENTRADO. */
+const TREE_H=1420;
+const TREE_B=(function(){
+  let mn=1e9,mx=-1e9,my=0;
+  for(const nd of TREE){
+    if(nd.x==null)continue;
+    if(nd.x<mn)mn=nd.x;
+    if(nd.x>mx)mx=nd.x;
+    if(nd.y&&nd.y>my)my=nd.y;
+  }
+  return{x0:Math.max(0,mn-32),x1:mx+32,y1:Math.max(900,my+50)};
+})();
 let treeZoom=1;
 function applyZoom(){
   const svg=$('#treeSvg');if(!svg)return;
-  svg.style.width=Math.round(TREE_W*treeZoom)+'px';
-  svg.style.height=Math.round(TREE_H*treeZoom)+'px';
+  svg.setAttribute('viewBox',TREE_B.x0+' 0 '+(TREE_B.x1-TREE_B.x0)+' '+TREE_B.y1);
+  svg.style.width=Math.round((TREE_B.x1-TREE_B.x0)*treeZoom)+'px';
+  svg.style.height=Math.round(TREE_B.y1*treeZoom)+'px';
   const pct=$('#zPct');if(pct)pct.textContent=Math.round(treeZoom*100)+'%';
 }
 function setZoom(z){treeZoom=clamp(Math.round(z*20)/20,.3,2.4);applyZoom();}
-function fitZoom(){setZoom(clamp((window.innerWidth-24)/TREE_W,.3,1));
+function fitZoom(){setZoom(clamp((window.innerWidth-24)/(TREE_B.x1-TREE_B.x0),.3,1));
   const svg=$('#treeSvg');if(svg&&svg.parentElement)svg.parentElement.scrollLeft=0;}
 bindEl('#zIn', 'click',()=>setZoom(treeZoom+.15));
 bindEl('#zOut', 'click',()=>setZoom(treeZoom-.15));

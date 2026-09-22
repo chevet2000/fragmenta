@@ -77,6 +77,7 @@ function openLucky(slot,rar,remote){
 function openChest(slot,kind){
   kind=kind||'boss';
   save.totChest=(save.totChest||0)+1;
+  if(state==='play')crewSay('chest'); /* v4.30: se dice antes de abrir pantalla */
   checkAch();persist();
   SFX.chest();
   /* v4.8: cofre blindado = UNA recompensa al azar, sin elección de 3 */

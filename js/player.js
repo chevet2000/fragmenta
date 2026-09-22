@@ -63,6 +63,7 @@ function hitPlayer(pl,d){
     }else{
       wrecks.push({slot:pl.slot,x:pl.x,y:pl.y,prog:0});
       floater(pl.x,pl.y-20,'NAVE CAÍDA · RESCÁTALA','#FF6B6B',12);
+      crewSay('down'); /* v4.30: el médico grita */
     }
   }
 }
@@ -134,17 +135,23 @@ function updEnergy(pl,dt){
         run.supFuel--;
         pl.fuel=pl.fuelMax*.6;
         banner('RESERVA DE COMBUSTIBLE','El pirata te salva: tanque al 60%');
+        crewSay('reservaF'); /* v4.30 */
         SFX.relic();vib(60);
       }else{
         pl.emergT=5;
         if(!run.noFuelWarned){run.noFuelWarned=true;
-          banner('SIN COMBUSTIBLE','5 s de propulsores de emergencia · luego al 20% · recoge bidones verdes');}
+          banner('SIN COMBUSTIBLE','5 s de propulsores de emergencia · luego al 20% · recoge bidones verdes');
+          crewSay('fuelOut'); /* v4.30 */}
         SFX.hurt();vib(90,true);
       }
     }
   }
   if(pl.fuel<=0&&pl.emergT>0)pl.emergT-=dt;
   if(pl.fuel>0)pl.emergT=0;
+  /* v4.30: la tripulación avisa con el tanque bajo (una vez por incursión) */
+  const fMax=pl.fuelMax||100;
+  if(pl.fuel>0&&pl.fuel<=fMax*.25&&!run.crewF25){run.crewF25=true;crewSay('fuelLow');}
+  if(pl.fuel>fMax*.6)run.crewF25=false;
   /* ELECTRICIDAD — el reactor regenera; drones y escudo consumen;
      el disparo consume en shoot() por bala */
   const regen=pl.enRegen*(run.supGen?1.6:1);
@@ -157,9 +164,14 @@ function updEnergy(pl,dt){
   else if(pl.noElec&&pl.en>=20)pl.noElec=false;
   if(pl.noElec&&!was){
     if(!run.noElecWarned){run.noElecWarned=true;
-      banner('APAGÓN ELÉCTRICO','Daño x0.5 y drones apagados hasta recuperar 20 de carga');}
+      banner('APAGÓN ELÉCTRICO','Daño x0.5 y drones apagados hasta recuperar 20 de carga');
+      crewSay('blackout'); /* v4.30 */}
     SFX.hurt();vib(80,true);
-  }
+  }else if(!pl.noElec&&was)crewSay('enBack'); /* v4.30: vuelve la luz */
+  /* v4.30: aviso de reactor débil (una vez por incursión) */
+  const eMax=pl.enMax||100;
+  if(!pl.noElec&&pl.en>0&&pl.en<=eMax*.2&&!run.crewE20){run.crewE20=true;crewSay('enLow');}
+  if(pl.en>eMax*.6)run.crewE20=false;
 }
 /* ============ updates de jugador ============ */
 function updPlayer(pl,dt){
@@ -487,6 +499,7 @@ function updWrecks(dt){
           hostRing(w.x,w.y,90,'#7FD1B9');
           SFX.rescue();
           vib(60,true);
+          crewSay('resc'); /* v4.30 */
           save.totRescue=(save.totRescue||0)+1;
           checkAch();
           w.remove=true;

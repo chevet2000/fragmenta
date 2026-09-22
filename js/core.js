@@ -87,6 +87,7 @@ function recompute(){
 /* ============ efectos ============ */
 function banner(t,s){
   bannerTxt=t;bannerSub=s||'';bannerT=BANNER_LIFE;
+  crewBannerMsg(t); /* v4.30: los banners grandes sacan palabras a la tripulación */
   if(net.mode==='host')sendMsg({t:'bn',a:t,b:s||''});
 }
 function floater(x,y,txt,color,size){
@@ -131,6 +132,7 @@ function gainExp(n){
   let need=shipNeed(run.shipLv);
   while(run.exp>=need){
     run.exp-=need;run.shipLv++;
+    crewSay('shipUp',{n:run.shipLv}); /* v4.30 */
     save.bestShip=Math.max(save.bestShip,run.shipLv);
     /* v4.8: máximo 5 niveles en espera — el excedente se convierte en oro
        (evita cadenas infinitas de elección de cartas en oleadas altas) */

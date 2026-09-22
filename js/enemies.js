@@ -21,7 +21,7 @@ function spawnEnemy(tk,elvl,o){
     revT:0,revived:false};
   /* v4.16: el MAGO tarda un poco en dar su primera invocación (respiro inicial) */
   if(tk==='mago')e.sumT=rand(4,7);
-  if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;}
+  if(e.elite){e.hp=e.maxhp=Math.round(hp*3.2);e.r=Math.min(38,e.r*1.38);e.sumT=4;crewSay('elite');} /* v4.30 */
   /* v4.10: presupuesto de oro = el mismo total que daba antes al morir,
      pero ahora se reparte: 4 tramos del 12,5% durante la pelea + resto al morir */
   const gPieces=(1+(elvl>=106?1:0)+(elvl>=114?1:0))+(T.magnet?1:0);

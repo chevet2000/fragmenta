@@ -482,6 +482,7 @@ function deployLaunch(){
   const f=deployThen;deployThen=null;
   $('#depList').innerHTML='';
   if(f)f();
+  crewSay('launch'); /* v4.30: la tripulación saluda al despegar */
 }
 function openDeploy(){
   const groups=[];

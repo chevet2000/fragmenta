@@ -78,6 +78,8 @@ function killEnemy(e,bySlot){
   dropLoot(e);
   if(e.tk==='hive')hiveBurst(e);
   doSplit(e);
+  /* v4.30: el artillero canta victoria cuando el sector queda casi limpio */
+  if(state==='play'&&!boss&&waveState==='play'&&wave.total>=5&&enemies.filter(q=>!q.dead).length<=2)crewSay('few');
   /* v4.8: XP según el nivel máximo de la oleada (1-5 por baja) */
   /* v4.12: COMBOS — cada baja en menos de 3 s mantiene la racha.
      Hitos 10/25/50/100 pagan oro (y gemas a partir de ×50). */
@@ -303,6 +305,7 @@ function spawnMeteor(){
     m.vx=rand(-85,85);m.vy=rand(115,175);
   }
   meteors.push(m);
+  crewSay(pur?'meteorP':'meteor'); /* v4.30 */
   if(pur){tone(900,120,.7,'sawtooth',.035);tone(240,700,.5,'sine',.03,.15);}
   else SFX.meteor();
   if(!meteorWarned){meteorWarned=true;
@@ -398,6 +401,7 @@ function spawnCube(){
   const sh=Math.max(22,Math.round(hpForLevel(maxLvlOf(run.level))*.9));
   const cx=clamp(W/2+rand(-W*.32,W*.32),50,W-50);
   pickups.push({t:'cube',x:cx,y:-40,vx:rand(-12,12),vy:rand(8,16),shield:sh,shieldMax:sh});
+  crewSay('cube'); /* v4.30 */
   floater(cx,110,'CUBO SORPRESA','#FF7EB6',13);
   tone(340,720,.25,'square',.05);tone(720,480,.2,'square',.035,.14);
   if(!save.seenCube){save.seenCube=1;
@@ -413,6 +417,7 @@ function resolveCube(p){
   if(Math.random()<.45){ /* 45%: NAVE AMIGA · 60 s con el doble de tu daño */
     const pl=players[0]||P;
     allies.push({x:pl?pl.x:W/2,y:pl?pl.y-60:H*.7,cd:.5,life:60,ph:rand(0,TAU)});
+    crewSay('ally'); /* v4.30 */
     updAllies.warn=false; /* rearma el aviso de retirada */
     save.totAlly=(save.totAlly||0)+1;
     floater(p.x,p.y-40,'¡NAVE AMIGA! 60 s','#FFE9B0',15);
@@ -445,6 +450,7 @@ function spawnPortal(){
   portals.push({x:side<0?-36:W+36,y:rand(H*.22,H*.5),vx:side*rand(52,86),vy:0,
     r:26,hp:6,maxhp:6,rot:rand(0,TAU),t:0,dead:false});
   tone(120,900,.6,'sine',.05);tone(900,240,.45,'sine',.04,.25);
+  crewSay('portal'); /* v4.30 */
   if(!portalWarned){portalWarned=true;
     banner('◈ ALGO SE ACERCA','Un portal desconocido cruza el sector…');
   }else banner('◈ PORTAL MISTERIOSO','Revéntalo y abre la DIMENSIÓN ANÓMALA');
