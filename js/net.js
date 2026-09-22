@@ -467,6 +467,10 @@ function clientEvent(d){
     return;
   }
   if(k==='temp'){ run.tempBuffs=d.l||[]; return; }
+  if(k==='pirSeal'){ /* v4.31: la MALDICIÓN PIRATA viaja al cliente */
+    run.pirSeal=d.a||null;recompute();
+    return;
+  }
   if(k==='curs'){ applyCurses(d.l); return; } /* v4.17: maldiciones del HECHICERO */
   if(k==='chestw'){ banner('COFRE','El anfitrión está abriendo…'); return; }
   if(k==='chestgot'){ banner('COFRE ABIERTO',d.m); return; }
@@ -562,6 +566,15 @@ function applySnap(d){
   cWrecks=(d.wk||[]).map(w=>({slot:w[0],x:w[1],y:w[2],prog:w[3]/100}));
   if(cWrecks.length>crewSnapWrecks)crewSay('down'); /* v4.30: pecio nuevo = médico grita */
   crewSnapWrecks=cWrecks.length;
+  /* v4.31: ☠ EL PIRATA GALÁCTICO — espejo ligero del anfitrión para pintar */
+  if(d.pi){
+    if(!cPirate)cPirate={x:d.pi[0],y:d.pi[1],flash:0};
+    cPirate.x=lerp(cPirate.x,d.pi[0],.45);cPirate.y=lerp(cPirate.y,d.pi[1],.45);
+    cPirate.rings=d.pi[2];cPirate.pct=d.pi[3];
+    cPirate.lootG=d.pi[4];cPirate.lootM=d.pi[5];
+    cPirate.las=d.pi[6]>=0?{a:d.pi[6]/100,ph:d.pi[7]}:null;
+    cPirate.dir=d.pi[8]||1;
+  }else cPirate=null;
   cNovaCd=d.nc;
 }
 

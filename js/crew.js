@@ -43,7 +43,16 @@ const CREW_LINES={
   ally:{sp:'rad',prio:1,cd:5,tx:['Nave amiga en formación, capitán.']},
   down:{sp:'med',prio:3,cd:6,tx:['¡La nave del compañero ha caído! Rescátenlo, capitán.']},
   resc:{sp:'med',prio:2,cd:6,tx:['¡Compañero rescatado! Bien hecho, caporales.']},
-  shipUp:{sp:'art',prio:2,cd:4,tx:['Nave evolucionada: nivel {n}, capitán.','La nave sube a nivel {n}. ¡Menudo arsenal!']}
+  shipUp:{sp:'art',prio:2,cd:4,tx:['Nave evolucionada: nivel {n}, capitán.','La nave sube a nivel {n}. ¡Menudo arsenal!']},
+  /* v4.31: EL PIRATA GALÁCTICO — la tripulación entra en pánico */
+  pirIn:{sp:'rad',prio:3,cd:4,tx:['¡Escondan sus pertenencias, llegaron los piratas!','¡Piratas en el radar, capitán! Protejan la carga.','¡Contacto hostil… es el PIRATA GALÁCTICO!']},
+  pirSteal:{sp:'med',prio:2,cd:10,tx:['¡Nos están robando el botín, capitán!','¡Ahí va nuestro oro, directo a sus bodegas!','¡El pirata aspira la carga, capitán!']},
+  pirCurse:{sp:'ing',prio:3,cd:5,tx:['¡Maldición pirata! Un sistema fuera de línea, capitán.','¡Sabotaje! Los piratas inutilizaron un sistema.']},
+  pirDie:{sp:'art',prio:3,cd:4,tx:['¡Pirata hundido! ¡El botín es nuestro, caporales!','¡Buen tiro, capitán! Recuperamos todo… y más.']},
+  pirEsc:{sp:'nav',prio:2,cd:4,tx:['El pirata escapó con el botín, capitán…','Se fue con nuestra carga. El próximo no escapa.']},
+  pirMsl:{sp:'nav',prio:2,cd:4,tx:['¡Misil teledirigido, capitán! ¡Esquive!','¡Misil corsario entrante, maniobre, capitán!']},
+  pirLas:{sp:'nav',prio:2,cd:4,tx:['¡Cargan el láser corsario! Fuera de la línea, capitán.','¡Láser al horno, capitán! Aparte.']},
+  pirCore:{sp:'art',prio:2,cd:5,tx:['¡Aros destruidos! ¡Al núcleo, caporales!','¡Núcleo expuesto, capitán! Fuego a discreción.']}
 };
 let crewCd={},crewHpLast=null,crewShipLast=null,crewSnapWrecks=0;
 function crewEnabled(){return save.crewOn!==false;}
@@ -64,6 +73,12 @@ function crewSay(key,vars){
    'bn' de la red (clientes co-op): cada pantalla habla una vez. */
 function crewBannerMsg(t){
   if(!t||typeof t!=='string')return;
+  /* v4.31: los banners del PIRATA GALÁCTICO sacan palabra a la tripulación */
+  if(t.indexOf('¡LLEGARON LOS PIRATAS')>=0)crewSay('pirIn');
+  else if(t.indexOf('¡PIRATA HUNDIDO')>=0)crewSay('pirDie');
+  else if(t.indexOf('PIRATA ESCAPÓ')>=0)crewSay('pirEsc');
+  else if(t.indexOf('MALDICIÓN PIRATA')>=0)crewSay('pirCurse');
+  else if(t.indexOf('NÚCLEO DEL PIRATA')>=0)crewSay('pirCore');
   if(t.indexOf('GUARDIÁN')===0)crewSay('boss');
   else if(t.indexOf('OLEADA DORADA')>=0)crewSay('golden');
   else if(t.indexOf('DIMENSIÓN ANÓMALA')>=0)crewSay('anomaly');

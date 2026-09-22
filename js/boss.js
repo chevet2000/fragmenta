@@ -435,6 +435,21 @@ function updEBullets(dt){
   /* v4.8: tope de balas enemigas simultáneas (anti-lag en oleadas extremas) */
   if(ebullets.length>320)ebullets.splice(0,ebullets.length-320);
   for(const b of ebullets){
+    /* v4.31: MISIL DEL PIRATA — persigue a la nave más cercana; se esquiva
+       o lo destruyen la NOVA, la defensa de punto y el campo de viento */
+    if(b.pir){
+      b.life-=dt;
+      if(b.life<=0){b.dead=true;burst(b.x,b.y,'#FF7EB6',10,120);continue;}
+      const tgt=nearestPlayer(b.x,b.y);
+      if(tgt){
+        const cur=Math.atan2(b.vy,b.vx),des=Math.atan2(tgt.y-b.y,tgt.x-b.x);
+        let dd=des-cur;while(dd>Math.PI)dd-=TAU;while(dd<-Math.PI)dd+=TAU;
+        const na=cur+clamp(dd,-2.6*dt,2.6*dt);
+        b.vx=Math.cos(na)*175;b.vy=Math.sin(na)*175;
+      }
+      if(Math.random()<dt*22&&parts.length<260)
+        parts.push({x:b.x,y:b.y,vx:rand(-15,15),vy:rand(-15,15),rot:0,vr:0,life:.25,t:0,color:'#FF7EB6',kind:'line',size:2.4});
+    }
     b.x+=b.vx*dt;b.y+=b.vy*dt;
     if(b.x<-20||b.x>W+20||b.y<-30||b.y>H+30){b.dead=true;continue;}
     let consumed=false;
@@ -450,7 +465,9 @@ function updEBullets(dt){
     if(consumed)continue;
     for(const pl of players){
       if(pl.hp<=0)continue;
-      if(Math.hypot(b.x-pl.x,b.y-pl.y)<b.r+9){b.dead=true;hitPlayer(pl,1);break;}
+      if(Math.hypot(b.x-pl.x,b.y-pl.y)<b.r+9){b.dead=true;
+        if(b.pir){burst(b.x,b.y,'#FF7EB6',18,180);floater(pl.x,pl.y-30,'¡MISIL!','#FF7EB6',14);}
+        hitPlayer(pl,b.pir?2:1);break;}
     }
   }
   ebullets=ebullets.filter(b=>!b.dead);
@@ -536,6 +553,19 @@ function updBullets(dt){
           }
           break;
         }
+      }
+    }
+    /* v4.31: LOS 6 AROS DEL PIRATA — toda bala golpea primero el aro
+       exterior; con los 6 rotos, la bala alcanza el núcleo */
+    if(!b.dead&&pirate&&!b.hits.includes('PR')){
+      const pdx=b.x-pirate.x,pdy=b.y-pirate.y;
+      const hasRings=pirate.rings.some(r=>r.hp>0);
+      const RR=hasRings?(pirate.r+62+b.r):(pirate.r+8+b.r);
+      if(pdx*pdx+pdy*pdy<RR*RR){
+        b.hits.push('PR');
+        if(hasRings)damagePirateRing(b.dmg,b.crit,b.slot);
+        else damagePirateCore(b.dmg,b.crit,b.slot);
+        b.dead=true;
       }
     }
     if(!b.dead&&boss&&!b.hits.includes('B')){
@@ -850,6 +880,11 @@ function updCollisions(){
   if(boss)for(const pl of players){
     if(pl.hp<=0)continue;
     if(Math.hypot(boss.x-pl.x,boss.y-pl.y)<boss.r+10)hitPlayer(pl,2);
+  }
+  /* v4.31: embestir el casco del pirata duele (2) — el imán te puede arrastrar hacia él */
+  if(pirate)for(const pl of players){
+    if(pl.hp<=0)continue;
+    if(Math.hypot(pirate.x-pl.x,pirate.y-pl.y)<pirate.r+10)hitPlayer(pl,2);
   }
 }
 function updPickups(dt){

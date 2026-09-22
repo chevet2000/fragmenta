@@ -64,6 +64,8 @@ const SFX={
     tone(f,f*.995,.17,'triangle',.07);tone(f*2,f*2,.1,'sine',.02)},
   vaultOpen(){[523,659,784,1047,1319].forEach((f,i)=>tone(f,f,.16,'sine',.05,i*.07))},
   vaultEmpty(){tone(220,140,.3,'triangle',.045)},
+  /* v4.31: bocina del PIRATA GALÁCTICO al entrar en escena */
+  pirate(){tone(64,40,1,'sawtooth',.09);tone(280,110,.6,'square',.055,.12);tone(430,180,.5,'sawtooth',.04,.32)},
 };
 /* v4.10: campanita aguda de CRÍTICO (con tope anti-spam de 70 ms) */
 function critPing(){

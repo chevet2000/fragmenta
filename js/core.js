@@ -30,6 +30,17 @@ function recompute(){
        v4.28: desde el DESPLIEGUE solo se aplican las que el piloto marcó
        (run.armedTaken); las que guardó siguen en save.armed sin aplicarse. */
     for(const pid of (run.armedTaken!=null?run.armedTaken:(save.armed||[]))){const pk=perkById(pid);if(pk)pk.fx(b);}
+    /* v4.31: MALDICIÓN PIRATA — el sistema elegido queda apagado */
+    if(run.pirSeal){
+      if(run.pirSeal==='drones')b.drones=0;
+      else if(run.pirSeal==='shield'){b.shield=false;b.shieldFast=false;}
+      else if(run.pirSeal==='orbs')b.orbs=0;
+      else if(run.pirSeal==='nova')b.nova=null;
+      else if(run.pirSeal==='ult')b.ult=false;
+      else if(run.pirSeal==='bh')b.bh=false;
+      else if(run.pirSeal==='bot')b.bot=0;
+      else if(run.pirSeal==='msl')b.msl=1;
+    }
     return b;
   };
   players.forEach((pl,i)=>{

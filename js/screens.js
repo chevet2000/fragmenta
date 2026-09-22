@@ -352,6 +352,9 @@ function openStats(){
     ['METEORITOS REVENTADOS',save.totMeteor||0],
     /* v4.20: púrpura, cubos, naves amigas, portales y cambios de gemas */
     ['METEORITOS PÚRPURA',save.totMeteorP||0],
+    /* v4.31: el pirata galáctico */
+    ['PIRATAS HUNDIDOS',save.totPirate||0],
+    ['PIRATAS ESCAPADOS',save.totPirEsc||0],
     ['CUBOS SORPRESA',save.totCube||0],
     ['NAVES AMIGAS',save.totAlly||0],
     ['PORTALES ABIERTOS',save.totPortal||0],
@@ -724,11 +727,12 @@ function startRunClient(d){
   localSlot=clamp(net.mySlot||1,1,np-1);
   enemies=[];bullets=[];ebullets=[];parts=[];pickups=[];floats=[];rings=[];beams=[];ultBeams=[];holes=[];wrecks=[];emosFx=[]; /* v4.14: holes */
   closeEmoPanel();
-  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;
+  cEnemies.clear();cEB=[];cBL=[];cPK=[];cWrecks=[];boss=null;cPirate=null; /* v4.31: sin pirata */
   run.buffs=players.map(()=>[]);
   run.curses=[]; /* v4.17 */
   /* v4.29: avisos y suministros a cero también en el cliente */
   run.noFuelWarned=false;run.noElecWarned=false;run.supFuel=0;run.supGen=0;
+  run.pirSeal=null; /* v4.31: sin maldición pirata heredada */
   run.armedTaken=null;
   recompute();
   for(const pl of players){pl.hp=pl.maxHp;pl.invul=1;}
@@ -803,6 +807,12 @@ function nextWave(){
   formY=0;formT=0;
   if(net.mode!=='client')updTempBuffs();
   if(net.mode!=='client')curseTickWave(); /* v4.17: las de varias oleadas cuentan atrás */
+  /* v4.31: la MALDICIÓN PIRATA dura SOLO esa oleada; si el pirata sigue
+     vivo al despejar, huye con lo robado a toda vela */
+  if(net.mode!=='client'){
+    if(run.pirSeal){run.pirSeal=null;recompute();sendMsg({t:'ev',k:'pirSeal',a:null});}
+    if(pirate)pirate.flee=true;
+  }
   buildWave(L);
   /* v4.28: el aviso de MEJORAS ARMADAS lo sustituye la pantalla de DESPLIEGUE,
      que aparece antes de la primera oleada (deployGate en cada inicio) */

@@ -319,6 +319,86 @@ function drawWreck(w){
   ctx.fillStyle='#7FD1B9';
   ctx.fillText('ACÉRCATE PARA RESCATAR (-1 VIDA)',w.x,w.y+44);
 }
+/* v4.31: ☠ EL PIRATA GALÁCTICO — galeón espacial con 6 aros de defensa,
+   aura de robo, calavera, láser corsario y el contador de botín robado.
+   Recibe el estado real (anfitrión/solitario) o el espejo del snapshot. */
+function drawPirateView(v){
+  if(!v)return;
+  const g=ctx;
+  const ringsLeft=(amClient()||typeof pirate==='undefined'||!pirate)?(v.rings||0):pirate.rings.filter(r=>r.hp>0).length;
+  const coreOut=ringsLeft<=0;
+  g.save();g.translate(v.x,v.y);
+  /* aura del campo de robo */
+  g.globalAlpha=.09+Math.sin(time*4)*.035;
+  g.fillStyle='#B388FF';
+  g.beginPath();g.arc(0,0,190,0,TAU);g.fill();
+  g.globalAlpha=.2+Math.sin(time*6)*.07;
+  g.strokeStyle='#B388FF';g.lineWidth=1.6;g.setLineDash([10,14]);
+  g.beginPath();g.arc(0,0,110,0,TAU);g.stroke();g.setLineDash([]);
+  g.globalAlpha=1;
+  /* láser corsario (aviso / disparo) */
+  if(v.las){
+    const L=v.las,lx=Math.cos(L.a)*920,ly=Math.sin(L.a)*920;
+    g.save();
+    if(L.ph===1){
+      g.globalAlpha=.45+Math.sin(time*20)*.22;
+      g.strokeStyle='#FF9F43';g.lineWidth=1.6;g.setLineDash([8,8]);
+      g.beginPath();g.moveTo(0,0);g.lineTo(lx,ly);g.stroke();g.setLineDash([]);
+    }else{
+      g.globalAlpha=.85;
+      g.strokeStyle='#FF4757';g.lineWidth=14;
+      g.beginPath();g.moveTo(0,0);g.lineTo(lx,ly);g.stroke();
+      g.strokeStyle='#FFFFFF';g.lineWidth=3;
+      g.beginPath();g.moveTo(0,0);g.lineTo(lx,ly);g.stroke();
+    }
+    g.restore();
+  }
+  /* casco: galeón estilizado mirando a su rumbo */
+  const dir=v.dir||1;
+  g.save();g.scale(dir,1);g.rotate(Math.sin(time*1.7)*.05);
+  g.fillStyle='#191423';
+  g.strokeStyle=v.flash>.4?'#FFF':(coreOut?'#FF4757':'#FFD166');
+  g.lineWidth=2.6;
+  g.beginPath();
+  g.moveTo(34,0);g.lineTo(15,-15);g.lineTo(-24,-13);g.lineTo(-32,0);
+  g.lineTo(-24,13);g.lineTo(15,15);g.closePath();g.fill();g.stroke();
+  /* aleta-vela */
+  g.strokeStyle='#FF9F43';g.lineWidth=2;
+  g.beginPath();g.moveTo(-4,-13);g.lineTo(-4,-32);g.lineTo(13,-16);g.closePath();g.stroke();
+  /* calavera */
+  g.fillStyle='#F2EFE6';
+  g.beginPath();g.arc(14,0,5.2,0,TAU);g.fill();
+  g.fillStyle='#191423';
+  g.beginPath();g.arc(12.4,-1.6,1.2,0,TAU);g.fill();
+  g.beginPath();g.arc(15.6,-1.6,1.2,0,TAU);g.fill();
+  g.strokeStyle='#F2EFE6';g.lineWidth=1.4;
+  g.beginPath();g.moveTo(9,6);g.lineTo(19,-2);g.moveTo(9,-2);g.lineTo(19,6);g.stroke();
+  g.restore();
+  /* los 6 aros de defensa giratorios (solo los intactos) */
+  for(let i=0;i<ringsLeft;i++){
+    const rr=42+i*9;
+    g.save();g.rotate(time*(.8+i*.22)*(i%2?-1:1));
+    g.strokeStyle='#FF9F43';g.lineWidth=2.2;g.globalAlpha=.85;
+    for(let k=0;k<5;k++){g.beginPath();g.arc(0,0,rr,k*TAU/5,k*TAU/5+TAU/5*.62);g.stroke();}
+    g.restore();
+  }
+  /* núcleo expuesto: pulso rojo */
+  if(coreOut){
+    g.globalAlpha=.35+Math.sin(time*10)*.2;
+    g.fillStyle='#FF4757';
+    g.beginPath();g.arc(0,0,17,0,TAU);g.fill();
+    g.globalAlpha=1;
+  }
+  /* bodega: lo que lleva robado */
+  if((v.lootG||0)>0||(v.lootM||0)>0){
+    g.font='700 10px "Chakra Petch",monospace';g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#FFD166';
+    g.lineWidth=3;g.strokeStyle='rgba(7,9,13,.9)';
+    const lt='☠ '+(v.lootG||0)+' ORO'+((v.lootM||0)>0?' · '+(v.lootM||0)+' GEMAS':'');
+    g.strokeText(lt,0,66);g.fillText(lt,0,66);
+  }
+  g.restore();
+}
 function drawBossCommon(){
   const b=boss;if(!b)return;
   const g=ctx,col=b.ph>=2?'#FF4757':(b.D?b.D.color:'#FF6B6B');
@@ -858,6 +938,7 @@ function renderGame(dt){
     ctx.globalAlpha=1;
     ctx.restore();
   }
+  drawPirateView(amClient()?cPirate:pirate); /* v4.31: ☠ EL PIRATA GALÁCTICO */
   if(amClient()){
     drawSnakeLinks([...cEnemies.values()]);
     for(const [,e] of cEnemies)drawEnemy(e);
@@ -870,6 +951,17 @@ function renderGame(dt){
   for(const w of wrList)drawWreck(w);
   const ebList=amClient()?cEB:ebullets;
   for(const b of ebList){
+    if(b.pir){ /* v4.31: misil del pirata — cohete que apunta a tu nave */
+      const pl=players[localSlot]||players[0];
+      const a=pl?Math.atan2(pl.y-b.y,pl.x-b.x):0;
+      ctx.save();ctx.translate(b.x,b.y);ctx.rotate(a);
+      ctx.globalAlpha=.3+Math.sin(time*12)*.15;ctx.fillStyle='#FF7EB6';
+      ctx.beginPath();ctx.arc(0,0,11,0,TAU);ctx.fill();
+      ctx.globalAlpha=1;ctx.fillStyle='#FF7EB6';
+      ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-6,4.5);ctx.lineTo(-6,-4.5);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#FFF';ctx.beginPath();ctx.arc(2,0,2,0,TAU);ctx.fill();
+      ctx.restore();continue;
+    }
     ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();
     ctx.fillStyle='#0B0E13';ctx.beginPath();ctx.arc(b.x,b.y,2,0,TAU);ctx.fill();
   }

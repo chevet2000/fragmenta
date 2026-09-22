@@ -1,6 +1,10 @@
 'use strict';
 /* ============ bucle ============ */
 let last=performance.now(),hudAcc=0,persAcc=0,snapAcc=0;
+/* v4.31: FIX heredado de v4.29 — inpAcc se usaba en el cliente sin declarar:
+   el bucle moría en cada frame con ReferenceError y la pantalla del cliente
+   quedaba congelada (lo event-driven seguía vivo y lo disimulaba) */
+let inpAcc=0;
 function loop(now){
   requestAnimationFrame(loop);
   let dt=(now-last)/1000;last=now;
@@ -23,6 +27,7 @@ function loop(now){
     updBoss(dt);
     updHoles(dt); /* v4.14: agujeros negros */
     updEBullets(dt);
+    updPirate(dt); /* v4.31: ☠ EL PIRATA GALÁCTICO (solo anfitrión/solitario) */
     updCollisions();
     if(players.length>1)updWrecks(dt);
     updPickups(dt);

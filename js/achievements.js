@@ -69,6 +69,9 @@ const ACHS=[
 {id:'merc5',name:'SOCIO DEL MERCADO NEGRO',desc:'Compra 5 cofres al MERCADER PIRATA',rw:6, ck:()=>(save.totMerc||0)>=5},
 {id:'nor10',name:'CARTA DE NORMAL',   desc:'Llega a la oleada 10 en modo NORMAL',   rw:4, ck:()=>save.bestMode&&(save.bestMode.normal||0)>=10},
 {id:'dif12',name:'MARCA DIFÍCIL',     desc:'Llega a la oleada 12 en modo DIFÍCIL',  rw:6, ck:()=>save.bestMode&&(save.bestMode.dificil||0)>=12},
+/* v4.31: EL PIRATA GALÁCTICO */
+{id:'pir1', name:'CORSARIO CAZADO',   desc:'Hunde al PIRATA GALÁCTICO',             rw:4, ck:()=>(save.totPirate||0)>=1},
+{id:'pir3', name:'TERROR DE LOS MARES',desc:'Hunde 3 Piratas Galácticos',           rw:7, ck:()=>(save.totPirate||0)>=3},
 ];
 /* v4.15: logros alcanzados que aún no han sido reclamados */
 function achPendingCount(){

@@ -17,7 +17,11 @@ function sendSnap(){
   const bs=boss?[Math.round(boss.x),Math.round(boss.y),Math.max(0,Math.ceil(boss.hp)),boss.ph,
     BOSS_ORDER.indexOf(boss.kind)]:null;
   const bp=boss?clamp(boss.hp/boss.maxhp*100,0,100):0;
-  const eb=ebullets.slice(0,90).map(b=>[Math.round(b.x),Math.round(b.y),b.r,colorIdx(b.color)]);
+  const eb=ebullets.slice(0,90).map(b=>{
+    const a=[Math.round(b.x),Math.round(b.y),b.r,colorIdx(b.color)];
+    if(b.pir)a.push(1); /* v4.31: misil del pirata (el cliente lo pinta como cohete) */
+    return a;
+  });
   const bl=bullets.slice(0,80).map(b=>{
     let kind=b.missile?4:b.dr?3:b.heavy?2:b.crit?1:0;
     return [Math.round(b.x),Math.round(b.y),Math.round(Math.atan2(b.vy,b.vx)*100),kind];
@@ -38,9 +42,16 @@ function sendSnap(){
     p.t==='elec'?[9,Math.round(p.x),Math.round(p.y)]:
     [2,Math.round(p.x),Math.round(p.y)]);
   const wk=wrecks.map(w=>[w.slot,Math.round(w.x),Math.round(w.y),Math.round(w.prog*100)]);
+  /* v4.31: EL PIRATA GALÁCTICO — posición, aros restantes, vida total, botín,
+     láser (ángulo ×100 + fase) y rumbo; nulo cuando no está en escena */
+  const pi=pirate?[Math.round(pirate.x),Math.round(pirate.y),
+    pirate.rings.filter(r=>r.hp>0).length,Math.round(pirPct(pirate)),
+    Math.min(99999,pirate.lootG),pirate.lootM,
+    pirate.las?Math.round(pirate.las.a*100):-1,pirate.las?pirate.las.ph:0,
+    pirate.dir]:null;
   const cN=players[1]&&players[1].nova;
   const nc=novaCdGlobal>0?clamp(1-novaCdGlobal/((cN?cN.cd:18)*(cN?players[1].novaCdMul:1)),0,1):1;
-  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,
+  sendMsg({t:'snap',p,en,bs,bp,eb,bl,pk,wk,pi,
     sv:run.shipLv,se:run.exp,wl:run.level,nc:nc});
   /* v4.15: la billetera de CADA cliente viaja por SU conexión (oro/gemas propios) */
   for(const c of net.conns){

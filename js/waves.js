@@ -115,6 +115,8 @@ function makeElite(L,delay){
 }
 function buildWave(L){
   wave={type:'',types:[],pending:0,total:0,wasBoss:false,snakes:[],spawnT:1,side:1,pool:[]};
+  /* v4.31: incursión nueva (oleada 1) = sin pirata ni maldición heredada */
+  if(L===1){pirate=null;pirateSpawnT=-1;run.pirSeal=null;}
   const coop=players.length>1&&net.mode==='host';
   /* v4.9: MODO FRENÉTICO — una sola oleada infinita con nivel creciente
      (run.level sube con el tiempo en updWaveSpawns) y jefes periódicos */
@@ -192,6 +194,9 @@ function buildWave(L){
     floater(c.sx,120,'¡CAMPISTA: '+c.CD.name+'!','#FFD166',14);
     banner('CAMPISTA',c.CD.name+' · '+c.CD.tip);
   }
+  /* v4.31: ☠ EL PIRATA GALÁCTICO — 50% desde la oleada 3 (nunca en oleada
+     jefa ni frenético): entra a los pocos segundos y lo roba todo */
+  if(L>=3&&!frenzyMode&&!pirate&&pirateSpawnT<0&&R()<.5)pirateSpawnT=rand(3.5,6);
   const names=comps.map(t=>WAVE_NAME[t]).join(' + ');
   banner('OLEADA '+L+(comps.length>1?' · MIXTA':''),names+' · nv '+minLvlOf(L)+'–'+maxLvlOf(L)+' · '+DIFF_LABEL[runDiff]);
   if(willGolden){

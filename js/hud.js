@@ -50,14 +50,18 @@ function refreshHUD(){
     }).join('');
     bb.title=tbs.map(t=>{const p=TEMP_POOL.find(x=>x.id===t.id);return p?p.name:'';}).join(' · ');
   }else{bb.classList.add('hidden');bb.innerHTML='';}
-  /* v4.17: maldiciones activas del HECHICERO (◈ = mientras él viva · Nol = oleadas) */
+  /* v4.17: maldiciones activas del HECHICERO (◈ = mientras él viva · Nol = oleadas)
+     v4.31: + el chip ☠ de la MALDICIÓN PIRATA */
   const cb=$('#curseBar');
   if(cb){
     const csl=(run.curses&&runActive)?run.curses:[];
-    if(csl.length){
+    const seal=(run.pirSeal&&runActive)?run.pirSeal:null;
+    if(csl.length||seal){
       cb.classList.remove('hidden');
-      cb.innerHTML=csl.map(c=>'<span class="bicon curse">'+(CURSE_ICON[c.id]||'✖')+'<i>'+(c.alive?'◈':c.waves+'ol')+'</i></span>').join('');
-      cb.title='MALDICIONES: '+csl.map(c=>CURSES[c.id].name).join(' · ');
+      cb.innerHTML=csl.map(c=>'<span class="bicon curse">'+(CURSE_ICON[c.id]||'✖')+'<i>'+(c.alive?'◈':c.waves+'ol')+'</i></span>').join('')+
+        (seal?'<span class="bicon curse" style="border-color:#FF9F43">☠<i>◈</i></span>':'');
+      cb.title='MALDICIONES: '+csl.map(c=>CURSES[c.id].name).join(' · ')+
+        (seal?(csl.length?' · ':'')+'PIRATA: '+(typeof pirSealName==='function'?pirSealName(seal):seal):'');
     }else{cb.classList.add('hidden');cb.innerHTML='';}
   }
   /* v4.12: contador de COMBO de bajas (se desvanece en su último segundo) */
@@ -106,9 +110,16 @@ function refreshHUD(){
   const pend=amClient()?0:wave.pending+wave.pool.length;
   const killed=Math.max(0,wave.total-pend-alive);
   $('#waveFill').style.width=(wave.total?clamp(killed/wave.total,0,1)*100:0)+'%';
-  $('#bossBar').classList.toggle('hidden',!boss);
+  /* v4.31: la barra de jefe también sirve para ☠ EL PIRATA GALÁCTICO */
+  const pv=amClient()?cPirate:pirate;
+  $('#bossBar').classList.toggle('hidden',!boss&&!pv);
   if(boss){
     const pct=amClient()?cBossPct:clamp(boss.hp/boss.maxhp*100,0,100);
+    $('#bossFill').style.width=pct+'%';
+  }else if(pv){
+    const ringsLeft=amClient()?(pv.rings||0):pv.rings.filter(r=>r.hp>0).length;
+    const pct=amClient()?(pv.pct!=null?pv.pct:100):pirPct(pv);
+    $('#bossName').textContent='☠ PIRATA GALÁCTICO · '+(ringsLeft>0?'AROS '+ringsLeft+'/6':'¡NÚCLEO EXPUESTO!');
     $('#bossFill').style.width=pct+'%';
   }
   const nb=$('#btnNova');
