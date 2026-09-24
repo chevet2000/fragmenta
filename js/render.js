@@ -420,7 +420,7 @@ function drawBossCommon(){
       const fade=L.t<.3?L.t/.3:(L.life-L.t<.4?(L.life-L.t)/.4:1);
       g.save();
       g.globalAlpha=fade*.85;
-      g.strokeStyle=col;g.lineWidth=8;
+      g.strokeStyle='#FF5E5E';g.lineWidth=8; /* v4.34: láser del jefe siempre caliente */
       g.beginPath();g.moveTo(0,0);g.lineTo(Math.cos(L.a)*900,Math.sin(L.a)*900);g.stroke();
       g.globalAlpha=fade;
       g.strokeStyle='#FFFFFF';g.lineWidth=2;
@@ -768,11 +768,25 @@ function renderGame(dt){
   const pkList=amClient()?cPK:pickups;
   for(const p of pkList){
     ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.sin(time*4+p.x)*.4);
-    if(p.t==='gold'){ctx.strokeStyle='#FFD166';ctx.lineWidth=1.8;
+    if(p.t==='gold'){ /* v4.34: MONEDA DE VERDAD — disco lleno, borde oscuro y muesca:
+      ya no rivaliza con ninguna bala (las balas enemigas ya nunca son ámbar) */
+      ctx.globalAlpha=.2+Math.sin(time*5+p.x)*.09;
+      ctx.fillStyle='#FFD166';ctx.beginPath();ctx.arc(0,0,11,0,TAU);ctx.fill();
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#FFD166';ctx.beginPath();ctx.arc(0,0,5.5,0,TAU);ctx.fill();
+      ctx.strokeStyle='#8A5A22';ctx.lineWidth=1.6;
       ctx.beginPath();ctx.arc(0,0,5.5,0,TAU);ctx.stroke();
-      ctx.fillStyle='#FFD166';ctx.beginPath();ctx.arc(0,0,2,0,TAU);ctx.fill();}
-    else if(p.t==='gem'){ctx.strokeStyle='#64C7FF';ctx.lineWidth=1.8;
-      ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.stroke();}
+      ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(0,-3);ctx.lineTo(0,3);ctx.stroke();
+      ctx.fillStyle='#FFF2CE';ctx.beginPath();ctx.arc(-2,-2.2,1,0,TAU);ctx.fill();}
+    else if(p.t==='gem'){ /* v4.34: gema con faceta y halo frío — el cian es 100% amigo */
+      ctx.globalAlpha=.16+Math.sin(time*6+p.x)*.07;
+      ctx.fillStyle='#64C7FF';ctx.beginPath();ctx.arc(0,0,11,0,TAU);ctx.fill();
+      ctx.globalAlpha=1;
+      ctx.strokeStyle='#64C7FF';ctx.lineWidth=1.8;
+      ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.stroke();
+      ctx.lineWidth=1;ctx.globalAlpha=.75;
+      ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(0,6);ctx.moveTo(-5,0);ctx.lineTo(5,0);ctx.stroke();
+      ctx.globalAlpha=1;}
     else if(p.t==='fuel'){ /* v4.29: BIDÓN DE COMBUSTIBLE — lata verde brillante */
       ctx.strokeStyle='#7DFF9E';ctx.lineWidth=1.8;
       ctx.strokeRect(-4.5,-6,9,12);
@@ -888,6 +902,21 @@ function renderGame(dt){
       }
       ctx.globalAlpha=1;
     }
+    else if(p.t==='heart'){ /* v4.34: CORAZÓN DE VERDAD — silueta única en todo el juego,
+      imposible confundir con una gema o un disparo */
+      ctx.globalAlpha=.2+Math.sin(time*6+p.y)*.1;
+      ctx.fillStyle='#FF5E7E';ctx.beginPath();ctx.arc(0,0,12,0,TAU);ctx.fill();
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#FF5E7E';
+      ctx.beginPath();
+      ctx.moveTo(0,6.5);
+      ctx.bezierCurveTo(-7.5,1,-6,-5.5,-2.6,-5.5);
+      ctx.bezierCurveTo(-1,-5.5,0,-4.2,0,-3);
+      ctx.bezierCurveTo(0,-4.2,1,-5.5,2.6,-5.5);
+      ctx.bezierCurveTo(6,-5.5,7.5,1,0,6.5);
+      ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#FFB3C6';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle='#FFE3EA';ctx.beginPath();ctx.arc(-2.4,-2.6,1.1,0,TAU);ctx.fill();}
     else{ctx.fillStyle='#FF6B6B';
       ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(5,0);ctx.lineTo(0,6);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();}
     ctx.restore();
@@ -969,17 +998,29 @@ function renderGame(dt){
       ctx.fillStyle='#FFF';ctx.beginPath();ctx.arc(2,0,2,0,TAU);ctx.fill();
       ctx.restore();continue;
     }
-    ctx.fillStyle=b.color;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,TAU);ctx.fill();
-    ctx.fillStyle='#0B0E13';ctx.beginPath();ctx.arc(b.x,b.y,2,0,TAU);ctx.fill();
+    /* v4.34: CÓDIGO DE FUEGO — TODO disparo enemigo es una ESTRELLA ARDIENTE roja/naranja
+      (antes heredaba el color del enemigo: ámbar se confundía con el oro, verde con el
+      bidón, menta con tu nave). Regla nueva: puntiagudo + caliente = duele. */
+    const er=b.r+1.2,erR=time*3.2+b.x*.05+b.y*.03;
+    ctx.globalAlpha=.26+Math.sin(time*9+b.x)*.08;
+    ctx.fillStyle='#FF573D';ctx.beginPath();ctx.arc(b.x,b.y,er+3.5,0,TAU);ctx.fill();
+    ctx.globalAlpha=1;
+    ctx.fillStyle='#FF5E5E';ctx.beginPath();
+    for(let i=0;i<8;i++){const sa=erR+i*TAU/8,sr=i%2?er*.55:er*1.15;
+      const sx=b.x+Math.cos(sa)*sr,sy=b.y+Math.sin(sa)*sr;
+      i?ctx.lineTo(sx,sy):ctx.moveTo(sx,sy);}
+    ctx.closePath();ctx.fill();
+    ctx.fillStyle='#FFC9A3';ctx.beginPath();ctx.arc(b.x,b.y,er*.5,0,TAU);ctx.fill();
+    ctx.fillStyle='#0B0E13';ctx.beginPath();ctx.arc(b.x,b.y,1.8,0,TAU);ctx.fill();
   }
   const blList=amClient()?cBL:bullets;
   for(const b of blList){
     if(amClient()){
       ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.ang);
       if(b.kind===4){ctx.fillStyle='#FF7EB6';ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-5,4);ctx.lineTo(-5,-4);ctx.closePath();ctx.fill();}
-      else if(b.kind===3){ctx.fillStyle='#FFD166';ctx.fillRect(-1.2,-5,2.4,10);}
-      else if(b.kind===2){ctx.fillStyle='#FFD166';ctx.fillRect(-2.5,-9,5,18);}
-      else{ctx.fillStyle=b.kind===1?'#FFD166':'#F2EFE6';ctx.fillRect(-1.5,-7,3,14);}
+      else if(b.kind===3){ctx.fillStyle='#7FD1B9';ctx.fillRect(-1.2,-5,2.4,10);}
+      else if(b.kind===2){ctx.fillStyle='#B0F2FF';ctx.fillRect(-2.5,-9,5,18);}
+      else{ctx.fillStyle=b.kind===1?'#7DF3FF':'#F2EFE6';ctx.fillRect(-1.5,-7,3,14);}
       ctx.restore();
     }else{
       if(b.missile){
@@ -988,18 +1029,18 @@ function renderGame(dt){
         ctx.fillStyle='#FF7EB6';
         ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(-5,4);ctx.lineTo(-5,-4);ctx.closePath();ctx.fill();
         ctx.restore();
-      }else if(b.dr){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-1.2,b.y-5,2.4,10);}
-      else if(b.ally){ /* v4.20: balas de la NAVE AMIGA — doradas */ ctx.fillStyle='#FFE9B0';ctx.fillRect(b.x-1.6,b.y-7,3.2,14);}
+      }else if(b.dr){ /* v4.34: dron → menta (familia fría del jugador) */ ctx.fillStyle='#7FD1B9';ctx.fillRect(b.x-1.2,b.y-5,2.4,10);}
+      else if(b.ally){ /* v4.34: nave amiga → hielo (ya no dorada: el ámbar es del oro) */ ctx.fillStyle='#B0F2FF';ctx.fillRect(b.x-1.6,b.y-7,3.2,14);}
       else if(b.bot){ /* v4.9: balas del aliado bot */ ctx.fillStyle='#B388FF';ctx.fillRect(b.x-1.5,b.y-6,3,12);}
-      else if(b.heavy){ctx.fillStyle='#FFD166';ctx.fillRect(b.x-2.5,b.y-9,5,18);}
-      else{ctx.fillStyle=b.crit?'#FFD166':'#F2EFE6';ctx.fillRect(b.x-1.5,b.y-7,3,14);}
+      else if(b.heavy){ /* v4.34: pesada → hielo */ ctx.fillStyle='#B0F2FF';ctx.fillRect(b.x-2.5,b.y-9,5,18);}
+      else{ /* v4.34: crítico → cian eléctrico (antes ámbar=oro) */ ctx.fillStyle=b.crit?'#7DF3FF':'#F2EFE6';ctx.fillRect(b.x-1.5,b.y-7,3,14);}
     }
   }
   for(const bm of beams){
     const a=1-bm.t/bm.life;
     ctx.globalAlpha=a;ctx.strokeStyle='#FFFFFF';ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(bm.x1,bm.y1);ctx.lineTo(bm.x2,bm.y2);ctx.stroke();
-    ctx.globalAlpha=a*.5;ctx.strokeStyle='#FFD166';ctx.lineWidth=5;
+    ctx.globalAlpha=a*.5;ctx.strokeStyle='#7FD1B9';ctx.lineWidth=5;
     ctx.beginPath();ctx.moveTo(bm.x1,bm.y1);ctx.lineTo(bm.x2,bm.y2);ctx.stroke();
   }
   /* v4.13: rayo del CAÑÓN ANIQUILADOR — haz grueso violeta con núcleo blanco */

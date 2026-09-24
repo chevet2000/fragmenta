@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" data-v="4.33">
+<html lang="es" data-v="4.34">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>FRAGMENTA v4.33 — purga geométrica infinita</title>
+<title>FRAGMENTA v4.34 — purga geométrica infinita</title>
 <meta name="theme-color" content="#07090D">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<link rel="stylesheet" href="css/styles.css?v=4.33">
+<link rel="stylesheet" href="css/styles.css?v=4.34">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -112,8 +112,8 @@
     <canvas id="heroCv" width="640" height="300"></canvas>
     <img id="heroImg" class="hidden" alt="FRAGMENTA">
   </div>
-  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.33</button>
-  <p class="tagline hidden" id="tagBody">La <b>v4.33</b> aprieta las tuercas: ① <b>ZONAS DE GUERRA</b> — desde la oleada 2, 32% de las oleadas nace dentro de una zona hostil: <b>◎ GRAVITATORIA</b> (efecto al azar: sus balas pegan doble / +25% de velocidad / +35% de vida enemiga), <b>☄ DE METEOROS</b> (lluvia de rocas indestructibles), <b>☀ SOLAR</b> (botín -70%, el oro resiste), <b>⚡ IÓNICA</b> (reactor -45% de recarga) y <b>≋ DISTORSIONADA</b> (balas +25% rápidas); chip en el HUD, velo de color y la tripulación avisa; en co-op la zona viaja por la red y el frenético también rota zonas. ② <b>GUARDIANES MÁS DUROS</b> en SOLO/NORMAL/DIFÍCIL: vida ×1.55, sus balas pegan 2 y embestir su casco cuesta 3 (HARDCORE/FRENÉTICO intactos). ③ <b>DRONES CON DURABILIDAD</b>: las balas enemigas y el contacto los dañan (4 de vida); derribado, tarda 9 s en rearmarse y van volviendo uno a uno — el ingeniero avisa. ④ <b>CHOQUE DE CASCO REHECHO</b>: la nave ya no siega enemigos gratis; embestir SIEMPRE cuesta vida (reloj de contacto propio, ignora i-frames de arma) y el enemigo recibe un golpe de ariete en vez de morir al instante. ⑤ <b>COMBUSTIBLE Y ELECTRICIDAD MÁS RAROS</b> (caen a menos de la mitad) y el <b>SIN COMBUSTIBLE</b> ahora se siente: manejo al 8%, chispas del motor y medidor latiendo en rojo. ⑥ Ajustes de balance de la zona solar y del frenético. Se mantiene todo: pirata galáctico, tripulación, árbol, energía, despliegue, revancha y ranking única.</p>
+  <button id="btnTag" class="tagbtn">▸ NOVEDADES DE LA v4.34</button>
+  <p class="tagline hidden" id="tagBody">La <b>v4.34</b> ordena el campo de batalla — <b>CÓDIGO DE FUEGO</b>: ① <b>TODO disparo enemigo es una ESTRELLA ARDIENTE roja/naranja</b> (antes heredaba el color del enemigo: ámbar se confundía con el oro, verde con el bidón, menta con tu nave) — puntiagudo + caliente = duele. ② <b>BALAS DEL JUGADOR en familia fría</b>: blancas, y las de crítico cian eléctrico, dron menta y pesada hielo — el ámbar ya es SOLO del oro. ③ <b>VIDAS = CORAZÓN de verdad</b> (antes un diamante rojo igual que la gema y los disparos), con brillo y halo. ④ <b>ORO = moneda de verdad</b>: disco lleno con borde oscuro y muesca. ⑤ Gema con faceta y halo frío; el láser del jefe siempre caliente. Sin cambios de juego: es puro legibilidad.</p>
   <div id="diffLbl">DIFICULTAD (LOCAL) · <b id="diffName">SOLO ×1</b></div>
   <div class="diffrow" id="diffRow">
     <button data-d="solo" class="on">SOLO ×1</button>
@@ -155,7 +155,7 @@
     <span id="mBest">PRIMERA INCURSIÓN</span>
     <span id="mGold"></span><span id="mGems"></span><span id="mPrest"></span>
   </div>
-  <div class="ver">FRAGMENTA v4.33 · ZONAS DE GUERRA (GRAVITATORIA · METEOROS · SOLAR · IÓNICA · DISTORSIONADA) · GUARDIANES MÁS DUROS EN SOLO/NORMAL/DIFÍCIL · DRONES CON DURABILIDAD · CHOQUE DE CASCO SIEMPRE CUESTA · DROP DE ENERGÍA REDUCIDO · SIN COMBUSTIBLE SE SIENTE · VENTANA DE MEJORA CENTRADA + SCROLL · CURVA DE EXP REBALANCEADA (CUADRÁTICA + TOPE SUAVE DE EXP) · CASILLA MEJORA AL AZAR · MENÚ MULTIJUGADOR · ☠ PIRATA GALÁCTICO (ROBA EL BOTÍN · 6 AROS · MALDICIÓN) · LA TRIPULACIÓN HABLA · ÁRBOL RECENTRADO · COMBUSTIBLE + ELECTRICIDAD · RAMA ENERGÍA · SUMINISTROS DEL PIRATA · DESPLIEGUE (ELIGE TUS MEJORAS ARMADAS) · REVANCHA EN CO-OP · RAMA ESTABILIDAD · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
+  <div class="ver">FRAGMENTA v4.34 · CÓDIGO DE FUEGO: BALAS ENEMIGAS = ESTRELLAS ARDIENTES ROJAS · BALAS DEL JUGADOR EN FAMILIA FRÍA (CRÍTICO CIAN · DRON MENTA · PESADA HIELO) · VIDAS = CORAZÓN REAL · ORO = MONEDA REAL CON BORDE Y MUESCA · GEMA CON FACETA · LÁSER DEL JEFE SIEMPRE CALIENTE · ZONAS DE GUERRA (GRAVITATORIA · METEOROS · SOLAR · IÓNICA · DISTORSIONADA) · GUARDIANES MÁS DUROS EN SOLO/NORMAL/DIFÍCIL · DRONES CON DURABILIDAD · CHOQUE DE CASCO SIEMPRE CUESTA · DROP DE ENERGÍA REDUCIDO · SIN COMBUSTIBLE SE SIENTE · VENTANA DE MEJORA CENTRADA + SCROLL · CURVA DE EXP REBALANCEADA (CUADRÁTICA + TOPE SUAVE DE EXP) · CASILLA MEJORA AL AZAR · MENÚ MULTIJUGADOR · ☠ PIRATA GALÁCTICO (ROBA EL BOTÍN · 6 AROS · MALDICIÓN) · LA TRIPULACIÓN HABLA · ÁRBOL RECENTRADO · COMBUSTIBLE + ELECTRICIDAD · RAMA ENERGÍA · SUMINISTROS DEL PIRATA · DESPLIEGUE (ELIGE TUS MEJORAS ARMADAS) · REVANCHA EN CO-OP · RAMA ESTABILIDAD · RANKING ÚNICA · SINCRONIZA AL CONECTAR EN EL LOBBY · REINTENTO AUTOMÁTICO · QR DE SALA · ESCANEAR QR PARA ENTRAR · RANKING AL CONECTAR · COMENZAR BLOQUEADO HASTA SINCRONIZAR · CERRADURA DE ECO (MEMORIA DE RUNAS) · CO-OP ARREGLADO · NAVE SOLO TUYA · COLORES SINCRONIZADOS · RANKING MULTI EN VIVO · LLAVES DE LA BÓVEDA · LEGENDARIO JUSTO · RÉCORD POR OLEADA · COMPRA MASIVA · GEMAS ESCASAS · CERRADURA JUSTA · ESCALA VIVA · MERCADER PIRATA · XP BRUTAL EN HARDCORE/FRENÉTICO · ÁRBOL CON GATES POR MODO · BÓVEDA MÁS GENEROSA · CONTROL DE PULSO · LA BÓVEDA · COFRES SELLADOS · MEJORAS ARMADAS · CUBOS SORPRESA · NAVE AMIGA · PORTAL MISTERIOSO · DIMENSIÓN ANÓMALA · METEORITOS PÚRPURA · CAMBIO DE GEMAS EN ESCALERA · REBALANCEO NORMAL/DIFÍCIL · RECOMPENSAS DE RACHA (ESTELAR ★) · RACHA DE MISIONES (DÍA 1, 2, 3…) · METEORITOS DORADOS · ACTUALIZADOR EN EL MENÚ · DOPAMINA · HIT-STOP · TONO EN ESCALERA · COFRES DE LA FORTUNA · OLEADA DORADA · MUERTE-GANCHO · MALDICIONES DEL HECHICERO · RESUCITA ESBIRROS · INVOCA UN ÉLITE · EL MAGO · GUARDIÁN HECHICERO · ⚙ AJUSTES · AVATAR DE PILOTO · RANKING POR MODOS · LOGROS POR RECLAMAR · CO-OP DE 3 · AGUJERO NEGRO · FANTASMA DEL RANKING · BIOMAS VISUALES · GUARDIANES DE 3–5 FASES · CAÑÓN ANIQUILADOR · NAVE QUE EVOLUCIONA · FRENÉTICO REHECHO · RETO DIARIO · MISIONES · HANGAR · COMBOS · BESTIARIO · PERFIL · TU NOMBRE EN EL RANKING · ALIADO BOT<br>
   INSTALAR · Android/Chrome: ⚙ AJUSTES → INSTALAR APP · iOS: Compartir → Añadir a inicio</div>
 </div>
 
@@ -465,39 +465,39 @@
   </div>
 </div>
 
-<script src="js/utils.js?v=4.33"></script>
-<script src="js/profile.js?v=4.33"></script>
-<script src="js/achievements.js?v=4.33"></script>
-<script src="js/audio.js?v=4.33"></script>
-<script src="js/config.js?v=4.33"></script>
-<script src="js/tree.js?v=4.33"></script>
-<script src="js/relics.js?v=4.33"></script>
-<script src="js/state.js?v=4.33"></script>
-<script src="js/zones.js?v=4.33"></script>
-<script src="js/crew.js?v=4.33"></script>
-<script src="js/net.js?v=4.33"></script>
-<script src="js/vendor/qrcode.js?v=4.33"></script>
-<script src="js/vendor/jsQR.js?v=4.33"></script>
-<script src="js/qr.js?v=4.33"></script>
-<script src="js/core.js?v=4.33"></script>
-<script src="js/enemies.js?v=4.33"></script>
-<script src="js/waves.js?v=4.33"></script>
-<script src="js/boss.js?v=4.33"></script>
-<script src="js/loot.js?v=4.33"></script>
-<script src="js/pirate.js?v=4.33"></script>
-<script src="js/player.js?v=4.33"></script>
-<script src="js/azar.js?v=4.33"></script>
-<script src="js/curses.js?v=4.33"></script>
-<script src="js/chests.js?v=4.33"></script>
-<script src="js/netsync.js?v=4.33"></script>
-<script src="js/render.js?v=4.33"></script>
-<script src="js/screens.js?v=4.33"></script>
-<script src="js/treeui.js?v=4.33"></script>
-<script src="js/hud.js?v=4.33"></script>
-<script src="js/vault.js?v=4.33"></script>
-<script src="js/merc.js?v=4.33"></script>
-<script src="js/input.js?v=4.33"></script>
-<script src="js/game.js?v=4.33"></script>
-<script src="js/update.js?v=4.33"></script>
+<script src="js/utils.js?v=4.34"></script>
+<script src="js/profile.js?v=4.34"></script>
+<script src="js/achievements.js?v=4.34"></script>
+<script src="js/audio.js?v=4.34"></script>
+<script src="js/config.js?v=4.34"></script>
+<script src="js/tree.js?v=4.34"></script>
+<script src="js/relics.js?v=4.34"></script>
+<script src="js/state.js?v=4.34"></script>
+<script src="js/zones.js?v=4.34"></script>
+<script src="js/crew.js?v=4.34"></script>
+<script src="js/net.js?v=4.34"></script>
+<script src="js/vendor/qrcode.js?v=4.34"></script>
+<script src="js/vendor/jsQR.js?v=4.34"></script>
+<script src="js/qr.js?v=4.34"></script>
+<script src="js/core.js?v=4.34"></script>
+<script src="js/enemies.js?v=4.34"></script>
+<script src="js/waves.js?v=4.34"></script>
+<script src="js/boss.js?v=4.34"></script>
+<script src="js/loot.js?v=4.34"></script>
+<script src="js/pirate.js?v=4.34"></script>
+<script src="js/player.js?v=4.34"></script>
+<script src="js/azar.js?v=4.34"></script>
+<script src="js/curses.js?v=4.34"></script>
+<script src="js/chests.js?v=4.34"></script>
+<script src="js/netsync.js?v=4.34"></script>
+<script src="js/render.js?v=4.34"></script>
+<script src="js/screens.js?v=4.34"></script>
+<script src="js/treeui.js?v=4.34"></script>
+<script src="js/hud.js?v=4.34"></script>
+<script src="js/vault.js?v=4.34"></script>
+<script src="js/merc.js?v=4.34"></script>
+<script src="js/input.js?v=4.34"></script>
+<script src="js/game.js?v=4.34"></script>
+<script src="js/update.js?v=4.34"></script>
 </body>
 </html>
